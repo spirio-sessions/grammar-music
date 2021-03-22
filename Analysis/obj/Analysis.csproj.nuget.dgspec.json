@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/xmaek/Code/grammar-music/Analysis/Analysis.csproj": {}
+  },
+  "projects": {
+    "/Users/xmaek/Code/grammar-music/Analysis/Analysis.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/xmaek/Code/grammar-music/Analysis/Analysis.csproj",
+        "projectName": "Analysis",
+        "projectPath": "/Users/xmaek/Code/grammar-music/Analysis/Analysis.csproj",
+        "packagesPath": "/Users/xmaek/.nuget/packages/",
+        "outputPath": "/Users/xmaek/Code/grammar-music/Analysis/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/xmaek/.config/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
+          "dependencies": {
+            "FftSharp": {
+              "target": "Package",
+              "version": "[1.0.8, )"
+            },
+            "NAudio.Core": {
+              "target": "Package",
+              "version": "[2.0.0, )"
+            },
+            "OpenTK.OpenAL": {
+              "target": "Package",
+              "version": "[4.6.2, )"
+            },
+            "ScottPlot": {
+              "target": "Package",
+              "version": "[4.0.48, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.osx-x64",
+              "version": "[3.1.13, 3.1.13]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.osx-x64",
+              "version": "[3.1.13, 3.1.13]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.201/RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "osx-x64": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
