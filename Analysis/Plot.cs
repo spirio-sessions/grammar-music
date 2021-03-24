@@ -59,8 +59,35 @@ namespace Analysis
                 var start = tone.start / sampleRate;
                 var end = tone.end / sampleRate;
                 var duration = end - start;
-                plot.PlotText(tone.pitchClass.ToString(), start + duration / 2, 0);
+                plot.PlotText(tone.pitchClass.ToString(), start + 0.01, 0, fontSize: 14);
             }
+
+            SavePlot(plot, title);
+        }
+
+        public static void Tokens(
+            double[] samples,
+            double sampleRate,
+            IEnumerable<Token> tokens,
+            string title)
+        {
+            var plot = new ScottPlot.Plot();
+            plot.PlotSignal(samples, sampleRate);
+
+            foreach (var token in tokens)
+            {
+                plot.PlotVLine(token.From.TotalSeconds, System.Drawing.Color.Red);
+
+                var item = token switch
+                {
+                    Rest _ => "R",
+                    Tone t => t.Pitch.ToString(),
+                    _ => "U"
+                };
+
+                plot.PlotText(item, token.From.TotalSeconds + 0.01, 0, System.Drawing.Color.Black);
+            }
+            plot.PlotVLine(tokens.Last().To.TotalSeconds, System.Drawing.Color.Red);
 
             SavePlot(plot, title);
         }

@@ -6,10 +6,10 @@ namespace Analysis
 
     public abstract class Token
     {
-        public readonly DateTime From;
-        public readonly DateTime To;
+        public readonly TimeSpan From;
+        public readonly TimeSpan To;
 
-        public Token(DateTime from, DateTime to)
+        public Token(TimeSpan from, TimeSpan to)
         {
             From = from;
             To = to;
@@ -17,13 +17,16 @@ namespace Analysis
 
         public Token(int from, int to, int sampleRate)
         {
-            From = new DateTime().AddSeconds((double)from / sampleRate);
-            To = new DateTime().AddSeconds((double)to / sampleRate);
+            From = new TimeSpan(0, 0, 0, GetSeconds(from), GetMilliSeconds(from));
+            To = new TimeSpan(0, 0, 0, GetSeconds(to), GetMilliSeconds(to));
+
+            int GetSeconds(int frameIndex) => frameIndex / sampleRate;
+            int GetMilliSeconds(int frameIndex) => 1000 * frameIndex / sampleRate % 1000;
         }
 
         public override string ToString()
         {
-            return $"{From.Minute}:{From.Second}:{From.Millisecond}-{To.Minute}:{To.Second}:{To.Millisecond}";
+            return $"{From.Minutes}:{From.Seconds}:{From.Milliseconds}-{To.Minutes}:{To.Seconds}:{To.Milliseconds}";
         }
     }
 
@@ -31,7 +34,7 @@ namespace Analysis
     {
         public readonly PitchClass Pitch;
 
-        public Tone(DateTime from, DateTime to, PitchClass pitch) : base(from, to)
+        public Tone(TimeSpan from, TimeSpan to, PitchClass pitch) : base(from, to)
         {
             Pitch = pitch;
         }
@@ -49,18 +52,18 @@ namespace Analysis
 
     public class Rest : Token
     {
-        public Rest(DateTime from, DateTime to) : base(from, to) { }
+        public Rest(TimeSpan from, TimeSpan to) : base(from, to) { }
         public Rest(int from, int to, int sampleRate) : base(from, to, sampleRate) { }
 
         public override string ToString()
         {
-            return "_@" + base.ToString();
+            return "R@" + base.ToString();
         }
     }
 
     public class UnidentifiedSection : Token
     {
-        public UnidentifiedSection(DateTime from, DateTime to) : base(from, to) { }
+        public UnidentifiedSection(TimeSpan from, TimeSpan to) : base(from, to) { }
         public UnidentifiedSection(int from, int to, int sampleRate) : base(from, to, sampleRate) { }
 
         public override string ToString()

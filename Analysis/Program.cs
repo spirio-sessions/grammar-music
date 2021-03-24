@@ -19,14 +19,16 @@ namespace Analysis
             var tones = Analysis.Tonal(transients, samples, format.SampleRate).Select(t => (t.start, t.end, t.pitchClass));
             var tokens = Analysis.Tokenize(tones, samples, format.SampleRate);
 
+            Plot.Tokens(samples, format.SampleRate, tokens, "tokens");
+
             foreach (var token in tokens)
                 Console.WriteLine(token);
 
-            Plot.Signal(samples, format.SampleRate, "raw");
-            Plot.Signal(preprocessed, 1 / hopLength, "preprocessed");
-            Plot.Signal(detection, 1 / hopLength, "detection");
-            Plot.Transients(samples, format.SampleRate, transients, "transients");
-            Plot.Tones(samples, format.SampleRate, tones, "tones");
+            //Plot.Signal(samples, format.SampleRate, "raw");
+            //Plot.Signal(preprocessed, 1 / hopLength, "preprocessed");
+            //Plot.Signal(detection, 1 / hopLength, "detection");
+            //Plot.Transients(samples, format.SampleRate, transients, "transients");
+            //Plot.Tones(samples, format.SampleRate, tones, "tones");
         }
     }
 }
