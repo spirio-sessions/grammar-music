@@ -1,18 +1,23 @@
 ﻿using FftSharp;
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
-namespace MusicAnalysis
+namespace Analysis
 {
     public static class Analysis
     {
+        // TODO: add silence detection to identify rests
+        // in the end, temporal and tonal analysis should form tokenizer for parsing the audio into a music grammar
+        // possible token model: tone(from, to, pitch/harmony), rest(from, to), unidentified-section(from, to)
+        // possible token class: abstract Token(DateTime from, DateTime to), rest as derived classes
         public static (
             double[] preprocessedSignal,
             double[] detectionSignal,
             IEnumerable<(int start, int end)> toneIndicies)
         Temporal(
-            double[] raw,
+            double[] raw, // needs to be mono
             int sampleRate,
             double hopLength = 0.05,
             double windowLength = 0.25,
@@ -162,10 +167,11 @@ namespace MusicAnalysis
             #endregion
         }
 
-        public static IEnumerable<(int start, int end, (double[] freqs, double[] power) fft, string pitchClass)>
+        // TODO: replace pitch class with harmony of three or more pitch classes
+        public static IEnumerable<(int start, int end, (double[] freqs, double[] power) fft, PitchClass pitchClass)>
         Tonal(
             IEnumerable<(int start, int end)> transients,
-            double[] rawAudio,
+            double[] rawAudio, // needs to be mono
             int sampleRate)
         {
 
@@ -185,7 +191,7 @@ namespace MusicAnalysis
 
             #endregion
 
-            var tones = new List<(int start, int end, (double[] freqs, double[] power), string pitchClass)>();
+            var tones = new List<(int start, int end, (double[] freqs, double[] power), PitchClass pitchClass)>();
 
             foreach (var transient in transients)
             {
@@ -195,7 +201,7 @@ namespace MusicAnalysis
 
             return tones;
 
-            (int start, int end, (double[] freqs, double[] power), string pitchClass) ToneDetect(int start, int end, double[] rawAudio)
+            (int start, int end, (double[] freqs, double[] power), PitchClass pitchClass) ToneDetect(int start, int end, double[] rawAudio)
             {
                 int duration = end - start;
                 var segment = new ArraySegment<double>(rawAudio, start, duration).ToArray();
@@ -207,7 +213,7 @@ namespace MusicAnalysis
                 var freqs = Transform.FFTfreq(sampleRate, power.Length);
 
                 var freq = DominantFreq(power, freqs);
-                var pitch = PitchClass(freq);
+                var pitch = DetectPitchClass(freq);
 
                 return (start, end, (freqs, power), pitch);
             }
@@ -225,7 +231,7 @@ namespace MusicAnalysis
             return freqs[maxIndex];
         }
 
-        public static string PitchClass(double freq)
+        public static PitchClass DetectPitchClass(double freq)
         {
             // map freq to [a, g#']
             while (!Between(freq, 213.826, 427.653))
@@ -238,22 +244,80 @@ namespace MusicAnalysis
 
             return freq switch
             {
-                double f when Between(f, 213.826, 226.541) => "A",
-                double f when Between(f, 226.541, 240.012) => "A#/Bb",
-                double f when Between(f, 240.012, 254.284) => "B",
-                double f when Between(f, 254.284, 269.405) => "C",
-                double f when Between(f, 269.405, 285.424) => "C#/Db",
-                double f when Between(f, 285.424, 302.396) => "D",
-                double f when Between(f, 302.396, 320.378) => "D#/Eb",
-                double f when Between(f, 320.378, 339.428) => "E",
-                double f when Between(f, 339.428, 359.611) => "F",
-                double f when Between(f, 359.611, 380.995) => "F#/Gb",
-                double f when Between(f, 380.995, 403.650) => "G",
-                double f when Between(f, 403.650, 427.653) => "G#/Ab",
-                _ => "unknown pitch class",
+                double f when Between(f, 213.826, 226.541) => PitchClass.A,
+                double f when Between(f, 226.541, 240.012) => PitchClass.Bb,
+                double f when Between(f, 240.012, 254.284) => PitchClass.B,
+                double f when Between(f, 254.284, 269.405) => PitchClass.C,
+                double f when Between(f, 269.405, 285.424) => PitchClass.Db,
+                double f when Between(f, 285.424, 302.396) => PitchClass.D,
+                double f when Between(f, 302.396, 320.378) => PitchClass.Eb,
+                double f when Between(f, 320.378, 339.428) => PitchClass.E,
+                double f when Between(f, 339.428, 359.611) => PitchClass.F,
+                double f when Between(f, 359.611, 380.995) => PitchClass.Gb,
+                double f when Between(f, 380.995, 403.650) => PitchClass.G,
+                double f when Between(f, 403.650, 427.653) => PitchClass.Ab,
+                _ => PitchClass.Unknown,
             };
 
             static bool Between(double d, double l, double u) => l < d && d < u;
+        }
+
+        public static IEnumerable<Token> Tokenize(
+            IEnumerable<(int start, int end, PitchClass pitch)> tones,
+            double[] rawAudio, // needs to be mono
+            int sampleRate,
+            double silenceThreshold = 0.1)
+        {
+            var tokens = new List<Token>();
+
+            if (!tones.Any())
+                return tokens;
+
+            var first = tones.First();
+            if (first.start != 0)
+                TokenizeSection(0, first.start);
+
+            TokenizeTone(first);
+
+            int prevToneEnd = first.end;
+            foreach (var tone in tones.Skip(1))
+            {
+                TokenizeSection(prevToneEnd, tone.start);
+                TokenizeTone(tone);
+
+                prevToneEnd = tone.end;
+            }
+
+            var lastToneEnd = tones.Last().end;
+            var lastSampleIndex = rawAudio.Length - 1;
+            if (lastToneEnd != lastSampleIndex)
+                TokenizeSection(lastToneEnd, lastSampleIndex);
+
+            return tokens;
+
+            #region subroutines
+
+            void TokenizeTone((int start, int end, PitchClass pitch) tone)
+            {
+                tokens.Add(new Tone(tone.start, tone.end, sampleRate, tone.pitch));
+            }
+
+            void TokenizeSection(int from, int to)
+            {
+                if (IsSilence(from, to))
+                    tokens.Add(new Rest(from, to, sampleRate));
+                else
+                    tokens.Add(new UnidentifiedSection(from, to, sampleRate));
+            }
+
+            bool IsSilence(int from, int to) =>
+                rawAudio
+                    .Skip(from)
+                    .Take(to - from)
+                    .Select(s => Math.Abs(s))
+                    .Average() < silenceThreshold;
+
+            #endregion
         }
     }
 }

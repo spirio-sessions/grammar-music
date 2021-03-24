@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 using static System.Console;
 
-namespace MusicAnalysis
+namespace Analysis
 {
     public static class Audio
     {

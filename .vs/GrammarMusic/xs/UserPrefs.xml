@@ -1,12 +1,16 @@
 ﻿<Properties StartupConfiguration="{C3962A03-34EB-40FA-84CA-831AA66D7508}|Default">
   <MonoDevelop.Ide.ItemProperties.Analysis PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Analysis/Program.cs">
+    <Files>
+      <File FileName="Analysis/Analysis.cs" Line="5" Column="34" />
+      <File FileName="Analysis/Program.cs" Line="8" Column="6" />
+    </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="GrammarMusic" expanded="True">
             <Node name="Analysis" expanded="True">
-              <Node name="Plot.cs" selected="True" />
+              <Node name="Program.cs" selected="True" />
             </Node>
           </Node>
         </State>

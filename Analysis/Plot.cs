@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace MusicAnalysis
+namespace Analysis
 {
     public static class Plot
     {
@@ -48,7 +48,7 @@ namespace MusicAnalysis
         public static void Tones(
             double[] samples,
             double sampleRate,
-            IEnumerable<(int start, int end, string pitchClass)> tones,
+            IEnumerable<(int start, int end, PitchClass pitchClass)> tones,
             string title)
         {
             var transients = tones.Select(tone => (tone.start, tone.end));
@@ -59,7 +59,7 @@ namespace MusicAnalysis
                 var start = tone.start / sampleRate;
                 var end = tone.end / sampleRate;
                 var duration = end - start;
-                plot.PlotText(tone.pitchClass, start + duration / 2, 0);
+                plot.PlotText(tone.pitchClass.ToString(), start + duration / 2, 0);
             }
 
             SavePlot(plot, title);
