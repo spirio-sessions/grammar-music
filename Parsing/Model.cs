@@ -1,8 +1,22 @@
 ﻿using System;
 
-namespace Analysis
+namespace Parsing
 {
     public enum PitchClass { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B, Unknown }
+
+    public struct Pitch
+    {
+        public readonly PitchClass pitchClass;
+        public readonly int octaveOffset;
+
+        public Pitch(PitchClass pitchClass, int octaveOffset)
+        {
+            this.pitchClass = pitchClass;
+            this.octaveOffset = octaveOffset;
+        }
+
+        public override string ToString() => $"{pitchClass}{octaveOffset}";
+    }
 
     public abstract class Token
     {
@@ -32,14 +46,14 @@ namespace Analysis
 
     public class Tone : Token
     {
-        public readonly PitchClass Pitch;
+        public readonly Pitch Pitch;
 
-        public Tone(TimeSpan from, TimeSpan to, PitchClass pitch) : base(from, to)
+        public Tone(TimeSpan from, TimeSpan to, Pitch pitch) : base(from, to)
         {
             Pitch = pitch;
         }
 
-        public Tone(int from, int to, int sampleRate, PitchClass pitch) : base(from, to, sampleRate)
+        public Tone(int from, int to, int sampleRate, Pitch pitch) : base(from, to, sampleRate)
         {
             Pitch = pitch;
         }

@@ -3,11 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Analysis
+namespace Parsing
 {
     public static class Plot
     {
-        private static void SavePlot(ScottPlot.Plot plot, string title, string dirPath = "")
+        public static void SavePlot(ScottPlot.Plot plot, string title, string dirPath = "")
         {
             plot.Title(title);
 

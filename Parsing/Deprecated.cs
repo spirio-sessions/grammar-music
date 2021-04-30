@@ -4,14 +4,10 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Analysis
+namespace Parsing
 {
-    public static class Analysis
+    public static class Deprecated
     {
-        // TODO: add silence detection to identify rests
-        // in the end, temporal and tonal analysis should form tokenizer for parsing the audio into a music grammar
-        // possible token model: tone(from, to, pitch/harmony), rest(from, to), unidentified-section(from, to)
-        // possible token class: abstract Token(DateTime from, DateTime to), rest as derived classes
         public static (
             double[] preprocessedSignal,
             double[] detectionSignal,
@@ -167,8 +163,7 @@ namespace Analysis
             #endregion
         }
 
-        // TODO: replace pitch class with harmony of three or more pitch classes
-        public static IEnumerable<(int start, int end, (double[] freqs, double[] power) fft, PitchClass pitchClass)>
+        public static IEnumerable<(int start, int end, (double[] freqs, double[] power) fft, Pitch pitchClass)>
         Tonal(
             IEnumerable<(int start, int end)> transients,
             double[] rawAudio, // needs to be mono
@@ -191,7 +186,7 @@ namespace Analysis
 
             #endregion
 
-            var tones = new List<(int start, int end, (double[] freqs, double[] power), PitchClass pitchClass)>();
+            var tones = new List<(int start, int end, (double[] freqs, double[] power), Pitch pitchClass)>();
 
             foreach (var transient in transients)
             {
@@ -201,7 +196,7 @@ namespace Analysis
 
             return tones;
 
-            (int start, int end, (double[] freqs, double[] power), PitchClass pitchClass) ToneDetect(int start, int end, double[] rawAudio)
+            (int start, int end, (double[] freqs, double[] power), Pitch pitchClass) ToneDetect(int start, int end, double[] rawAudio)
             {
                 int duration = end - start;
                 var segment = new ArraySegment<double>(rawAudio, start, duration).ToArray();
@@ -213,7 +208,7 @@ namespace Analysis
                 var freqs = Transform.FFTfreq(sampleRate, power.Length);
 
                 var freq = DominantFreq(power, freqs);
-                var pitch = DetectPitchClass(freq);
+                var pitch = DetectPitch(freq);
 
                 return (start, end, (freqs, power), pitch);
             }
@@ -231,40 +226,53 @@ namespace Analysis
             return freqs[maxIndex];
         }
 
-        public static PitchClass DetectPitchClass(double freq)
+        public static Pitch DetectPitch(double freq)
         {
-            // map freq to [a, g#']
-            while (!Between(freq, 213.826, 427.653))
+            if (freq <= 0)
+                return new Pitch(PitchClass.Unknown, int.MinValue);
+
+            int octaveOffset = 4;
+
+            // map freq to [C4, B4]
+            double freqB3C4 = 254.284;
+            double freqB4C5 = 508.565;
+            while (!Between(freq, freqB3C4, freqB4C5))
             {
-                if (freq < 213.826)
+                if (freq < freqB3C4)
+                {
                     freq *= 2;
-                else if (freq >= 427.653)
+                    octaveOffset--;
+                }
+                else if (freq > freqB4C5)
+                {
                     freq /= 2;
+                    octaveOffset++;
+                }
             }
 
             return freq switch
             {
-                double f when Between(f, 213.826, 226.541) => PitchClass.A,
-                double f when Between(f, 226.541, 240.012) => PitchClass.Bb,
-                double f when Between(f, 240.012, 254.284) => PitchClass.B,
-                double f when Between(f, 254.284, 269.405) => PitchClass.C,
-                double f when Between(f, 269.405, 285.424) => PitchClass.Db,
-                double f when Between(f, 285.424, 302.396) => PitchClass.D,
-                double f when Between(f, 302.396, 320.378) => PitchClass.Eb,
-                double f when Between(f, 320.378, 339.428) => PitchClass.E,
-                double f when Between(f, 339.428, 359.611) => PitchClass.F,
-                double f when Between(f, 359.611, 380.995) => PitchClass.Gb,
-                double f when Between(f, 380.995, 403.650) => PitchClass.G,
-                double f when Between(f, 403.650, 427.653) => PitchClass.Ab,
-                _ => PitchClass.Unknown,
+                double f when Between(f, freqB3C4, 269.405) => new Pitch(PitchClass.C, octaveOffset),
+                double f when Between(f, 269.405, 285.424) => new Pitch(PitchClass.Db, octaveOffset),
+                double f when Between(f, 285.424, 302.396) => new Pitch(PitchClass.D, octaveOffset),
+                double f when Between(f, 302.396, 320.378) => new Pitch(PitchClass.Eb, octaveOffset),
+                double f when Between(f, 320.378, 339.428) => new Pitch(PitchClass.E, octaveOffset),
+                double f when Between(f, 339.428, 359.611) => new Pitch(PitchClass.F, octaveOffset),
+                double f when Between(f, 359.611, 380.995) => new Pitch(PitchClass.Gb, octaveOffset),
+                double f when Between(f, 380.995, 403.650) => new Pitch(PitchClass.G, octaveOffset),
+                double f when Between(f, 403.650, 427.653) => new Pitch(PitchClass.Ab, octaveOffset),
+                double f when Between(f, 427.653, 453.080) => new Pitch(PitchClass.A, octaveOffset),
+                double f when Between(f, 453.080, 480.020) => new Pitch(PitchClass.Bb, octaveOffset),
+                double f when Between(f, 480.020, freqB4C5) => new Pitch(PitchClass.B, octaveOffset),
+                _ => new Pitch(PitchClass.Unknown, int.MinValue)
             };
 
             static bool Between(double d, double l, double u) => l < d && d < u;
         }
 
         public static IEnumerable<Token> Tokenize(
-            IEnumerable<(int start, int end, PitchClass pitch)> tones,
-            double[] rawAudio, // needs to be mono
+            IEnumerable<(int start, int end, Pitch pitch)> tones,
+            double[] rawAudio, // needs to be normalised mono
             int sampleRate,
             double silenceThreshold = 0.1)
         {
@@ -297,7 +305,7 @@ namespace Analysis
 
             #region subroutines
 
-            void TokenizeTone((int start, int end, PitchClass pitch) tone)
+            void TokenizeTone((int start, int end, Pitch pitch) tone)
             {
                 tokens.Add(new Tone(tone.start, tone.end, sampleRate, tone.pitch));
             }

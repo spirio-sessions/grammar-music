@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 using static System.Console;
 
-namespace Analysis
+namespace Parsing
 {
     public static class Audio
     {
