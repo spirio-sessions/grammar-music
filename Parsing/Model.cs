@@ -20,69 +20,52 @@ namespace Parsing
 
     public abstract class Token
     {
-        public readonly TimeSpan From;
-        public readonly TimeSpan To;
+        public readonly double duration;
 
-        public Token(TimeSpan from, TimeSpan to)
+        public Token(double duration)
         {
-            From = from;
-            To = to;
+            this.duration = duration;
         }
 
-        public Token(int from, int to, int sampleRate)
+        public Token(int durationFrames, double sampleRate)
         {
-            From = new TimeSpan(0, 0, 0, GetSeconds(from), GetMilliSeconds(from));
-            To = new TimeSpan(0, 0, 0, GetSeconds(to), GetMilliSeconds(to));
-
-            int GetSeconds(int frameIndex) => frameIndex / sampleRate;
-            int GetMilliSeconds(int frameIndex) => 1000 * frameIndex / sampleRate % 1000;
+            duration = durationFrames / sampleRate;
         }
 
         public override string ToString()
         {
-            return $"{From.Minutes}:{From.Seconds}:{From.Milliseconds}-{To.Minutes}:{To.Seconds}:{To.Milliseconds}";
+            return $"{duration,6:F3}";
         }
     }
 
     public class Tone : Token
     {
-        public readonly Pitch Pitch;
+        public readonly Pitch pitch;
 
-        public Tone(TimeSpan from, TimeSpan to, Pitch pitch) : base(from, to)
+        public Tone(Pitch pitch, double duration) : base(duration)
         {
-            Pitch = pitch;
+            this.pitch = pitch;
         }
 
-        public Tone(int from, int to, int sampleRate, Pitch pitch) : base(from, to, sampleRate)
+        public Tone(Pitch pitch, int durationFrames, double sampleRate) : base(durationFrames, sampleRate)
         {
-            Pitch = pitch;
+            this.pitch = pitch;
         }
 
         public override string ToString()
         {
-            return $"{Pitch}@" + base.ToString();
-        }
-    }
-
-    public class Rest : Token
-    {
-        public Rest(TimeSpan from, TimeSpan to) : base(from, to) { }
-        public Rest(int from, int to, int sampleRate) : base(from, to, sampleRate) { }
-
-        public override string ToString()
-        {
-            return "R@" + base.ToString();
+            return $"{pitch,3} {base.ToString()}";
         }
     }
 
     public class UnidentifiedSection : Token
     {
-        public UnidentifiedSection(TimeSpan from, TimeSpan to) : base(from, to) { }
-        public UnidentifiedSection(int from, int to, int sampleRate) : base(from, to, sampleRate) { }
+        public UnidentifiedSection(double duration) : base(duration) { }
+        public UnidentifiedSection(int durationFrames, double sampleRate) : base(durationFrames, sampleRate) { }
 
         public override string ToString()
         {
-            return "U@" + base.ToString();
+            return $"{"U",3} {base.ToString()}";
         }
     }
 }
