@@ -65,32 +65,33 @@ namespace Parsing
             SavePlot(plot, title);
         }
 
-        public static void Tokens(
-            double[] samples,
-            double sampleRate,
-            IEnumerable<Token> tokens,
-            string title)
-        {
-            var plot = new ScottPlot.Plot();
-            plot.PlotSignal(samples, sampleRate);
+        // TODO: refactor
+        //public static void Tokens(
+        //    double[] samples,
+        //    double sampleRate,
+        //    IEnumerable<Token> tokens,
+        //    string title)
+        //{
+        //    var plot = new ScottPlot.Plot();
+        //    plot.PlotSignal(samples, sampleRate);
 
-            foreach (var token in tokens)
-            {
-                plot.PlotVLine(token.From.TotalSeconds, System.Drawing.Color.Red);
+        //    foreach (var token in tokens)
+        //    {
+        //        plot.PlotVLine(token.From.TotalSeconds, System.Drawing.Color.Red);
 
-                var item = token switch
-                {
-                    Rest _ => "R",
-                    Tone t => t.Pitch.ToString(),
-                    _ => "U"
-                };
+        //        var item = token switch
+        //        {
+        //            Rest _ => "R",
+        //            Tone t => t.Pitch.ToString(),
+        //            _ => "U"
+        //        };
 
-                plot.PlotText(item, token.From.TotalSeconds + 0.01, 0, System.Drawing.Color.Black);
-            }
-            plot.PlotVLine(tokens.Last().To.TotalSeconds, System.Drawing.Color.Red);
+        //        plot.PlotText(item, token.From.TotalSeconds + 0.01, 0, System.Drawing.Color.Black);
+        //    }
+        //    plot.PlotVLine(tokens.Last().To.TotalSeconds, System.Drawing.Color.Red);
 
-            SavePlot(plot, title);
-        }
+        //    SavePlot(plot, title);
+        //}
 
         public static void Spectogram(double[] frequencies, double[] powers, string title)
         {

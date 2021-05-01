@@ -1,8 +1,7 @@
 ﻿<Properties StartupConfiguration="{C3962A03-34EB-40FA-84CA-831AA66D7508}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Parsing/Program.cs">
     <Files>
-      <File FileName="Parsing/Tokenizer.cs" Line="1" Column="1" />
-      <File FileName="Parsing/Program.cs" Line="23" Column="35" />
+      <File FileName="Parsing/Program.cs" Line="19" Column="33" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">

@@ -5,12 +5,12 @@ namespace Parsing
 {
     public class Tokenizer
     {
-        double fMin;
-        double fMax;
-        double[] frequencies;
-        int framesPerToneMin;
-        double pMin;
-        int peaksCount;
+        readonly double fMin;
+        readonly double fMax;
+        readonly double[] frequencies;
+        readonly int framesPerToneMin;
+        readonly double pMin;
+        readonly int peaksCount;
 
         public Tokenizer(double fMin, double fMax, double[] frequencies, int framesPerToneMin = 3, double pMin = -50.0, int peaksCount = 3)
         {
@@ -26,9 +26,6 @@ namespace Parsing
         {
             var freq = LimitFrequencies(frequencies);
 
-            var fCounted = new List<(double f, int c)>();
-            fCounted.Add((0.0, 1));
-
             return frames
                 .Select(LimitFrequencies)
                 .Select(frame => (frame, peaks: frame.ArgPeaks(peaksCount)))
@@ -41,9 +38,10 @@ namespace Parsing
                     .OrderBy(t => t.f)
                     .Select(t => t.f)
                     .FirstOrDefault())
-                .Aggregate(fCounted, MergeCount)
+                .Aggregate(new List<(double f, int c)>{(0.0, 1)}, MergeCount)
                 .Select(t => (DetectPitch(t.f), t.c))
                 .Select(t => t.c < framesPerToneMin ? (new Pitch(PitchClass.Unknown, int.MinValue), t.c) : t);
+                // TODO: map to Token objects & add double duration to Token class
         }
 
         private double[] LimitFrequencies(double[] frame)
@@ -54,7 +52,7 @@ namespace Parsing
             return frame[lfb .. ufb];
         }
 
-        static private List<(double f, int c)> MergeCount(List<(double f, int c)> acc, double f)
+        private static List<(double f, int c)> MergeCount(List<(double f, int c)> acc, double f)
         {
             var last = acc [^1];
             if (f == last.f)
@@ -70,7 +68,7 @@ namespace Parsing
             return acc;
         }
 
-        static private Pitch DetectPitch(double freq)
+        private static Pitch DetectPitch(double freq)
         {
             if (freq <= 0)
                 return new Pitch(PitchClass.Unknown, int.MinValue);
