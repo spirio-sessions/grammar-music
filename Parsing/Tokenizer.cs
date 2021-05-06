@@ -22,7 +22,7 @@ namespace Parsing
             this.peaksCount = peaksCount;   
         }
 
-        public IEnumerable<(Pitch p, int c)> Tokenize(IEnumerable<double[]> frames)
+        public IEnumerable<Token> Tokenize(IEnumerable<double[]> frames, double sampleRate)
         {
             var freq = LimitFrequencies(frequencies);
 
@@ -39,9 +39,14 @@ namespace Parsing
                     .Select(t => t.f)
                     .FirstOrDefault())
                 .Aggregate(new List<(double f, int c)>{(0.0, 1)}, MergeCount)
-                .Select(t => (DetectPitch(t.f), t.c))
-                .Select(t => t.c < framesPerToneMin ? (new Pitch(PitchClass.Unknown, int.MinValue), t.c) : t);
-                // TODO: map to Token objects & add double duration to Token class
+                .Select(t => (p: DetectPitch(t.f), t.c))
+                .Select(t => t.c < framesPerToneMin ? (p: new Pitch(PitchClass.Unknown, int.MinValue), t.c) : t)
+                .Select(t => (t.p, d: t.c / sampleRate))
+                .Select<(Pitch p, double d), Token>(t =>
+                    t.p.pitchClass == PitchClass.Unknown
+                        ? new UnidentifiedSection(t.d)
+                        : new Tone(t.p, t.d));
+            // TODO: add rests by zip-joining with downsamples version of original samples and threshold filtering
         }
 
         private double[] LimitFrequencies(double[] frame)

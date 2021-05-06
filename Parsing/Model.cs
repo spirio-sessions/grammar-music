@@ -20,21 +20,27 @@ namespace Parsing
 
     public abstract class Token
     {
-        public readonly double duration;
+        public double Duration { get; private set; }
 
         public Token(double duration)
         {
-            this.duration = duration;
+            Duration = duration;
         }
 
         public Token(int durationFrames, double sampleRate)
         {
-            duration = durationFrames / sampleRate;
+            Duration = durationFrames / sampleRate;
+        }
+
+        public Token DurationAdd(double secs)
+        {
+            Duration += secs;
+            return this;
         }
 
         public override string ToString()
         {
-            return $"{duration,6:F3}";
+            return $"{Duration,6:F3}";
         }
     }
 

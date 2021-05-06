@@ -21,7 +21,6 @@ namespace Parsing
                 throw new ArgumentException("window size must be shorter than sample length");
 
             var powerChunks = new List<double[]>();
-            samples = Pad.ZeroPad(samples);
 
             for (var h = halfWindowSize; h + halfWindowSize < samples.Length; h += hopSize)
             {
