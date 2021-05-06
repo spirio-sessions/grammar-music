@@ -47,6 +47,7 @@ namespace Parsing
                         ? new UnidentifiedSection(t.d)
                         : new Tone(t.p, t.d));
             // TODO: add rests by zip-joining with downsamples version of original samples and threshold filtering
+            // TODO: add rests by designating regions with low harmonicity as rests
         }
 
         private double[] LimitFrequencies(double[] frame)
