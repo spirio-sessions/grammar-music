@@ -11,9 +11,18 @@ using static System.Console;
 
 namespace Parsing
 {
-    public static class Audio
+    public class Audio
     {
-        public static double[] Record(double duration, int sampleRate = 44_100)
+        public double SampleRate { get; }
+        public double[] Samples { get; }
+
+        private Audio(double sampleRate, double[] samples)
+        {
+            SampleRate = sampleRate;
+            Samples = samples;
+        }
+
+        public static Audio Record(double duration, int sampleRate = 44_100)
         {
             var device = ALC.CaptureOpenDevice(null, sampleRate, ALFormat.Mono16, 1024);
             CheckAlcError();
@@ -53,9 +62,11 @@ namespace Parsing
 
             WriteLine("recording finished");
 
-            return samples
+            var samplesDouble = samples
                 .Select(s => (double)s / short.MaxValue)
                 .ToArray();
+
+            return new Audio(sampleRate, samplesDouble);
 
             static void CheckAlcError()
             {
@@ -65,7 +76,7 @@ namespace Parsing
             }
         }
 
-        public static (WaveFormat format, int framesRead, double[] samples) File(string path, double length)
+        public static Audio File(string path, double length)
         {
             using var wfr = new WaveFileReader(path);
 
@@ -84,10 +95,7 @@ namespace Parsing
                 framesRead++;
             }
 
-            // one greater than actually read
-            framesRead--;
-                
-            return (wfr.WaveFormat, framesRead, samples.ToArray());
+            return new Audio(wfr.WaveFormat.SampleRate, samples.ToArray());
         }
     }
 
