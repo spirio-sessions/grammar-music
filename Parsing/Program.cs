@@ -12,7 +12,7 @@ namespace Parsing
 
         static void Main()
         {
-            TestMeterDetectionStft();
+            TestEvaluation();
         }
 
         static void TestTokenization()
@@ -21,10 +21,10 @@ namespace Parsing
             var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
             int stftHop = 1024, stftHalfWindow = 1024;
 
-            var (format, _, samples) = Audio.File(inPath, duration);
-            var (freqs, frames) = STFT.Run(samples, format.SampleRate, stftHop, stftHalfWindow);
+            var audio = Audio.File(inPath, duration);
+            var (freqs, frames) = STFT.RunIndex(audio.Samples, audio.SampleRate, stftHop, stftHalfWindow);
             var tokens = new Tokenizer(130, 1000, freqs)
-                .Tokenize(frames, format.SampleRate / stftHop);
+                .Tokenize(frames, audio.SampleRate / stftHop);
 
             foreach (var t in tokens)
                 WriteLine(t);
@@ -34,7 +34,7 @@ namespace Parsing
         {
             var rec = new Recording(null, 44_100, 4.0, frame => WriteLine($"{frame.Length} samples recorded @ {DateTime.Now}"));
             rec.Start();
-            Console.ReadKey();
+            ReadKey();
             rec.Stop();
         }
 
@@ -42,17 +42,17 @@ namespace Parsing
         {
             var duration = 4.0;
             var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
-            var (format, _, samples) = Audio.File(inPath, duration);
+            var audio = Audio.File(inPath, duration);
 
-            samples = FftSharp.Pad.ZeroPad(samples);
+            var samples = FftSharp.Pad.ZeroPad(audio.Samples);
             var rfft = FftSharp.Transform.RFFT(samples);
-            var freqs = FftSharp.Transform.FFTfreq(format.SampleRate, rfft.Length);
+            var freqs = FftSharp.Transform.FFTfreq(audio.SampleRate, rfft.Length);
 
             double fd = freqs[1];
             int lfb = (int)(1 / fd); // 60bpm
             int ufb = (int)(5 / fd) + 1; // 300bpm
 
-            var period = format.SampleRate / freqs[rfft[lfb..ufb].Select(c => c.Magnitude).ToArray().ArgMax()];
+            var period = audio.SampleRate / freqs[rfft[lfb..ufb].Select(c => c.Magnitude).ToArray().ArgMax()];
             var rfftMax = rfft[lfb..ufb].OrderByDescending(c => c.Magnitude).First();
             var shift = Math.Atan2(rfftMax.Imaginary, rfftMax.Real) * period / Math.PI;
 
@@ -60,11 +60,11 @@ namespace Parsing
             WriteLine(shift);
 
             var plot = new ScottPlot.Plot();
-            plot.PlotSignal(samples, format.SampleRate);
+            plot.PlotSignal(samples, audio.SampleRate);
 
-            var tShift = shift / format.SampleRate;
-            var tPeriod = period / format.SampleRate;
-            var tMax = samples.Length / format.SampleRate;
+            var tShift = shift / audio.SampleRate;
+            var tPeriod = period / audio.SampleRate;
+            var tMax = samples.Length / audio.SampleRate;
             for (double t = 0; t < tMax; t += tPeriod) // without shift
                 plot.PlotVLine(t, System.Drawing.Color.Red);
             for (double t = tShift; t < tMax; t += tPeriod) // with shift
@@ -77,15 +77,15 @@ namespace Parsing
         {
             var duration = 4.0;
             var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
-            var (format, _, samples) = Audio.File(inPath, duration);
-            int origLength = samples.Length;
+            var audio = Audio.File(inPath, duration);
+            int origLength = audio.Samples.Length;
 
             int stftHop = 1024, stftHalfWindow = 1024;
             // this also zero-pads halfway left and halfway right up to the next power of 2
-            var (freqs, frames) = STFT.Run(samples, format.SampleRate, stftHop, stftHalfWindow);
+            var (freqs, frames) = STFT.RunIndex(audio.Samples, audio.SampleRate, stftHop, stftHalfWindow);
 
             var tokens = new Tokenizer(130, 1000, freqs)
-                .Tokenize(frames, format.SampleRate / stftHop);
+                .Tokenize(frames, audio.SampleRate / stftHop);
             double relevantDuration = 0.1;
             var relevantTokens = new List<Token>() { tokens.First() };
 
@@ -116,18 +116,28 @@ namespace Parsing
             var shift =
                 relevantTokens.First() is UnidentifiedSection
                     // if shifted, subtract half padding length from left
-                    ? relevantTokens.First().Duration - (samples.Length - origLength) / 2 / format.SampleRate
+                    ? relevantTokens.First().Duration - (audio.Samples.Length - origLength) / 2 / audio.SampleRate
                     : 0.0;
 
             var plot = new ScottPlot.Plot();
-            plot.PlotSignal(samples, format.SampleRate);
-            var tMax = samples.Length / format.SampleRate;
+            plot.PlotSignal(audio.Samples, audio.SampleRate);
+            var tMax = audio.Samples.Length / audio.SampleRate;
             for (double t = 0; t < tMax; t += period) // without shift
                 plot.PlotVLine(t, System.Drawing.Color.Red);
             for (double t = shift; t < tMax; t += period) // with shift
                 plot.PlotVLine(t, System.Drawing.Color.Blue);
 
             Plot.SavePlot(plot, "beat-raw-stft");
+        }
+
+        static void TestEvaluation()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "solo_samples", "musicnet");
+            var name = "2191";
+
+            var evaluation = new Evaluation(path, name);
+
+            // TODO: handle parallel tones in violin, possibly also cello
         }
     }
 }
