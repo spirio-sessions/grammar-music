@@ -13,7 +13,7 @@ namespace Parsing
         /// <param name="samples">the discrete samples</param>
         /// <param name="hopLength">the offset between fft chunks in frames</param>
         /// <param name="halfWindowSize">half length of the fft window used to produce an fft chunk in frames</param>
-        public static (double[] freqs, IEnumerable<double[]> powerChunks) Run(double[] samples, int sampleRate, int hopSize, int halfWindowSize)
+        public static (double[] freqs, IEnumerable<double[]> powerChunks) RunIndex(double[] samples, double sampleRate, int hopSize, int halfWindowSize)
         {
             if (hopSize % 2 != 0)
                 throw new ArgumentException("hop size must be power of two");
@@ -43,12 +43,12 @@ namespace Parsing
         public static (double[] freqs, IEnumerable<double[]> powerChunks) Run(
             double[] samples,
             int sampleRate,
-            double hopLength = 0.05 /*seconds*/,
-            double windowLength = 0.1 /*seconds*/)
+            double hopLength,
+            double halfWindowLength)
         {
             int hopSize = (int)(hopLength * sampleRate);
-            int halfWindowSize = (int)(0.5 * windowLength * sampleRate);
-            return Run(samples, sampleRate, hopSize, halfWindowSize);
+            int halfWindowSize = (int)(halfWindowLength * sampleRate);
+            return RunIndex(samples, sampleRate, hopSize, halfWindowSize);
         }
     }
 }

@@ -76,22 +76,32 @@ namespace Parsing
             }
         }
 
-        public static Audio File(string path, double length)
+        public static Audio File(string path, double length = 0)
         {
-            using var wfr = new WaveFileReader(path);
+            if (length < 0)
+                throw new ArgumentException("audio length must not be negative");
 
-            int framesToRead = (int) (length * wfr.WaveFormat.SampleRate);
+            using var wfr = new WaveFileReader(path);
+            var readAll = length == 0;
             var samples = new List<double>();
 
-            var frame = wfr.ReadNextSampleFrame();
-            int framesRead = 1;
+            long framesToRead = (long) (length * wfr.WaveFormat.SampleRate);
+            long framesAvailable = wfr.Length / wfr.BlockAlign;
+            framesToRead =
+                framesToRead == 0
+                ? framesAvailable // 0 -> read everything
+                : Math.Min(framesAvailable, framesToRead); // ensure read length did not exceed stream length
 
-            while(frame != null && framesRead <= framesToRead)
+            long framesRead = 0;
+            float[] frame;
+
+            while(framesRead < framesToRead)
             {
+                frame = wfr.ReadNextSampleFrame();
+
                 foreach (var sample in frame)
                     samples.Add(sample);
 
-                frame = wfr.ReadNextSampleFrame();
                 framesRead++;
             }
 
