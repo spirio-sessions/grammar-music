@@ -2,20 +2,20 @@
 
 namespace Parsing
 {
-    public enum PitchClass { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B, Unknown }
+    public enum PitchClass { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B }
 
-    public struct Pitch
+    public class Pitch
     {
-        public readonly PitchClass pitchClass;
-        public readonly int octaveOffset;
+        public readonly byte midiNoteNumber;
+        public PitchClass PitchClass => (PitchClass)(midiNoteNumber % 12);
+        public int OctaveOffset => midiNoteNumber / 12 - 1;
 
-        public Pitch(PitchClass pitchClass, int octaveOffset)
+        public Pitch(byte midiNoteNumber)
         {
-            this.pitchClass = pitchClass;
-            this.octaveOffset = octaveOffset;
+            this.midiNoteNumber = midiNoteNumber;
         }
 
-        public override string ToString() => $"{pitchClass}{octaveOffset}";
+        public override string ToString() => $"{PitchClass}{OctaveOffset}";
     }
 
     public abstract class Token
