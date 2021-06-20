@@ -1,11 +1,17 @@
 ﻿<Properties StartupConfiguration="{C3962A03-34EB-40FA-84CA-831AA66D7508}|Default">
-  <MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Parsing/Plot.cs">
+    <Files>
+      <File FileName="Parsing/Evaluation.cs" Line="13" Column="16" />
+      <File FileName="Parsing/Program.cs" Line="18" Column="65" />
+      <File FileName="Parsing/F0Estimator.cs" Line="61" Column="35" />
+      <File FileName="Parsing/Plot.cs" Line="8" Column="6" />
+    </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="GrammarMusic" expanded="True">
-            <Node name="Parsing" expanded="True">
-              <Node name="Tokenizer.cs" selected="True" />
+            <Node name="Parsing" expanded="True" selected="True">
+              <Node name="Dependencies" expanded="True" />
             </Node>
           </Node>
         </State>
@@ -16,7 +22,9 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/xmaek/Code/grammar-music/Parsing/Plot.cs" relfile="Parsing/Plot.cs" line="23" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>

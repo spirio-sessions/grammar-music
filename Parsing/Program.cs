@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using static System.Console;
@@ -12,19 +13,22 @@ namespace Parsing
 
         static void Main()
         {
-            TestEvaluation();
+            //ConductExperiment("FMax", new double[] { 4000, 6000, 8000, 10_000, 12_000, 14_000, 16_000 });
+
+            Plot.Signal(new double[] { 1, 2, 3, 4 }, 1, "test");
         }
 
         static void TestTokenization()
         {
             var duration = 4.0;
             var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
-            int stftHop = 1024, stftHalfWindow = 1024;
 
             var audio = Audio.File(inPath, duration);
-            var (freqs, frames) = STFT.RunIndex(audio.Samples, audio.SampleRate, stftHop, stftHalfWindow);
-            var tokens = new Tokenizer(130, 1000, freqs)
-                .Tokenize(frames, audio.SampleRate / stftHop);
+            var estimator = new F0Estimator();
+            var tokenizer = new Tokenizer();
+
+            var (f0s, sampleRate)  = estimator.Run(audio.Samples, audio.SampleRate);
+            var tokens = tokenizer.Run(f0s, sampleRate);
 
             foreach (var t in tokens)
                 WriteLine(t);
@@ -38,106 +42,45 @@ namespace Parsing
             rec.Stop();
         }
 
-        static void TestMeterDetectionFft()
+        static void IterateMusicNet(Action<string, string> experiment)
         {
-            var duration = 4.0;
-            var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
-            var audio = Audio.File(inPath, duration);
+            var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "solo_samples");
+            var samplePath = Path.Combine(basePath, "musicnet");
+            var metaPath = Path.Combine(basePath, "musicnet_metadata_solo.csv");
 
-            var samples = FftSharp.Pad.ZeroPad(audio.Samples);
-            var rfft = FftSharp.Transform.RFFT(samples);
-            var freqs = FftSharp.Transform.FFTfreq(audio.SampleRate, rfft.Length);
+            var sampleIds = File.ReadAllLines(metaPath)
+                .Skip(1)
+                .Select(line => line.Split(",").First())
+                .Where(id => id != string.Empty);
 
-            double fd = freqs[1];
-            int lfb = (int)(1 / fd); // 60bpm
-            int ufb = (int)(5 / fd) + 1; // 300bpm
-
-            var period = audio.SampleRate / freqs[rfft[lfb..ufb].Select(c => c.Magnitude).ToArray().ArgMax()];
-            var rfftMax = rfft[lfb..ufb].OrderByDescending(c => c.Magnitude).First();
-            var shift = Math.Atan2(rfftMax.Imaginary, rfftMax.Real) * period / Math.PI;
-
-            WriteLine(period);
-            WriteLine(shift);
-
-            var plot = new ScottPlot.Plot();
-            plot.PlotSignal(samples, audio.SampleRate);
-
-            var tShift = shift / audio.SampleRate;
-            var tPeriod = period / audio.SampleRate;
-            var tMax = samples.Length / audio.SampleRate;
-            for (double t = 0; t < tMax; t += tPeriod) // without shift
-                plot.PlotVLine(t, System.Drawing.Color.Red);
-            for (double t = tShift; t < tMax; t += tPeriod) // with shift
-                plot.PlotVLine(t, System.Drawing.Color.Blue);
-
-            Plot.SavePlot(plot, "beat-raw-fft");
+            foreach (var id in sampleIds)
+                experiment(samplePath, id);
         }
 
-        static void TestMeterDetectionStft()
+        static void ConductExperiment(string parameter, IEnumerable<double> arguments)
         {
-            var duration = 4.0;
-            var inPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Sax_1.wav");
-            var audio = Audio.File(inPath, duration);
-            int origLength = audio.Samples.Length;
-
-            int stftHop = 1024, stftHalfWindow = 1024;
-            // this also zero-pads halfway left and halfway right up to the next power of 2
-            var (freqs, frames) = STFT.RunIndex(audio.Samples, audio.SampleRate, stftHop, stftHalfWindow);
-
-            var tokens = new Tokenizer(130, 1000, freqs)
-                .Tokenize(frames, audio.SampleRate / stftHop);
-            double relevantDuration = 0.1;
-            var relevantTokens = new List<Token>() { tokens.First() };
-
-            foreach (var t in tokens.Skip(1))
+            IterateMusicNet((samplePath, id) =>
             {
-                if (t.Duration < relevantDuration)
+                var evaluation = new Evaluation(samplePath, id);
+
+                var tasks = arguments.Select(arg =>
                 {
-                    var elem = relevantTokens.Last();
-                    elem.DurationAdd(t.Duration);
-                }
-                else
-                    relevantTokens.Add(t);
-            }
+                    // set the config's experiment parameter via reflection
+                    var config = new F0Estimator.Config();
+                    Type configType = typeof(F0Estimator.Config);
+                    var propertyInfo = configType.GetProperty(parameter);
+                    propertyInfo.SetValue(config, arg);
 
-            if (relevantTokens.First().Duration < relevantDuration && relevantTokens.Count() > 1)
-            {
-                relevantTokens[1].DurationAdd(relevantTokens.First().Duration);
-                relevantTokens.RemoveAt(0);
-            }
+                    var estimator = new F0Estimator();
+                    var task = new Task<Evaluation.Result>(() => evaluation.Run(estimator));
 
-            var period = (from t in relevantTokens
-                          select t.Duration into d
-                          orderby d ascending
-                          group d by d into g
-                          orderby g.Count() descending
-                          select g.Key).First();
+                    task.Start();
+                    return task;
+                });
 
-            var shift =
-                relevantTokens.First() is UnidentifiedSection
-                    // if shifted, subtract half padding length from left
-                    ? relevantTokens.First().Duration - (audio.Samples.Length - origLength) / 2 / audio.SampleRate
-                    : 0.0;
-
-            var plot = new ScottPlot.Plot();
-            plot.PlotSignal(audio.Samples, audio.SampleRate);
-            var tMax = audio.Samples.Length / audio.SampleRate;
-            for (double t = 0; t < tMax; t += period) // without shift
-                plot.PlotVLine(t, System.Drawing.Color.Red);
-            for (double t = shift; t < tMax; t += period) // with shift
-                plot.PlotVLine(t, System.Drawing.Color.Blue);
-
-            Plot.SavePlot(plot, "beat-raw-stft");
-        }
-
-        static void TestEvaluation()
-        {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "solo_samples", "musicnet");
-            var name = "2191";
-
-            var evaluation = new Evaluation(path, name);
-
-            // TODO: handle parallel tones in violin, possibly also cello
+                var results = Task.WhenAll(tasks).Result;
+                Plot.EvaluationResults(results, parameter, arguments.ToArray(), $"musicnet-{id}-{parameter}-{arguments.First()}-{arguments.Last()}");
+            });
         }
     }
 }
