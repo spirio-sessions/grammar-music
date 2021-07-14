@@ -111,30 +111,26 @@ namespace Parsing
 
     public class Recording
     {
-        private readonly string deviceName;
-        private readonly int sampleRate;
-        private readonly double frameLength;
+        private readonly Config config;
 
         private readonly Action<double[]> handle;
 
         private bool running = false;
         private ALCaptureDevice device;
 
-        public Recording(string deviceName, int sampleRate, double frameLength, Action<double[]> handle)
+        public Recording(Action<double[]> handle, Config config = null)
         {
-            this.deviceName = deviceName;
-            this.sampleRate = sampleRate;
-            this.frameLength = frameLength;
+            this.config = config ?? new Config();
             this.handle = handle;
         }
 
         public Task Start()
         {
-            int frameSize = (int)(frameLength * sampleRate);
+            int frameSize = (int)(config.FrameLength * config.SampleRate);
 
             var task = new Task(() =>
             {
-                device = ALC.CaptureOpenDevice(deviceName, sampleRate, ALFormat.Mono16, 1024);
+                device = ALC.CaptureOpenDevice(config.DeviceName, config.SampleRate, ALFormat.Mono16, 1024);
                 CheckAlcError();
 
                 ALC.CaptureStart(device);
@@ -156,7 +152,7 @@ namespace Parsing
                 CheckAlcError();
 
                 if (!ALC.CaptureCloseDevice(device))
-                    Error.WriteLine($"could not close {deviceName}");
+                    Error.WriteLine($"could not close {config.DeviceName}");
 
                 CheckAlcError();
             });
@@ -210,6 +206,20 @@ namespace Parsing
                 .Select(s => (double)s / short.MaxValue)
                 .ToArray();
             handle(samplesNormalized);
+        }
+
+        public class Config
+        {
+            public int SampleRate { get; }
+            public double FrameLength { get; }
+            public string DeviceName { get; }
+
+            public Config(int sampleRate = 44_100, double frameLength = 2.0, string deviceName = null)
+            {
+                SampleRate = sampleRate;
+                FrameLength = frameLength;
+                DeviceName = deviceName ?? ALC.GetString(ALDevice.Null, AlcGetString.CaptureDefaultDeviceSpecifier);
+            }
         }
     }
 }

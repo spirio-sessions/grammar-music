@@ -31,23 +31,28 @@ namespace Parsing
             SavePlot(plot, title);
         }
 
-        public static void EvaluationResults(Evaluation.Result[] results, string parameterName, double[] parameters, string title)
+        public static void EvaluationResults(Evaluation.Result[] results, string parameter, double[] arguments, string title)
         {
             var plot = new ScottPlot.Plot();
 
-            plot.XLabel(parameterName);
+            plot.XLabel(parameter);
             plot.YLabel("share of all samples");
 
             plot.Axis(y1: 0, y2: 1);
 
-            plot.PlotScatter(parameters, results.Select(r => r.AmbiguousRate).ToArray(), System.Drawing.Color.Gray, label: "ambiguous");
-            plot.PlotScatter(parameters, results.Select(r => r.MinorRate).ToArray(), System.Drawing.Color.Blue, label:"min err");
-            plot.PlotScatter(parameters, results.Select(r => r.MajorRate).ToArray(), System.Drawing.Color.Red, label:"maj err");
-            plot.PlotScatter(parameters, results.Select(r => r.OverallRate).ToArray(), System.Drawing.Color.Black, label:"all err");
+            plot.PlotScatter(arguments, results.Select(r => r.AmbiguousRate).ToArray(), System.Drawing.Color.Gray, label: "ambiguous");
+            plot.PlotScatter(arguments, results.Select(r => r.MinorRate).ToArray(), System.Drawing.Color.Blue, label:"min err");
+            plot.PlotScatter(arguments, results.Select(r => r.MajorRate).ToArray(), System.Drawing.Color.Red, label:"maj err");
+            plot.PlotScatter(arguments, results.Select(r => r.OverallRate).ToArray(), System.Drawing.Color.Black, label:"all err");
 
             plot.Legend();
 
             SavePlot(plot, title);
+        }
+
+        public static void Experiment(string id, Evaluation.Result[] results, string parameter, double[] arguments)
+        {
+            EvaluationResults(results, parameter, arguments, $"musicnet-{id}-{parameter}-{arguments.First()}-{arguments.Last()}");
         }
     }
 }

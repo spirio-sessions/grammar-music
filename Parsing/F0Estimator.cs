@@ -57,7 +57,7 @@ namespace Parsing
                 double fMin = 0,
                 double fMax = 8000,
                 int stftHop = 1024,
-                int stftHalfWindow = 2048,
+                int stftHalfWindow = 4096,
                 double pMin = -50,
                 int peaksCount = 2
             )

@@ -7,14 +7,16 @@ namespace Parsing
 {
     public class Evaluation
     {
+        private readonly string id;
         private readonly Audio audio;
-        public readonly IEnumerable<Label> labels;
+        private readonly IEnumerable<Label> labels;
 
-        public Evaluation(string basePath, string name)
+        public Evaluation(string basePath, string id)
         {
-            var audioPath = Path.Combine(basePath, $"{name}.wav");
+            this.id = id;
+            var audioPath = Path.Combine(basePath, $"{id}.wav");
             audio = Audio.File(audioPath);
-            var labelPath = Path.Combine(basePath, $"{name}.csv");
+            var labelPath = Path.Combine(basePath, $"{id}.csv");
             labels = ReadLabels(labelPath);
         }
 
@@ -27,9 +29,6 @@ namespace Parsing
                 .Skip(1)
                 .Select(line => line.Split(','))
                 .Select(fields => LabelFromFields(fields));
-                //.GroupBy(
-                    //label => label.start,
-                    //(_, ls) => ls);
 
             static Label LabelFromFields(string[] fields)
             {
@@ -55,29 +54,41 @@ namespace Parsing
             }
         }
 
-        public abstract class Error { }
-        public class Ambiguous : Error { }
-        public class Minor : Error { }
-        public class Major : Error { }
-
         public class Result
         {
-            public int N { get; }
-            public int Ambiguous { get; }
-            public int MinorErrors { get; }
-            public int MajorErrors { get; }
+            public string Id { get; set; }
+            public int N { get; set; }
+            public int Ambiguous { get; set; }
+            public int MinorErrors { get; set; }
+            public int MajorErrors { get; set; }
 
             public double AmbiguousRate => (double)Ambiguous / N;
             public double MinorRate => (double)MinorErrors / N;
             public double MajorRate => (double)MajorErrors / N;
             public double OverallRate => (double)(MinorErrors + MajorErrors) / N;
 
-            public Result(int n, int ambiguousErrors, int minorErrors, int majorErrors)
+            public Result(string id, int n, int ambiguousErrors, int minorErrors, int majorErrors)
             {
+                Id = id;
                 N = n;
                 Ambiguous = ambiguousErrors;
                 MinorErrors = minorErrors;
                 MajorErrors = majorErrors;
+            }
+
+            public Result() { }
+
+            public static Result Average(IEnumerable<Result> results)
+            {
+                int n = 0, amb = 0, min = 0, maj = 0;
+                foreach (var result in results)
+                {
+                    n += result.N;
+                    amb += result.Ambiguous;
+                    min += result.MinorErrors;
+                    maj += result.MajorErrors;
+                }
+                return new Result("average", n, amb, min, maj);
             }
 
             public override string ToString() => $"amb: {AmbiguousRate}\nmin: {MinorRate}\nmaj: {MajorRate}\novr: {OverallRate}";
@@ -97,14 +108,11 @@ namespace Parsing
                 i++;
                 var endTime = i / sampleRate;
 
-                //Console.Write($"{startTime}-{endTime}:");
-
                 var relevantLabels = labels.Where(l => l.start <= startTime && l.end >= endTime);
 
                 if (!relevantLabels.Any()) // overlap error
                 {
                     nAmb++;
-                    //Console.WriteLine("amb");
                 }
                 else // fit
                 {
@@ -121,12 +129,10 @@ namespace Parsing
                     if (isMinor(deltaClass, deltaOctave))
                     {
                         nMin++;
-                        //Console.WriteLine($"min:{deltaClass},{deltaOctave}");
                     }
                     else if (isMajor(deltaClass))
                     {
                         nMaj++;
-                        //Console.WriteLine($"maj:{deltaClass},{deltaOctave}");
                     }
 
                     static bool isMinor(int delC, int delO) =>
@@ -137,7 +143,7 @@ namespace Parsing
                 }
             }
 
-            return new Result(n, nAmb, nMin, nMaj);
+            return new Result(id, n, nAmb, nMin, nMaj);
         }
     }
 }
