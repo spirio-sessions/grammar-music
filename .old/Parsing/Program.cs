@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
+
+using OpenTK.Audio.OpenAL;
 
 using static System.Console;
 
@@ -9,11 +13,11 @@ namespace Parsing
     {
         static void Main()
         {
-            var results = Sandbox.LoadResults("musicnet-all-peaks-2-halfwindow-4096");
-            WriteLine(Evaluation.Result.Average(results));
+            var audio = Audio.Record(4);
+            Plot.Signal(audio.Samples, audio.SampleRate, "capture-test");
         }
 
-        static void LiveTokenize(Action<IEnumerable<Token>> action)
+        static void LiveTokenize(Action<IEnumerable<Token>> handle) // use action in body
         {
             var estimator = new F0Estimator();
             var tokenizer = new Tokenizer();
@@ -21,8 +25,8 @@ namespace Parsing
             var recording = new Recording(samples =>
             {
                 var (f0s, sampleRate) = estimator.Run(samples, 44_100);
-                foreach (var token in tokenizer.Run(f0s, sampleRate))
-                    WriteLine(token);
+                var tokens = tokenizer.Run(f0s, sampleRate);
+                handle(tokens);
             });
 
             recording.Start();
