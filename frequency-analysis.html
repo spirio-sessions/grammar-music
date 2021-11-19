@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="./util.mjs" type="module"></script>
+  <script src="./time.mjs" type="module"></script>
+
+  <title>Frequency Analysis</title>
+
+</head>
+<body>
+
+  <select>
+    <option value="default">select an input</option>
+    <option value="2186.wav">2186</option>
+    <option value="2191.wav">2191</option>
+    <option value="Sax_1.wav">sax impro</option>
+    <option value="mic">mic</option>
+  </select>
+  <audio controls></audio>
+  <br>
+  <canvas id="time" height="256"></canvas>
+  <canvas id="freq" height="256"></canvas>
+  <p></p>
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    audio {
+      visibility: hidden;
+    }
+
+    p {
+      height: 1em;
+    }
+  </style>
+
+  <script type="module">
+    const FFT_SIZE = 4096 // => frequency-bins of SAMPLE_RATE / FFT_SIZE Hz, 5-6Hz for 4096
+    const TOP = 3 // number of dominant F0 candidates
+    const TUNE = 440 // tune of A4 in Hz
+    const POWER_THRESHOLD = 0.25 // aplitude threshold factor for voiced/unvoiced decision, range: [0, 1]
+    const DURATION_THRESHOLD = 125 // duration threshold for timely (ir)relevant decision in milliseconds => 125 corresponds to 1/16 at 120 bpm
+
+    //#region audio graph setup
+
+    const select = document.querySelector('select')
+    const audio = document.querySelector('audio')
+
+    const audioContext = new AudioContext()
+    let source
+    
+    select.onchange = async () => {
+      if (select.value === 'mic'){
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          source = audioContext.createMediaStreamSource(stream)
+          audio.srcObject = stream
+          audio.style.visibility = 'visible'
+          buildAudioPipeline()
+        } catch {
+          alert('Please permit usage of microphone in order to proceed.')
+        }
+      }
+      else {
+        source = audioContext.createMediaElementSource(audio)
+        audio.src = `samples/${select.value}`
+        audio.style.visibility = 'visible'
+        buildAudioPipeline()
+      }
+    }
+
+    function buildAudioPipeline() {
+      source
+      .connect(analyser)
+      .connect(audioContext.destination)
+    }
+    
+    const analyser = audioContext.createAnalyser()
+    analyser.fftSize = FFT_SIZE
+    
+    let buffer, step, avgPower
+    let tokens = []
+
+    //#endregion
+    
+    //#region time domain rendering
+    const canvasTime = document.getElementById('time')
+    canvasTime.width = window.innerWidth
+    const canvasCtxTime = canvasTime.getContext('2d')
+    canvasCtxTime.translate(0, canvasTime.height / 2) // vertically center x-axis
+    canvasCtxTime.scale(1, -1)
+
+    buffer = new Uint8Array(analyser.frequencyBinCount)
+    step = canvasTime.width / analyser.frequencyBinCount
+
+    import { applyWindow } from './util.mjs'
+
+    function renderTime() {
+      analyser.getByteTimeDomainData(buffer)
+      
+      const windowed = applyWindow(64)(buffer)
+
+      canvasCtxTime.lineWidth = 2
+      canvasCtxTime.clearRect(0, - canvasTime.height / 2, canvasTime.width, canvasTime.height)
+      canvasCtxTime.beginPath()
+      let acc = 0
+      let x = 0
+
+      for (let i = 0; i < windowed.length; i++) {
+        const power = windowed[i]**2
+        acc += power
+        const y = power / 128**2 * canvasTime.height
+        canvasCtxTime.lineTo(x, y)
+        x += step        
+      }
+
+      canvasCtxTime.lineTo(canvasTime.width, canvasTime.height / 2)
+      canvasCtxTime.stroke()
+
+      avgPower = acc / windowed.length
+    }
+    //#endregion
+
+    //#region frequency domain rendering
+    const canvasFreq = document.getElementById('freq')
+    canvasFreq.width = window.innerWidth
+    const canvasCtxFreq = canvasFreq.getContext('2d')
+    canvasCtxFreq.translate(0, canvasFreq.height)
+    canvasCtxFreq.scale(1, -1)
+
+    buffer = new Uint8Array(analyser.frequencyBinCount)
+    step = Math.round(canvasFreq.width / analyser.frequencyBinCount)
+    const p = document.querySelector('p')
+
+    import { argTop, fToTone } from './util.mjs'
+    const argTopN = argTop(TOP)
+    const parseFrequency = fToTone(TUNE) // tune frequency parsing to A4 = 440Hz
+
+    function renderFreq() {
+      canvasCtxFreq.clearRect(0, 0, canvasFreq.width, canvasFreq.height)
+      let x = 0
+      
+      analyser.getByteFrequencyData(buffer)      
+
+      for (let i = 0; i < buffer.length; i++) {
+        const y = buffer[i] / 256 * canvasFreq.height
+        canvasCtxFreq.fillRect(x, 0, step, y)
+        x += step
+      }
+
+      let token
+      if (avgPower > 128 * POWER_THRESHOLD) {
+        // low pass filter befor searching max?
+        const iMin = Math.min(...argTopN(buffer))
+        const fMax = iMin * audioContext.sampleRate / analyser.fftSize
+        token = parseFrequency(fMax)
+        token.duration = 1
+      } else {
+        token = { pitch: null, midiNumber: null, duration: 1}
+      }
+      tokens.push(token)
+
+      p.innerText = token.pitch
+    }
+    //#endregion
+
+    //#region render loop setup
+
+    const interval = analyser.fftSize / audioContext.sampleRate
+    let frameId, now, elapsed, then, acc, i
+
+    function startRendering() {
+      then = performance.now()
+      acc = 0
+      i = 0
+      render()
+    }
+
+    function render() {
+      now = performance.now()
+      elapsed = now - then
+      if (elapsed >= interval) {
+        acc += elapsed
+        i ++
+        then = now
+        renderTime()
+        renderFreq()
+      }
+      frameId = requestAnimationFrame(render)
+    }
+    
+    import { aggregateTokens } from './util.mjs'
+
+    // TODO: stop recording on play stop?
+    function stopAndReport() {
+      cancelAnimationFrame(frameId)
+      const estimated = acc / i
+      console.log(`estimated frame duration: ${estimated}ms`)
+      
+      // translate duration from frames to milliseconds
+      const tokensTimed = tokens.map(t => ({ pitch:t.pitch, midiNumber:t.midiNumber, duration: t.duration * estimated }))
+      // aggregate subsequent frames of same pitch
+      const tokensAggregated = aggregateTokens(tokensTimed)
+      // filter out too short tokens
+      const tokensFiltered = tokensAggregated.map(t => 
+        t.duration >= DURATION_THRESHOLD 
+        ? t
+        : { pitch:null, midiNumber:null, duration: t.duration }
+        )
+      // aggregate again to merge subsequent null tokens from last step
+      const tokensRefined = aggregateTokens(tokensFiltered)
+
+      console.log(tokensRefined)
+    }
+
+    audio.addEventListener('play', startRendering)
+    audio.addEventListener('pause', stopAndReport)
+
+    //#endregion
+  </script>
+  
+</body>
+</html>
