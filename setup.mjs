@@ -3,21 +3,21 @@
 window.inputMode = undefined
 window.inputSource = undefined
 
-export function selectInput(form) {
+export async function selectInput(form) {
   const data = new FormData(form)
   window.inputMode = data.get('input')
 
   switch (window.inputMode) {
     case 'midi':
-      modalSetInputMidi()
+      await modalSetInputMidi()
       break;
 
     case 'mic':
-      modalSetInputMic()
+      await modalSetInputMic()
       break;
 
     case 'file':
-      modalSetInputFile()
+      await modalSetInputFile()
       break;
 
     default: 
@@ -85,6 +85,7 @@ function createRadioForm(name, handleSelection, options) {
     handleSelection(value)
 
     modalSeparator.remove()
+    setReady()
   }
 
   document.body
@@ -114,6 +115,8 @@ export async function setupOutput(form) {
     const data = new FormData(form)
     const id = data.get('midi-output')
     window.midiOutput = midiAccess.outputs.get(id)
+
+    setReady()
   }
 }
 
@@ -133,4 +136,10 @@ function createRadioEntry(inputName, labelName, id) {
   const br = document.createElement('br')
 
   return [ radio, label, br ]
+}
+
+function setReady() {
+  const startStopButton = document.getElementById('start-stop-button')
+  const ready = !(window.inputMode && window.inputSource && window.midiOutput)
+  startStopButton.disabled = ready
 }
