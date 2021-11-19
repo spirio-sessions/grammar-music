@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="./main.mjs" type="module"></script>
+  <link rel="stylesheet" href="style.css">
+  
+  <title>Grammar Music</title>
+</head>
+<body>
+  
+  
+  <form id="input-form" class="io-form">
+    <fieldset>
+      <legend>Input</legend>
+
+      <input type="radio" name="input" id="midi" value="midi">
+      <label for="midi">MIDI Device</label>
+      <br>
+
+      <input type="radio" name="input" id="mic" value="mic">
+      <label for="mic">Microphone</label>
+      <br>
+
+      <input type="radio" name="input" id="file" value="file">
+      <label for="file">Local File</label>
+
+    </fieldset>
+  </form>
+
+  <form id="output-form" class="io-form">
+    <fieldset>
+      <legend>Output</legend>
+    </fieldset>
+  </form>
+
+  <button>Start</button>
+
+</body>
+</html>
