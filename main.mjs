@@ -1,18 +1,11 @@
-// #region input
-
-import { selectInput, setupOutput } from './setup.mjs'
+import { setupIO } from './io-setup.mjs'
+import { setupPipeline } from './pipeline-setup.mjs'
 
 const inputForm = document.getElementById('input-form')
-inputForm.onchange = () => selectInput(inputForm)
-
 const outputForm = document.getElementById('output-form')
-setupOutput(outputForm)
-
-// #endregion
+await setupIO(inputForm, outputForm, setupPipeline)
 
 
-
-// #region audio-graph
 
 // sourceNode -> (analyserNode, emphDump)
 

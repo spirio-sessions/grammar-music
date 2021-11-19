@@ -3,7 +3,28 @@
 window.inputMode = undefined
 window.inputSource = undefined
 
-export async function selectInput(form) {
+window.midiOutput = true
+
+window.ready = undefined
+
+export async function setupIO(inputForm, outputForm, onSetupFinished) {
+  inputForm.onchange = () => selectInput(inputForm)
+  await setupOutput(outputForm)
+
+  window.ready = {
+    _state: false,
+    set state(s) {
+      this._state = s
+      if (s)
+        onSetupFinished()
+    },
+    get state() {
+      return this._state
+    }
+  }
+}
+
+async function selectInput(form) {
   const data = new FormData(form)
   window.inputMode = data.get('input')
 
@@ -97,9 +118,7 @@ function createRadioForm(name, handleSelection, options) {
 
 //#region midi output
 
-window.midiOutput = undefined
-
-export async function setupOutput(form) {
+async function setupOutput(form) {
   const midiAccess = await navigator.requestMIDIAccess()
   const outputs = Array
   .from(midiAccess.outputs)
@@ -140,6 +159,8 @@ function createRadioEntry(inputName, labelName, id) {
 
 function setReady() {
   const startStopButton = document.getElementById('start-stop-button')
-  const ready = !(window.inputMode && window.inputSource && window.midiOutput)
-  startStopButton.disabled = ready
+  const ready = window.inputMode && window.inputSource && window.midiOutput
+
+  window.ready.state = ready
+  startStopButton.disabled = !window.ready.state
 }
