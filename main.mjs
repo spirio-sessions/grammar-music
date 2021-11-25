@@ -87,8 +87,9 @@ import { transformTransfer } from './transform-transfer.mjs'
 
 const startStopButton = document.getElementById('start-stop-button')
 let running = false
+
+const timerDuration = 2000 // ms
 let timerId
-const timerDuration = 2000
 
 const process = () => {
   transformTransfer(window.parsed)

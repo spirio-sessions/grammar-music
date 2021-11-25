@@ -41,10 +41,12 @@ function createRadioEntry(inputName, labelName, id) {
   radio.name = inputName
   radio.id = labelName
   radio.value = id
+  radio.classList.add('pointer')
 
   const label = document.createElement('label')
   label.setAttribute('for', labelName)
   label.innerText = labelName
+  label.classList.add('pointer')
 
   const br = document.createElement('br')
 
