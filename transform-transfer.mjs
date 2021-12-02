@@ -11,7 +11,7 @@ export async function transformTransfer(parseDump, destination) {
 
 function transform(tones) {
   // parse, manipulate and serialize
-
+  // tones.reverse() // for demo only
   return tones
 }
 
