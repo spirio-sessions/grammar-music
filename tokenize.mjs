@@ -1,5 +1,5 @@
-export const lookupParse = {
-  midi: { startParsing: startMidi, stopParsing: stopMidi }
+export const lookupTokenize = {
+  midi: { startTokenizing: startMidi, stopTokenizing: stopMidi }
 }
 
 function startMidi(source, dump) {
@@ -17,7 +17,7 @@ function startMidi(source, dump) {
     const velocity = data[2]
     
     switch (statusCode) {
-      case 8:
+      case 8: // note off
         if (nLast === noteNumber) {
           tLast = timestamp
           
@@ -29,7 +29,7 @@ function startMidi(source, dump) {
         }
         break
       
-      case 9:
+      case 9: // note on
         tLast = timestamp
         nLast = noteNumber
         vLast = velocity

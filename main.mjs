@@ -1,8 +1,6 @@
 //#region input generation
 
-async function sleep(ms) {
-  await new Promise(r => setTimeout(r, ms))
-}
+import { sleep } from './util.mjs'
 
 async function* generateInput(queryValue, ms){
   while(true){
@@ -72,18 +70,14 @@ destinationFieldset.disabled = true
 
 //#endregion
 
-//#region parse, transform, trasfer
+//#region trigger
 
-window.parsed = []
+window.tokenized = []
 
-import { lookupParse } from './parse.mjs'
-const { startParsing, stopParsing } = lookupParse[type]
+import { lookupTokenize } from './tokenize.mjs'
+const { startTokenizing, stopTokenizing } = lookupTokenize[type]
 
 import { transformTransfer } from './transform-transfer.mjs'
-
-//#endregion
-
-//#region trigger
 
 const startStopButton = document.getElementById('start-stop-button')
 let running = false
@@ -92,18 +86,18 @@ const timerDuration = 2000 // ms
 let timerId
 
 const process = () => {
-  transformTransfer(window.parsed)
+  transformTransfer(window.tokenized, destination)
   timerId = setTimeout(process, timerDuration)
 }
 
 startStopButton.onclick = () => {
   if (running) {
-    stopParsing(source)
+    stopTokenizing(source)
     clearTimeout(timerId)
     startStopButton.innerText = 'Start'
   }
   else{
-    startParsing(source, window.parsed)
+    startTokenizing(source, window.tokenized)
     timerId = setTimeout(process, timerDuration)
     startStopButton.innerText = 'Stop'
   }

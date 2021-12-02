@@ -1,3 +1,7 @@
+export async function sleep(ms) {
+  await new Promise(r => setTimeout(r, ms))
+}
+
 export const argTop = k => array => {
   let tops = []
   for (let i = 0; i < array.length; i++) {
