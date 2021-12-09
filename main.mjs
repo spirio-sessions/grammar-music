@@ -73,6 +73,12 @@ destinationFieldset.disabled = true
 //#region trigger
 
 window.tokenized = []
+window.lastTokenization
+window.playing
+window.tokenizationState = (t, b) => {
+  window.lastTokenization = t
+  window.playing = b
+}
 
 import { lookupTokenize } from './tokenize.mjs'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
@@ -82,12 +88,23 @@ import { transformTransfer } from './transform-transfer.mjs'
 const startStopButton = document.getElementById('start-stop-button')
 let running = false
 
-const timerDuration = 2000 // ms
+const timerDuration = 50 // ms
 let timerId
 
+// process only when there are two seconds of subsequent silence
 const process = () => {
-  transformTransfer(window.tokenized, destination)
+  if (isSilence(2000)) {
+    // stop tokenization to avoid huge rests while player is listening to grammar music
+    stopTokenizing(source)
+    transformTransfer(window.tokenized, destination)
+    startTokenizing(source, window.tokenized, window.tokenizationState)
+  }
+
   timerId = setTimeout(process, timerDuration)
+  
+  function isSilence(ms) {
+    return !window.playing && performance.now() - window.lastTokenization >= ms
+  }
 }
 
 startStopButton.onclick = () => {
@@ -97,7 +114,7 @@ startStopButton.onclick = () => {
     startStopButton.innerText = 'Start'
   }
   else{
-    startTokenizing(source, window.tokenized)
+    startTokenizing(source, window.tokenized, window.tokenizationState)
     timerId = setTimeout(process, timerDuration)
     startStopButton.innerText = 'Stop'
   }

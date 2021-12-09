@@ -9,26 +9,34 @@ export async function transformTransfer(parseDump, destination) {
   await transfer(response, destination)
 }
 
-function transform(tones) {
+function transform(tokens) {
   // parse, manipulate and serialize
-  // tones.reverse() // for demo only
-  return tones
+  // tokens.reverse() // for demo only
+  return tokens
 }
 
 import { sleep } from './util.mjs'
 
-async function transfer(tones, destination) {
+async function transfer(tokens, destination) {
   // send tones to midi input device 'destination'
 
-  for (const tone of tones) {
-    const noteOn = [0x90, tone.noteNumber, tone.velocity]
-    const noteOff = [0x80, tone.noteNumber, 0]
+  for (const token of tokens) {
 
-    console.log(`${tone.pitch}  ON: ${performance.now()}`)
-    destination.send(noteOn)
+    // handle rest
+    if (token.type === 'rest') {
+      console.log(`${performance.now()} R   ${token.duration}`)
+      await sleep(token.duration)
+    }
+    // handle tone
+    else {
+      const noteOn = [0x90, token.noteNumber, token.velocity]
+      const noteOff = [0x80, token.noteNumber, 0]
+  
+      console.log(`${performance.now()} ${token.pitch} ${token.duration}`)
 
-    await sleep(tone.duration)
-    console.log(`${tone.pitch} OFF: ${performance.now()}`)
-    destination.send(noteOff)
+      destination.send(noteOn)
+      await sleep(token.duration)
+      destination.send(noteOff)
+    }
   }
 }
