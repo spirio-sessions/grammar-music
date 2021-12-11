@@ -5,7 +5,7 @@ export const lookupTokenize = {
 function startMidi(source, dump, tokenizationState) {
   
   const tStart = performance.now()
-  let tLast, nLast, vLast
+  let tLast, nLast, vLast, mLast
   
   source.onmidimessage = message => {
     const now = performance.now()
@@ -21,32 +21,32 @@ function startMidi(source, dump, tokenizationState) {
     switch (statusCode) {
       case 8: // note off
         if (nLast === noteNumber) {
-          
-          // now stopped playing
+          mLast = 'off'
+          tLast = timestamp
           tokenizationState(now, false)
 
-          tLast = timestamp
-          // vLast conatins actual velocity from note on event
           const tone = new Tone(duration, noteNumber, vLast)
           dump.push(tone)
         }
         break
       
       case 9: // note on
-
-        // now started playing
         tokenizationState(now, true)
+
+        if (mLast === 'on') { // polyphonic
+          const tone = new Tone(duration, nLast, vLast)
+          dump.push(tone)
+        }
+
+        if (mLast === 'off' && duration > 50) { // monophonic + rest
+          const rest = new Rest(duration)
+          dump.push(rest)
+        }
 
         tLast = timestamp
         nLast = noteNumber
         vLast = velocity
-
-        // rest = gap in time between off & on longer than threshold
-        // how to adjust threshold?
-        if (duration > 50) {
-          const rest = new Rest(duration)
-          dump.push(rest)
-        }
+        mLast = 'on'
         break
     
       default:
