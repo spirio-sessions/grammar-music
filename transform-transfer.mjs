@@ -21,10 +21,9 @@ async function transfer(tokens, destination) {
   // send tones to midi input device 'destination'
 
   for (const token of tokens) {
-
     // handle rest
     if (token.type === 'rest') {
-      console.log(`${performance.now()} R   ${token.duration}`)
+      console.log(`${Math.round(performance.now())} R   ${Math.round(token.duration)}`)
       await sleep(token.duration)
     }
     // handle tone
@@ -32,7 +31,7 @@ async function transfer(tokens, destination) {
       const noteOn = [0x90, token.noteNumber, token.velocity]
       const noteOff = [0x80, token.noteNumber, 0]
   
-      console.log(`${performance.now()} ${token.pitch} ${token.duration}`)
+      console.log(`${Math.round(performance.now())} ${token.pitch} ${Math.round(token.duration)}`)
 
       destination.send(noteOn)
       await sleep(token.duration)
