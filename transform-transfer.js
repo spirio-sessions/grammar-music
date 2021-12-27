@@ -15,7 +15,7 @@ function transform(tokens) {
   return tokens
 }
 
-import { sleep } from './util.mjs'
+import { sleep } from './util.js'
 
 async function transfer(tokens, destination) {
   // send tones to midi input device 'destination'

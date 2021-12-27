@@ -1,6 +1,6 @@
 //#region input generation
 
-import { sleep } from './util.mjs'
+import { sleep } from './util.js'
 
 async function* generateInput(queryValue, ms){
   while(true){
@@ -27,7 +27,7 @@ const typeInput = generateInput(() => {
 
 const type = (await typeInput.next()).value
 
-import { lookupSourceInput } from './input.mjs'
+import { lookupSourceInput } from './input.js'
 const { element:sourceForm, getValue:getSource, closeModal } = await lookupSourceInput[type]()
 
 const sourceInput = generateInput(() => {
@@ -50,7 +50,7 @@ typeFieldset.disabled = true
 
 //#region acquire destination
 
-import { renderDestinationInput } from './input.mjs'
+import { renderDestinationInput } from './input.js'
 const destinationForm = document.getElementById('destination-form')
 const getDestination = await renderDestinationInput(destinationForm)
 
@@ -80,10 +80,10 @@ window.tokenizationState = (t, b) => {
   window.playing = b
 }
 
-import { lookupTokenize } from './tokenize.mjs'
+import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
 
-import { transformTransfer } from './transform-transfer.mjs'
+import { transformTransfer } from './transform-transfer.js'
 
 const startStopButton = document.getElementById('start-stop-button')
 let running = false
