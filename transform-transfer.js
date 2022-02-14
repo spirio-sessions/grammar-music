@@ -1,8 +1,8 @@
 let readIndex = 0
 
-export async function transformTransfer(parseDump, destination) {
-  const call = parseDump.slice(readIndex)
-  readIndex = parseDump.length
+export async function transformTransfer(tokenDump, destination) {
+  const call = tokenDump.slice(readIndex)
+  readIndex = tokenDump.length
 
   const response = transform(call)
 

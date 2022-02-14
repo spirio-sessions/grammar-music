@@ -15,6 +15,8 @@ async function* generateInput(queryValue, ms){
 
 //#endregion
 
+
+
 //#region acquire source
 
 const typeForm = document.getElementById('type-form')
