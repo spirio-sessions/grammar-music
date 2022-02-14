@@ -2,7 +2,7 @@ export const lookupTokenize = {
   midi: { startTokenizing: startMidi, stopTokenizing: stopMidi }
 }
 
-function startMidi(source, dump, tokenizationState) {
+function startMidi(source, dump, tokenizationState, renderToken) {
   
   const tStart = performance.now()
   let tLast, nLast, vLast, mLast
@@ -27,6 +27,7 @@ function startMidi(source, dump, tokenizationState) {
 
           const tone = new Tone(duration, noteNumber, vLast)
           dump.push(tone)
+          renderToken(tone)
         }
         break
       
@@ -36,11 +37,13 @@ function startMidi(source, dump, tokenizationState) {
         if (mLast === 'on') { // polyphonic
           const tone = new Tone(duration, nLast, vLast)
           dump.push(tone)
+          renderToken(tone)
         }
 
         if (mLast === 'off' && duration > 50) { // monophonic + rest
           const rest = new Rest(duration)
           dump.push(rest)
+          renderToken(rest)
         }
 
         tLast = timestamp
@@ -116,17 +119,17 @@ function stopMidi(source) {
 class Token{
   constructor(type, duration) {
     this.type = type
-    this.duration = duration
+    this.duration = duration // ms
   }
 }
 
-class Rest extends Token {
+export class Rest extends Token {
   constructor(duration) {
     super('rest', duration)
   }
 }
 
-class Tone extends Token {
+export class Tone extends Token {
   constructor(duration, noteNumber, velocity) {
     super('tone', duration)
     

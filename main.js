@@ -48,6 +48,8 @@ typeFieldset.disabled = true
 
 //#endregion
 
+
+
 //#region acquire destination
 
 import { renderDestinationInput } from './input.js'
@@ -70,6 +72,8 @@ destinationFieldset.disabled = true
 
 //#endregion
 
+
+
 //#region trigger
 
 window.tokenized = []
@@ -82,6 +86,8 @@ window.tokenizationState = (t, b) => {
 
 import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
+
+import { renderToken } from './render-token.mjs'
 
 import { transformTransfer } from './transform-transfer.js'
 
@@ -97,7 +103,7 @@ const process = () => {
     // stop tokenization to avoid huge rests while player is listening to grammar music
     stopTokenizing(source)
     transformTransfer(window.tokenized, destination)
-    startTokenizing(source, window.tokenized, window.tokenizationState)
+    startTokenizing(source, window.tokenized, window.tokenizationState, renderToken)
   }
 
   timerId = setTimeout(process, timerDuration)
@@ -114,7 +120,7 @@ startStopButton.onclick = () => {
     startStopButton.innerText = 'Start'
   }
   else{
-    startTokenizing(source, window.tokenized, window.tokenizationState)
+    startTokenizing(source, window.tokenized, window.tokenizationState, renderToken)
     timerId = setTimeout(process, timerDuration)
     startStopButton.innerText = 'Stop'
   }
