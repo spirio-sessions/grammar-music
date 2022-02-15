@@ -89,7 +89,7 @@ window.tokenizationState = (t, b) => {
 import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
 
-import { renderToken } from './render-token.mjs'
+import { renderToken } from './render-token.js'
 
 import { transformTransfer } from './transform-transfer.js'
 
