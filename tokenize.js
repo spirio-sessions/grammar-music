@@ -21,30 +21,32 @@ function startMidi(source, dump, tokenizationState, renderToken) {
     switch (statusCode) {
       case 8: // note off
         if (nLast === noteNumber) {
-          mLast = 'off'
-          tLast = timestamp
+
+          const tone = new Tone(tLast, duration, noteNumber, vLast)
+          dump.push(tone)
           tokenizationState(now, false)
 
-          const tone = new Tone(duration, noteNumber, vLast)
-          dump.push(tone)
           renderToken(tone)
+
+          mLast = 'off'
+          tLast = timestamp
         }
         break
       
       case 9: // note on
-        tokenizationState(now, true)
-
         if (mLast === 'on') { // polyphonic
-          const tone = new Tone(duration, nLast, vLast)
+          const tone = new Tone(tLast, duration, nLast, vLast)
           dump.push(tone)
           renderToken(tone)
         }
 
         if (mLast === 'off' && duration > 50) { // monophonic + rest
-          const rest = new Rest(duration)
+          const rest = new Rest(tLast, duration)
           dump.push(rest)
           renderToken(rest)
         }
+
+        tokenizationState(now, true)
 
         tLast = timestamp
         nLast = noteNumber
@@ -117,21 +119,22 @@ function stopMidi(source) {
 }
 
 class Token{
-  constructor(type, duration) {
+  constructor(type, start, duration) {
+    this.start = start // timestamp
     this.type = type
     this.duration = duration // ms
   }
 }
 
 export class Rest extends Token {
-  constructor(duration) {
-    super('rest', duration)
+  constructor(start, duration) {
+    super('rest', start, duration)
   }
 }
 
 export class Tone extends Token {
-  constructor(duration, noteNumber, velocity) {
-    super('tone', duration)
+  constructor(start, duration, noteNumber, velocity) {
+    super('tone', start, duration)
     
     // this may fail!
     const pitch = midiToPitch(noteNumber)

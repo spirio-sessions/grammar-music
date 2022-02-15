@@ -9,8 +9,12 @@ export async function transformTransfer(tokenDump, destination) {
   await transfer(response, destination)
 }
 
+import { analyse } from './analysis.js'
+
 function transform(tokens) {
-  // parse, manipulate and serialize
+
+  analyse(tokens)
+
   // tokens.reverse() // for demo only
   return tokens
 }
