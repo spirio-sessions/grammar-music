@@ -145,6 +145,6 @@ export class Tone extends Token {
   }
 
   serialize() {
-    return `(R ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch} ${this.velocity})`
+    return `(T ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch} ${this.velocity})`
   }
 }
