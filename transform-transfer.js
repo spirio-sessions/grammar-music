@@ -1,22 +1,28 @@
 let readIndex = 0
 
+import { analyse } from './analysis.js'
+
 export async function transformTransfer(tokenDump, destination, sideEffect) {
   const call = tokenDump.slice(readIndex)
-  readIndex = tokenDump.length
-  
-  sideEffect(call)
 
-  const response = transform(call)
+  // exit if dump didn't grow
+  if (call.length === 0)
+    return
+
+  readIndex = tokenDump.length
+
+  let bpm, annotated
+  ({ bpm, annotated } = analyse(call))
+  
+  console.log(`${bpm} bpm`)
+  sideEffect(annotated)
+
+  const response = transform(annotated)
 
   await transfer(response, destination)
 }
 
-import { analyse } from './analysis.js'
-
 function transform(tokens) {
-
-  analyse(tokens)
-
   // tokens.reverse() // for demo only
   return tokens
 }

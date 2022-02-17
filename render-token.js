@@ -23,8 +23,9 @@ function renderToken(token) {
     
   if (token instanceof Tone) {
     y = h * token.noteNumber
-    const relativeVelocity = token.velocity / 128 // midi velocity range: 0 - 127
-    ctx.fillStyle = `rgb(${relativeVelocity * 255}, 0, ${(1-relativeVelocity) * 255})`
+    // const relativeVelocity = token.velocity / 128 // midi velocity range: 0 - 127
+    // ctx.fillStyle = `rgb(${relativeVelocity * 255}, 0, ${(1-relativeVelocity) * 255})`
+    ctx.fillStyle = `rgb(${(token.dominant ? 1 : 0) * 255}, 0, ${(token.dominant ? 0 : 1) * 255})`
     ctx.fillRect(x, y, w, h)
   }
   // do not render rests

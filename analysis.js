@@ -34,7 +34,7 @@ function estimateBpm(tokens) {
  * @param {Array<Token>} tokens 
  * return {Array<Token>} annotated tokens
  */
-function anotateDominants(tokens) {
+function annotateDominants(tokens) {
   const tones = tokens.filter(t => t instanceof Tone)
 
   if (tones.length < 3)
@@ -42,6 +42,8 @@ function anotateDominants(tokens) {
 
   if (tones[0].velocity > tones[1].velocity)
     tones[0].dominant = true
+  else
+    tones[0].dominant = false
 
   for (let i = 1; i < tones.length - 1; i++) {
     if (tones[i-1].velocity < tones[i].velocity && tones[i].velocity > tones[i+1].velocity)
@@ -52,11 +54,16 @@ function anotateDominants(tokens) {
 
   if (tones.at(-2).velocity < tones.at(-1).velocity)
     tones.at(-1).dominant = true
+  else
+    tones[0].dominant = false
 
   // return original sequence
   return tokens
 }
 
 export function analyse(tokens) {
-  estimateBpm(tokens)
+  return {
+    bpm: estimateBpm(tokens),
+    annotated: annotateDominants(tokens)
+  } 
 }
