@@ -29,6 +29,34 @@ function estimateBpm(tokens) {
   return 1 / onsetPeriodMin
 }
 
+/**
+ * Mark dominant tones in a sequence of tokens.
+ * @param {Array<Token>} tokens 
+ * return {Array<Token>} annotated tokens
+ */
+function anotateDominants(tokens) {
+  const tones = tokens.filter(t => t instanceof Tone)
+
+  if (tones.length < 3)
+    return tokens
+
+  if (tones[0].velocity > tones[1].velocity)
+    tones[0].dominant = true
+
+  for (let i = 1; i < tones.length - 1; i++) {
+    if (tones[i-1].velocity < tones[i].velocity && tones[i].velocity > tones[i+1].velocity)
+      tones[i].dominant = true
+    else
+      tones[i].dominant = false
+  }
+
+  if (tones.at(-2).velocity < tones.at(-1).velocity)
+    tones.at(-1).dominant = true
+
+  // return original sequence
+  return tokens
+}
+
 export function analyse(tokens) {
   estimateBpm(tokens)
 }
