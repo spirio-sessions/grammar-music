@@ -23,7 +23,7 @@ function renderToken(token) {
     
   if (token instanceof Tone) {
     y = h * token.noteNumber
-    const relativeVelocity = token.velocity / 100
+    const relativeVelocity = token.velocity / 128 // midi velocity range: 0 - 127
     ctx.fillStyle = `rgb(${relativeVelocity * 255}, 0, ${(1-relativeVelocity) * 255})`
     ctx.fillRect(x, y, w, h)
   }
