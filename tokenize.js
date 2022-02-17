@@ -126,6 +126,10 @@ export class Rest extends Token {
   constructor(start, duration) {
     super('rest', start, duration)
   }
+
+  serialize() {
+    return `(R ${this.start} ${this.duration})`
+  }
 }
 
 export class Tone extends Token {
@@ -138,5 +142,9 @@ export class Tone extends Token {
     this.noteNumber = noteNumber
     this.pitch = pitch
     this.velocity = velocity
+  }
+
+  serialize() {
+    return `(R ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch} ${this.velocity})`
   }
 }

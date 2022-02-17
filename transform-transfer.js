@@ -38,7 +38,7 @@ async function transfer(tokens, destination) {
 
     // handle rest
     if (token instanceof Rest) {
-      console.log(`${now} R   ${Math.round(token.duration)}`)
+      console.log(token.serialize())
       await sleep(token.duration)
     }
     // handle tone
@@ -46,7 +46,7 @@ async function transfer(tokens, destination) {
       const noteOn = [0x90, token.noteNumber, token.velocity]
       const noteOff = [0x80, token.noteNumber, 0]
   
-      console.log(`${now} ${token.pitch} ${Math.round(token.duration)} ${token.velocity}`)
+      console.log(token.serialize())
 
       destination.send(noteOn)
       await sleep(token.duration)
