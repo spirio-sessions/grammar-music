@@ -1,0 +1,26 @@
+{
+  "name": "grammar-music",
+  "version": "1.0.0",
+  "description": "a grammar-based translation system for interactive music improvisation",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.informatik.fh-nuernberg.de/agcharis67705/grammar-music.git"
+  },
+  "keywords": [
+    "context-free-grammar",
+    "parsing",
+    "translation",
+    "music",
+    "improvistion",
+    "midi"
+  ],
+  "author": "Ismael Agchar",
+  "license": "ISC",
+  "dependencies": {
+    "jacob": "^1.0.5"
+  }
+}
