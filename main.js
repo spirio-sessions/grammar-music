@@ -89,7 +89,7 @@ window.tokenizationState = (t, b) => {
 import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
 
-import { renderToken } from './render-token.js'
+import { renderTokens } from './render-token.js'
 
 import { transformTransfer } from './transform-transfer.js'
 
@@ -104,8 +104,8 @@ const process = () => {
   if (isSilence(2000)) {
     // stop tokenization to avoid huge rests while player is listening to grammar music
     stopTokenizing(source)
-    transformTransfer(window.tokenized, destination)
-    startTokenizing(source, window.tokenized, window.tokenizationState, renderToken)
+    transformTransfer(window.tokenized, destination, renderTokens)
+    startTokenizing(source, window.tokenized, window.tokenizationState)
   }
 
   timerId = setTimeout(process, timerDuration)
@@ -122,7 +122,7 @@ startStopButton.onclick = () => {
     startStopButton.innerText = 'Start'
   }
   else{
-    startTokenizing(source, window.tokenized, window.tokenizationState, renderToken)
+    startTokenizing(source, window.tokenized, window.tokenizationState)
     timerId = setTimeout(process, timerDuration)
     startStopButton.innerText = 'Stop'
   }

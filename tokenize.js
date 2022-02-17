@@ -2,7 +2,7 @@ export const lookupTokenize = {
   midi: { startTokenizing: startMidi, stopTokenizing: stopMidi }
 }
 
-function startMidi(source, dump, tokenizationState, renderToken) {
+function startMidi(source, dump, tokenizationState) {
   
   const tStart = performance.now()
   let tLast, nLast, vLast, mLast
@@ -26,8 +26,6 @@ function startMidi(source, dump, tokenizationState, renderToken) {
           dump.push(tone)
           tokenizationState(now, false)
 
-          renderToken(tone)
-
           mLast = 'off'
           tLast = timestamp
         }
@@ -37,13 +35,11 @@ function startMidi(source, dump, tokenizationState, renderToken) {
         if (mLast === 'on') { // polyphonic
           const tone = new Tone(tLast, duration, nLast, vLast)
           dump.push(tone)
-          renderToken(tone)
         }
 
         if (mLast === 'off' && duration > 50) { // monophonic + rest
           const rest = new Rest(tLast, duration)
           dump.push(rest)
-          renderToken(rest)
         }
 
         tokenizationState(now, true)

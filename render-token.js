@@ -13,7 +13,7 @@ const h = canvas.height / 128 // 128 midi tones
  * 
  * @param {Token} token 
  */
-export function renderToken(token) {
+function renderToken(token) {
   w = token.duration / 20
 
   if (x + w > canvas.width) {
@@ -30,4 +30,12 @@ export function renderToken(token) {
   // do not render rests
 
     x += w
+}
+
+/**
+ * 
+ * @param {Array<Token>} tokens 
+ */
+export function renderTokens(tokens) {
+  tokens.forEach(renderToken)
 }
