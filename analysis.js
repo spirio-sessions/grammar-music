@@ -2,6 +2,7 @@ import { Tone } from "./tokenize.js"
 
 /**
  * May fail if less than 2 tones in tokens and return NaN.
+ * All durations in ms.
  * @param {Array<Token>} tokens 
  * @returns {Number} bpm or NaN
  */
@@ -14,19 +15,55 @@ function estimateBpm(tokens) {
 
   let lastStart = tones[0].start
   let currentStart
-  let onsetPeriodAcc = 0
+  const onsetPeriods = []
 
   for (let i = 1; i < tones.length; i++) {
     currentStart = tones[i].start
+    onsetPeriods.push(currentStart - lastStart)
 
-    onsetPeriodAcc += currentStart - lastStart
     lastStart = currentStart
   }
 
-  const onsetPeriodMs = onsetPeriodAcc / tones.length
-  const onsetPeriodMin = onsetPeriodMs / (1000 * 60)
+  const minOnsetPeriod = Math.min(...onsetPeriods)
+  const remainders = onsetPeriods.map(op => op % minOnsetPeriod)
+  let maxRemainder = Math.max(...remainders)
+
+  if (maxRemainder < 50)
+    maxRemainder = minOnsetPeriod
+
+  const onsetPeriodMin = maxRemainder / (1000 * 60)
 
   return 1 / onsetPeriodMin
+}
+
+/**
+ * 
+ * @param {Number} noteDuration in ms
+ * @param {Number} bpm
+ */
+function estimateNoteValue(noteDurationMs, bpm) {
+  const beatPeriodMs = (1 / bpm) * 60 * 1000
+  const max = Math.max(beatPeriodMs, noteDurationMs)
+  const min = Math.min(beatPeriodMs, noteDurationMs)
+
+  let noteValue = Math.round(max / min)
+
+  if (beatPeriodMs > noteDurationMs)
+    return 1 / noteValue
+  else
+    return noteValue
+}
+
+/**
+ * Annotate each token's length relativ to the underlying beat.
+ * @param {Array<Token>} tokens 
+ * @param {Number} bpm 
+ */
+function annotateNoteValues(tokens, bpm) {
+  return tokens.map(token => {
+    token.noteValue = estimateNoteValue(token.duration, bpm)
+    return token
+  })
 }
 
 /**
@@ -62,8 +99,10 @@ function annotateDominants(tokens) {
 }
 
 export function analyse(tokens) {
+  const bpm = estimateBpm(tokens)
+
   return {
-    bpm: estimateBpm(tokens),
-    annotated: annotateDominants(tokens)
+    bpm: bpm,
+    annotated: annotateDominants(annotateNoteValues(tokens, bpm))
   } 
 }

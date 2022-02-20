@@ -38,5 +38,6 @@ function renderToken(token) {
  * @param {Array<Token>} tokens 
  */
 export function renderTokens(tokens) {
+  console.log(tokens)
   tokens.forEach(renderToken)
 }
