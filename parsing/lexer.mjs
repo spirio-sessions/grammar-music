@@ -1,4 +1,8 @@
 export class Token {
+  /**
+   * @param {String} name 
+   * @param {Object} value 
+   */
   constructor(name, value) {
     this.name = name
     this.value = value
@@ -8,9 +12,7 @@ export class Token {
 export class Lexer {
 
   /**
-  * @constructor
   * @param {Dict<string, predicate>} rules
-  * @returns {Lexer}
   */
   constructor(rules) {
     this.rules = rules

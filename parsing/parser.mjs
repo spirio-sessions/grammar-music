@@ -4,12 +4,19 @@ import { Token } from './lexer.mjs'
 import Grammar from './grammar.mjs'
 
 export class AST {
+  /**
+   * @param {String} label 
+   */
   constructor(label) {
     this.label = label
   }
 }
 
 export class ASTNode extends AST {
+  /**
+   * @param {String} label 
+   * @param  {...AST} children 
+   */
   constructor(label, ...children) {
     super(label)
     this.children = children
@@ -17,6 +24,10 @@ export class ASTNode extends AST {
 }
 
 export class ASTLeaf extends AST {
+  /**
+   * @param {String} label 
+   * @param {Token} token 
+   */
   constructor(label, token) {
     super(label)
     this.token = token
@@ -24,10 +35,12 @@ export class ASTLeaf extends AST {
 }
 
 /**
+ * depth-first traversal of ASTs
+ * no return value, side-effect only
  * @param {AST} ast 
  * @param {Function} cb 
  */
-function dft(ast, cb) {
+export function dft(ast, cb) {
   if (ast instanceof ASTLeaf)
     cb(ast)
   else if (ast instanceof ASTNode) {
@@ -36,9 +49,15 @@ function dft(ast, cb) {
       dft(c, cb)
   }
   else
-    error('invalid ast')
+    error('input is not an AST')
 }
 
+/**
+ * convenient wrapper function for parser result passing
+ * @param {AST} ast 
+ * @param {Integer} index 
+ * @returns {{AST,Integer}}
+ */
 function result(ast, index) {
   return {
     ast: ast,
@@ -56,14 +75,27 @@ export class Parser {
     this.tokens = null
   }
 
+  /**
+   * @param {String} symbol 
+   * @returns {Boolean}
+   */
   isTerminal(symbol) {
     return this.grammar.terminals.has(symbol)
   }
 
+  /**
+   * @param {String} symbol 
+   * @returns {Boolean}
+   */
   isNonTerminal(symbol) {
     return this.grammar.nonTerminals.has(symbol)
   }
 
+  /**
+   * @param {String} symbol 
+   * @param {Integer} index 
+   * @returns {{AST,Integer}}
+   */
   parse(symbol, index) {
     if (this.isTerminal(symbol))
       return this.parseT(symbol, index)
@@ -74,6 +106,11 @@ export class Parser {
     error(`unknown symbol '${symbol}' at position ${index}`)
   }
 
+  /**
+   * @param {String} symbol 
+   * @param {Integer} index 
+   * @returns {{AST,Integer}}
+   */
   parseT(symbol, index) {
     const token = this.tokens[index]
 
@@ -83,6 +120,11 @@ export class Parser {
       return false
   }
 
+  /**
+   * @param {String} symbol 
+   * @param {Integer} index 
+   * @returns {{AST,Integer}}
+   */
   parseNT(symbol, index) {
     let res
     const production = this.grammar.productions[symbol]
@@ -103,6 +145,11 @@ export class Parser {
     return false
   }
 
+  /**
+   * @param {String} symbol 
+   * @param {Integer} index 
+   * @returns {{AST,Integer}}
+   */
   parseSeq(rhs, index) {
     const children = []
     let i = index, res
@@ -122,8 +169,8 @@ export class Parser {
   }
 
   /**
-   * @param {Array<Token>} tokens
-   * @returns {AST} 
+   * @param {...Token} tokens
+   * @returns {{AST,Integer}} 
    */
   run(...tokens) {
     if (isEmpty(tokens))
