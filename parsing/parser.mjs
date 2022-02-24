@@ -1,7 +1,7 @@
 import { error, isEmpty } from './util.mjs'
 
 import { Token } from './lexer.mjs'
-import Grammar from './grammar.mjs'
+import { Grammar } from './grammar.mjs'
 
 export class AST {
   /**
@@ -112,6 +112,9 @@ export class Parser {
    * @returns {{AST,Integer}}
    */
   parseT(symbol, index) {
+    if (index >= this.tokens.length)
+      return false
+
     const token = this.tokens[index]
 
     if (token.name === symbol)

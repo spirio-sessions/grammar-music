@@ -14,7 +14,7 @@ class Production {
   }
 }
 
-export default class Grammar {
+export class Grammar {
   /**
    * @param {Array<String>} terminals 
    * @param {Array<String>} nonTerminals 
@@ -55,12 +55,24 @@ export default class Grammar {
   static from(terminals, productions) {
     if (isEmpty(terminals))
       error('no terminals provided')
+    if (containsFalsyValue(terminals))
+      error('terminals must no contain falsy values')
 
     if (isEmpty(productions))
       error('no productions provided')
+    if (containsFalsyValue(productions))
+      error('productions may not contain falsy values')
 
     const nonTerminals = productions.map(p => p[0])
+    if (containsFalsyValue(nonTerminals))
+      error('non-terminals may not contain falsy values')
 
     return new Grammar(terminals, nonTerminals, productions)
+
+    function containsFalsyValue(array) {
+      return array.includes(undefined)
+        || array.includes(null) 
+        || array.includes(false)
+    }
   }
 }

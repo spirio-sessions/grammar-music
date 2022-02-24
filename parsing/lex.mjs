@@ -1,9 +1,9 @@
 export default {
 
-  a: o => o === 'a' ,
+  'even': o => typeof o === 'number' && o % 2 === 0 ,
 
-  b: o => o === 'b' ,
+  'odd': o => typeof o === 'number' && o % 2 !== 0 ,
 
-  lol: o => o === 'lol'
+  'text': o => typeof o === 'string'
 
 }

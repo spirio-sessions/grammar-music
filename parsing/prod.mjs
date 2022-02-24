@@ -1,11 +1,17 @@
 export default [
   
-  [ 'S' , NaN , [ 'A', 'B', 'B', 'A' ] ] ,
+  [ 'S' , NaN , [ 'A' , 'E' ] ] ,
 
-  [ 'A' , NaN , [ 'a' ] ] ,
+  [ 'A' , NaN , [ 'N' , 'A' ] ] ,
 
-  [ 'B' , NaN , [ 'b' ] ] ,
+  [ 'A' , NaN , [ 'N' ] ] ,
 
-  [ 'B' , NaN , [ 'lol' ] ]
+  [ 'N' , NaN , [ 'even' ] ] ,
+
+  [ 'N' , NaN , [ 'odd' ] ] ,
+
+  [ 'E' , NaN , [ 'text' , 'E' ] ] ,
+
+  [ 'E' , NaN , [ 'text' ] ]
 
 ]
