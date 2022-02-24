@@ -5,15 +5,22 @@ class Token {
   }
 }
 
-/**
- * rules {object of named predicates}
- */
 class TerminalPhenoTyper {
 
+  /**
+  * @constructor
+  * @param {Dict<string, predicate>} rules
+  * @returns {TerminalPhenoTyper}
+  */
   constructor(rules) {
     this.rules = rules
   }
 
+  /**
+   * @param {Object} terminal 
+   * @param {Number} index 
+   * @returns {Token}
+   */
   phenotypeTerminal(terminal, index) {
     let tokenName
     for (const name in rules) {
