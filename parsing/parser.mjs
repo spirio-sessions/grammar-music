@@ -118,7 +118,7 @@ export function printAST(ast, format = 'json') {
       }
     })
 
-    const leafAttrs = leafs.map(l => `  { n${l.i} [label=${l.label} shape=none] }`)
+    const leafAttrs = leafs.map(l => `  { n${l.i} [label="${l.token.print()}" shape=none] }`)
     const leafNodes = leafs.map(l => `n${l.i}`)
     const leafRank = `  { rank=same ; ${leafNodes.join(' ; ')} }`
 

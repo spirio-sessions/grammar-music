@@ -7,6 +7,10 @@ export class Token {
     this.name = name
     this.value = value
   }
+
+  print() {
+    return `${this.name}:${this.value.toString()}`
+  }
 }
 
 export class Lexer {
