@@ -2,7 +2,7 @@ import lexRules from './lex.mjs'
 import productions from './prod.mjs'
 import { Lexer } from './lexer.mjs'
 import { Grammar } from './grammar.mjs'
-import { Parser } from './parser.mjs'
+import { Parser , printAST } from './parser.mjs'
 
 const lexer = new Lexer(lexRules)
 const terminals = lexer.terminals()
@@ -14,4 +14,5 @@ const input = [ 1, 2, 3, 2, 1, 'this', 'is', 'the', 'end' ]
 const tokens = lexer.run(...input)
 const res = parser.run(...tokens)
 
-console.log(JSON.stringify(res, null, 2))
+if (res)
+  console.log(printAST(res.ast, 'dot'))

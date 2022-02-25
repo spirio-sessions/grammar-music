@@ -38,7 +38,7 @@ export class ASTLeaf extends AST {
  * depth-first traversal of ASTs
  * no return value, side-effect only
  * @param {AST} ast 
- * @param {Function} cb 
+ * @param {(AST) => undefined} cb 
  */
 export function dft(ast, cb) {
   if (ast instanceof ASTLeaf)
@@ -50,6 +50,80 @@ export function dft(ast, cb) {
   }
   else
     error('input is not an AST')
+}
+
+/**
+ * breadth-first traversal of ASTs
+ * no return value, side-effect only
+ * @param {AST} ast 
+ * @param {(AST) => undefined} cb 
+ */
+export function bft(ast, cb) {
+  const queue = [ast]
+
+  iter()
+
+  function iter() {
+    if (isEmpty(queue))
+      return
+
+    const ast = queue.shift()
+
+    if (ast instanceof ASTLeaf) {
+      cb(ast)
+      iter()
+    }
+    else if (ast instanceof ASTNode) {
+      cb(ast)
+      for (const c of ast.children)
+        queue.push(c)
+      iter()
+    }
+    else
+      error('input is not an AST')  
+  }
+}
+
+/**
+ * @param {AST} ast
+ * @param {'json'|'dot'} format 
+ */
+export function printAST(ast, format = 'json') {
+  switch (format) {
+    case 'json':
+      return JSON.stringify(this, null, 2)
+
+    case 'dot':
+      return printDot(ast)
+
+    default:
+      throw new Error('unknown print format')
+  }
+
+  function printDot(ast) {
+    const start = 'graph G {'
+    let i = 0
+    let defs = '', leafs = []
+    const end = '\n}'
+
+    bft(ast, ast => ast.i = i++)
+
+    bft(ast, ast => {
+      if (ast instanceof ASTNode) {
+        defs += `\n  { n${ast.i} [label=${ast.label}] }`
+        for (const c of ast.children)
+          defs += `\n  n${ast.i} -- n${c.i} ;`
+      } else if (ast instanceof ASTLeaf){
+        leafs.push(ast)
+      }
+    })
+
+    const leafAttrs = leafs.map(l => `  { n${l.i} [label=${l.label} shape=none] }`)
+    const leafNodes = leafs.map(l => `n${l.i}`)
+    const leafRank = `  { rank=same ; ${leafNodes.join(' ; ')} }`
+
+    return [ start, defs, '', ...leafAttrs, '', leafRank, end ].join('\n')
+  }
 }
 
 /**
