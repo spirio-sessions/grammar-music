@@ -12,7 +12,7 @@
 </head>
 <body>
   
-  <section id="io-config">
+  <section id="io-config" class="flexing">
   
     <form id="type-form" class="io-form">
       <fieldset>
@@ -42,14 +42,17 @@
 
   </section>
 
-  <section id="rendering">
+  <section id="rendering" class="flexing">
     <canvas class="stroked" width="600" height="400"></canvas>
     <div id="tree-display" class="stroked"></div>
     <script src="viz-js/viz.js"></script>
     <script src="viz-js/lite.render.js"></script>
   </section>
 
-  <button id="start-stop-button" disabled class="pointer">Start</button>
+  <section id="buttons" class="flexing">
+    <button id="start-stop-button" disabled class="pointer">Start</button>
+    <button id="edit-grammar" disabled class="pointer">Edit Grammar</button>
+  </section>
 
 </body>
 </html>

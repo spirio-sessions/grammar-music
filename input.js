@@ -22,7 +22,6 @@ function createRadioForm(name, options) {
   modalSeparator.classList.add('modal')
   
   const form = document.createElement('form')
-  // form.classList.add('modal')
 
   options.forEach(option => {
     form.append(...createRadioEntry(name, option.name, option.value))

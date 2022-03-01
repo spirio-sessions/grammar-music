@@ -30,10 +30,11 @@ import { Lexer } from './parsing/lexer.mjs'
 import { Grammar } from './parsing/grammar.mjs'
 import { Parser } from './parsing/parser.mjs'
 
+window.productions = productions
 const lexer = new Lexer(lexRules)
 const terminals = lexer.terminals()
-const grammar = Grammar.from(terminals, productions)
-const parser = new Parser(grammar)
+let grammar = Grammar.from(terminals, productions)
+let parser = new Parser(grammar)
 
 /**
  * Parse tokens to syntax tree representation.
@@ -41,6 +42,11 @@ const parser = new Parser(grammar)
  * @returns {SyntaxTree}
  */
 function parse(tokens) {
+  if (window.productions !== productions) { // have been edited?
+    grammar = Grammar.from(terminals, window.productions)
+    parser = new Parser(grammar)
+  }
+
   const grammarTokens = lexer.run(...tokens)
   const result = parser.run(...grammarTokens)
 

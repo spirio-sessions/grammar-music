@@ -76,7 +76,7 @@ destinationFieldset.disabled = true
 
 
 
-//#region trigger
+//#region start-stop
 
 window.tokenized = []
 window.lastTokenization
@@ -85,12 +85,11 @@ window.tokenizationState = (t, b) => {
   window.lastTokenization = t
   window.playing = b
 }
+window.productions
 
 import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
-
 import { renderTokens, renderTree } from './render.js'
-
 import { transformTransfer } from './transform-transfer.js'
 
 const startStopButton = document.getElementById('start-stop-button')
@@ -129,6 +128,12 @@ startStopButton.onclick = () => {
   running = !running
 }
 
+import { editGrammar } from './edit-grammar.js'
+
+const editGrammarButton = document.getElementById('edit-grammar')
+editGrammarButton.onclick = editGrammar
+
 startStopButton.toggleAttribute('disabled')
+editGrammarButton.toggleAttribute('disabled')
 
 //#endregion

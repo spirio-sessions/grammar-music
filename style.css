@@ -18,7 +18,9 @@ body {
 
 #io-config {
   padding: 1em;
+}
 
+.flexing {
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -45,15 +47,9 @@ body {
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
+  gap: 1em;
 
   background-color:lightgray;
-}
-
-#rendering {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  gap: 1em;
 }
 
 .stroked {
@@ -66,12 +62,11 @@ body {
   overflow-y: scroll;
 }
 
-#start-stop-button {
-  /* position: absolute;
-  bottom: 2em;
-  left: 50vw;
-  transform: translateX(-50%); */
+#buttons {
 
+}
+
+button {
   height: 3em;
   width: 6em;
 
