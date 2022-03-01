@@ -3,7 +3,7 @@ import { error, isEmpty } from './util.mjs'
 import { Token } from './lexer.mjs'
 import { Grammar } from './grammar.mjs'
 
-export class AST {
+export class SyntaxTree {
   /**
    * @param {String} label 
    */
@@ -12,10 +12,10 @@ export class AST {
   }
 }
 
-export class ASTNode extends AST {
+export class STNode extends SyntaxTree {
   /**
    * @param {String} label 
-   * @param  {...AST} children 
+   * @param  {...SyntaxTree} children 
    */
   constructor(label, ...children) {
     super(label)
@@ -23,7 +23,7 @@ export class ASTNode extends AST {
   }
 }
 
-export class ASTLeaf extends AST {
+export class STLeaf extends SyntaxTree {
   /**
    * @param {String} label 
    * @param {Token} token 
@@ -35,31 +35,31 @@ export class ASTLeaf extends AST {
 }
 
 /**
- * depth-first traversal of ASTs
+ * depth-first traversal of SyntaxTrees
  * no return value, side-effect only
- * @param {AST} ast 
- * @param {(AST) => undefined} cb 
+ * @param {SyntaxTree} st 
+ * @param {(SyntaxTree) => undefined} cb 
  */
-export function dft(ast, cb) {
-  if (ast instanceof ASTLeaf)
-    cb(ast)
-  else if (ast instanceof ASTNode) {
-    cb(ast)
-    for (const c of ast.children)
+export function dft(st, cb) {
+  if (st instanceof STLeaf)
+    cb(st)
+  else if (st instanceof STNode) {
+    cb(st)
+    for (const c of st.children)
       dft(c, cb)
   }
   else
-    error('input is not an AST')
+    error('input is not a SyntaxTree')
 }
 
 /**
- * breadth-first traversal of ASTs
+ * breadth-first traversal of SyntaxTrees
  * no return value, side-effect only
- * @param {AST} ast 
- * @param {(AST) => undefined} cb 
+ * @param {SyntaxTree} st 
+ * @param {(SyntaxTree) => undefined} cb 
  */
-export function bft(ast, cb) {
-  const queue = [ast]
+export function bft(st, cb) {
+  const queue = [st]
 
   iter()
 
@@ -67,54 +67,54 @@ export function bft(ast, cb) {
     if (isEmpty(queue))
       return
 
-    const ast = queue.shift()
+    const st = queue.shift()
 
-    if (ast instanceof ASTLeaf) {
-      cb(ast)
+    if (st instanceof STLeaf) {
+      cb(st)
       iter()
     }
-    else if (ast instanceof ASTNode) {
-      cb(ast)
-      for (const c of ast.children)
+    else if (st instanceof STNode) {
+      cb(st)
+      for (const c of st.children)
         queue.push(c)
       iter()
     }
     else
-      error('input is not an AST')  
+      error('input is not a SyntaxTree')  
   }
 }
 
 /**
- * @param {AST} ast
+ * @param {SyntaxTree} st
  * @param {'json'|'dot'} format 
  */
-export function printAST(ast, format = 'json') {
+export function printST(st, format = 'json') {
   switch (format) {
     case 'json':
       return JSON.stringify(this, null, 2)
 
     case 'dot':
-      return printDot(ast)
+      return printDot(st)
 
     default:
       throw new Error('unknown print format')
   }
 
-  function printDot(ast) {
+  function printDot(st) {
     const start = 'graph G {'
     let i = 0
     let defs = '', leafs = []
     const end = '\n}'
 
-    bft(ast, ast => ast.i = i++)
+    bft(st, st => st.i = i++)
 
-    bft(ast, ast => {
-      if (ast instanceof ASTNode) {
-        defs += `\n  { n${ast.i} [label=${ast.label}] }`
-        for (const c of ast.children)
-          defs += `\n  n${ast.i} -- n${c.i} ;`
-      } else if (ast instanceof ASTLeaf){
-        leafs.push(ast)
+    bft(st, st => {
+      if (st instanceof STNode) {
+        defs += `\n  { n${st.i} [label=${st.label}] }`
+        for (const c of st.children)
+          defs += `\n  n${st.i} -- n${c.i} ;`
+      } else if (st instanceof STLeaf){
+        leafs.push(st)
       }
     })
 
@@ -128,13 +128,13 @@ export function printAST(ast, format = 'json') {
 
 /**
  * convenient wrapper function for parser result passing
- * @param {AST} ast 
+ * @param {SyntaxTree} st 
  * @param {Integer} index 
- * @returns {{AST,Integer}}
+ * @returns {{st:SyntaxTree,index:Integer}}
  */
-function result(ast, index) {
+function result(st, index) {
   return {
-    ast: ast,
+    st: st,
     index: index
   }
 }
@@ -168,7 +168,7 @@ export class Parser {
   /**
    * @param {String} symbol 
    * @param {Integer} index 
-   * @returns {{AST,Integer}}
+   * @returns {{SyntaxTree,Integer}}
    */
   parse(symbol, index) {
     if (this.isTerminal(symbol))
@@ -183,7 +183,7 @@ export class Parser {
   /**
    * @param {String} symbol 
    * @param {Integer} index 
-   * @returns {{AST,Integer}}
+   * @returns {{SyntaxTree,Integer}}
    */
   parseT(symbol, index) {
     if (index >= this.tokens.length)
@@ -192,7 +192,7 @@ export class Parser {
     const token = this.tokens[index]
 
     if (token.name === symbol)
-      return result(new ASTLeaf(symbol, token), index+1)
+      return result(new STLeaf(symbol, token), index+1)
     else
       return false
   }
@@ -200,7 +200,7 @@ export class Parser {
   /**
    * @param {String} symbol 
    * @param {Integer} index 
-   * @returns {{AST,Integer}}
+   * @returns {{SyntaxTree,Integer}}
    */
   parseNT(symbol, index) {
     let res
@@ -210,12 +210,12 @@ export class Parser {
       if (body.rhs.length > 1) {
         res = this.parseSeq(body.rhs, index)
         if (res)
-          return result(new ASTNode(symbol, ...res.ast), res.index)
+          return result(new STNode(symbol, ...res.st), res.index)
       }
       else {
         res = this.parse(body.rhs[0], index)
         if (res)
-          return result(new ASTNode(symbol, res.ast), res.index)
+          return result(new STNode(symbol, res.st), res.index)
       }
     }
 
@@ -225,7 +225,7 @@ export class Parser {
   /**
    * @param {String} symbol 
    * @param {Integer} index 
-   * @returns {{AST,Integer}}
+   * @returns {{SyntaxTree,Integer}}
    */
   parseSeq(rhs, index) {
     const children = []
@@ -237,7 +237,7 @@ export class Parser {
       if (!res)
         return false
       else {
-        children.push(res.ast)
+        children.push(res.st)
         i = res.index
       }
     }
@@ -247,7 +247,7 @@ export class Parser {
 
   /**
    * @param {...Token} tokens
-   * @returns {{AST,Integer}} 
+   * @returns {{st:SyntaxTree,index:Integer}} 
    */
   run(...tokens) {
     if (isEmpty(tokens))
