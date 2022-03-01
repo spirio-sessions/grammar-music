@@ -6,7 +6,9 @@ export default [
 
   [ 'MORE' , NaN , [ 'TOKEN'] ] ,
 
-  [ 'TOKEN' , NaN , [ 'tone' ] ] ,
+  [ 'TOKEN' , NaN , [ 'anchor' ] ] ,
+
+  [ 'TOKEN' , NaN , [ 'filler' ] ] ,
 
   [ 'TOKEN' , NaN , [ 'rest' ] ] ,
 
