@@ -101,7 +101,7 @@ export function printST(st, format = 'json') {
   }
 
   function printDot(st) {
-    const start = 'graph G {'
+    const start = 'graph G {\n  size="6.25,4.16";'
     let i = 0
     let defs = '', leafs = []
     const end = '\n}'

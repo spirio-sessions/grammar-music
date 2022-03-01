@@ -98,6 +98,11 @@ function annotateDominants(tokens) {
   return tokens
 }
 
+/**
+ * Analyse beat, annotate note values and dominant tones of tokens.
+ * @param {Array<Token>} tokens 
+ * @returns {{bpm:Number, annotated:Array<Token>}}
+ */
 export function analyse(tokens) {
   const bpm = estimateBpm(tokens)
 

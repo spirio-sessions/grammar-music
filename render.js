@@ -10,7 +10,7 @@ let y, w
 const h = canvas.height / 128 // 128 midi tones
 
 /**
- * 
+ * Place a tone or rest onto the canvas in a piano-roll-like fashion.
  * @param {Token} token 
  */
 function renderToken(token) {
@@ -34,10 +34,35 @@ function renderToken(token) {
 }
 
 /**
- * 
+ * Renders a sequence of tones and rests in a piano-roll-like fashion onto the canvas.
  * @param {Array<Token>} tokens 
  */
 export function renderTokens(tokens) {
   console.log(tokens)
   tokens.forEach(renderToken)
+}
+
+import { SyntaxTree, printST } from './parsing/parser.mjs'
+
+let viz = new Viz()
+let display = document.getElementById('tree-display')
+
+/**
+ * Renders a syntax tree.
+ * @param {SyntaxTree} st 
+ */
+export function renderTree(st) {
+  const dot = printST(st, 'dot')
+  viz.renderSVGElement(dot)
+    .then(svg => {
+      svg.classList.add('stroked')
+      svg.style.width = '600px'
+      svg.style.height = '400px'
+      display.parentNode.replaceChild(svg, display)
+      display = svg
+    })
+    .catch(e => {
+      viz = new Viz()
+      console.error(e)
+    })
 }

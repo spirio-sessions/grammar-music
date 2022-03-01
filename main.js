@@ -89,7 +89,7 @@ window.tokenizationState = (t, b) => {
 import { lookupTokenize } from './tokenize.js'
 const { startTokenizing, stopTokenizing } = lookupTokenize[type]
 
-import { renderTokens } from './render-token.js'
+import { renderTokens, renderTree } from './render.js'
 
 import { transformTransfer } from './transform-transfer.js'
 
@@ -104,7 +104,7 @@ const process = () => {
   if (isSilence(2000)) {
     // stop tokenization to avoid huge rests while player is listening to grammar music
     stopTokenizing(source)
-    transformTransfer(window.tokenized, destination, renderTokens)
+    transformTransfer(window.tokenized, destination, renderTokens, renderTree)
     startTokenizing(source, window.tokenized, window.tokenizationState)
   }
 

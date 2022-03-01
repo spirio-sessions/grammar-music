@@ -1,9 +1,9 @@
+import { Tone, Rest } from '../tokenize.js'
+
 export default {
 
-  'even': o => typeof o === 'number' && o % 2 === 0 ,
+  tone: t => t instanceof Tone,
 
-  'odd': o => typeof o === 'number' && o % 2 !== 0 ,
-
-  'text': o => typeof o === 'string'
+  rest: t => t instanceof Rest
 
 }

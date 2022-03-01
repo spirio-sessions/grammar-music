@@ -1,17 +1,13 @@
 export default [
-  
-  [ 'S' , NaN , [ 'A' , 'E' ] ] ,
 
-  [ 'A' , NaN , [ 'N' , 'A' ] ] ,
+  [ 'S' , NaN , [ 'MORE' ] ] ,
 
-  [ 'A' , NaN , [ 'N' ] ] ,
+  [ 'MORE' , NaN , [ 'TOKEN' , 'MORE' ] ] ,
 
-  [ 'N' , NaN , [ 'even' ] ] ,
+  [ 'MORE' , NaN , [ 'TOKEN'] ] ,
 
-  [ 'N' , NaN , [ 'odd' ] ] ,
+  [ 'TOKEN' , NaN , [ 'tone' ] ] ,
 
-  [ 'E' , NaN , [ 'text' , 'E' ] ] ,
-
-  [ 'E' , NaN , [ 'text' ] ]
+  [ 'TOKEN' , NaN , [ 'rest' ] ] ,
 
 ]

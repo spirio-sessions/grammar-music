@@ -130,6 +130,10 @@ export class Rest extends Token {
   serialize() {
     return `(R ${this.start} ${this.duration})`
   }
+
+  toString() {
+    return `rest`
+  }
 }
 
 export class Tone extends Token {
@@ -146,5 +150,9 @@ export class Tone extends Token {
 
   serialize() {
     return `(T ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch} ${this.velocity})`
+  }
+
+  toString() {
+    return `${this.pitch}`
   }
 }

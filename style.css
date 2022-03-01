@@ -49,8 +49,21 @@ body {
   background-color:lightgray;
 }
 
-canvas {
+#rendering {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 1em;
+}
+
+.stroked {
   border: 2px solid black;
+}
+
+#tree-display {
+  width: 600px;
+  height: 400px;
+  overflow-y: scroll;
 }
 
 #start-stop-button {
