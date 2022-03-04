@@ -19,40 +19,57 @@ function startMidi(source, dump, tokenizationState) {
     const velocity = data[2]
     
     switch (statusCode) {
-      case 8: // note off
-        if (nLast === noteNumber) {
-
-          const tone = new Tone(tLast, duration, noteNumber, vLast)
-          dump.push(tone)
-          tokenizationState(now, false)
-
-          mLast = 'off'
-          tLast = timestamp
-        }
+      case 8:
+        handleNoteOff()
         break
       
-      case 9: // note on
-        if (mLast === 'on') { // polyphonic
-          const tone = new Tone(tLast, duration, nLast, vLast)
-          dump.push(tone)
-        }
-
-        if (mLast === 'off' && duration > 50) { // monophonic + rest
-          const rest = new Rest(tLast, duration)
-          dump.push(rest)
-        }
-
-        tokenizationState(now, true)
-
-        tLast = timestamp
-        nLast = noteNumber
-        vLast = velocity
-        mLast = 'on'
+      case 9:
+        handleNoteOn()
         break
     
       default:
         console.log('unknown message')
+        break
+    }
+
+    function handleNoteOff() {
+      if (nLast === noteNumber) {
+        console.log(noteNumber + ' off')
+
+        const tone = new Tone(tLast, duration, noteNumber, vLast)
+        dump.push(tone)
+        tokenizationState(now, false)
+
+        mLast = 'off'
+        tLast = timestamp
+      }
+    }
+
+    function handleNoteOn() {
+
+      if (velocity === 0) {
+        handleNoteOff()
         return
+      }
+
+      console.log(noteNumber + ' on')
+
+      if (mLast === 'on') { // polyphonic
+        const tone = new Tone(tLast, duration, nLast, vLast)
+        dump.push(tone)
+      }
+
+      else if (mLast === 'off' && duration > 50) { // monophonic + rest
+        const rest = new Rest(tLast, duration)
+        dump.push(rest)
+      }
+
+      tokenizationState(now, true)
+
+      tLast = timestamp
+      nLast = noteNumber
+      vLast = velocity
+      mLast = 'on'
     }
   }
 }
