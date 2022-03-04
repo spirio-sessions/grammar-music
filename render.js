@@ -6,15 +6,16 @@ ctx.translate(0, canvas.height)
 ctx.scale(1, -1)
 
 let x = 0
-let y, w
+let y , w
 const h = canvas.height / 128 // 128 midi tones
 
 /**
  * Place a tone or rest onto the canvas in a piano-roll-like fashion.
  * @param {Token} token 
  */
-function renderToken(token) {
-  w = token.duration / 20
+function renderToken(token, widthMs) {
+  //w = token.duration / 20
+  w = widthMs * token.duration // fit all tokens from section on canvas
 
   if (x + w > canvas.width) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -24,13 +25,13 @@ function renderToken(token) {
   if (token instanceof Tone) {
     y = h * token.noteNumber
     // const relativeVelocity = token.velocity / 128 // midi velocity range: 0 - 127
-    // ctx.fillStyle = `rgb(${relativeVelocity * 255}, 0, ${(1-relativeVelocity) * 255})`
+    // ctx.fillStyle = `rgb(${relativeVelocity * 255}, 128, ${(1-relativeVelocity) * 255})`
     ctx.fillStyle = `rgb(${(token.dominant ? 1 : 0) * 255}, 0, ${(token.dominant ? 0 : 1) * 255})`
     ctx.fillRect(x, y, w, h)
   }
   // do not render rests
 
-    x += w
+  x += w
 }
 
 /**
@@ -39,7 +40,9 @@ function renderToken(token) {
  */
 export function renderTokens(tokens) {
   console.log(tokens)
-  tokens.forEach(renderToken)
+  const totalDuration = tokens.reduce((acc, t) => acc += t.duration, 0)
+  const widthMs = canvas.width / totalDuration
+  tokens.forEach(t => renderToken(t, widthMs))
 }
 
 import { SyntaxTree, printST } from './parsing/parser.mjs'
