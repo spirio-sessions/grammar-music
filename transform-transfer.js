@@ -20,7 +20,8 @@ export async function transformTransfer(tokenDump, destination, renderTokens, re
   const st = parse(annotated)
   renderTree(st)
 
-  const response = annotated
+  // response = reverse call for demo
+  const response = annotated.reverse()
   await transfer(response, destination)
 }
 
@@ -42,7 +43,7 @@ let parser = new Parser(grammar)
  * @returns {SyntaxTree}
  */
 function parse(tokens) {
-  if (window.productions !== productions) { // have been edited?
+  if (window.productions.edited) { // have been edited?
     grammar = Grammar.from(terminals, window.productions)
     parser = new Parser(grammar)
   }

@@ -48,9 +48,11 @@ function onEditingFinished() {
   }
   else {
     window.productions = eval(input)
+    window.productions.edited = true
     modal.remove()
   }
 
+  // TODO: bring in semantic checks from grammar module
   function check(input) {
     if (!input.startsWith('['))
       return 'input is not a valid s-expression in JS'
