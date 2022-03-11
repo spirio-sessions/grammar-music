@@ -1,139 +1,170 @@
-//#region input generation
-
-import { sleep } from './util.js'
-
-async function* generateInput(queryValue, ms){
-  while(true){
-    const { available, value } = queryValue()
-    if(available)
-      return value
-    else{
-      await sleep(ms)
-    }
-  }
+window.pipeline = {
+  'midi-in': undefined,
+  annotate: undefined,
+  lex: undefined,
+  parse: undefined,
+  transform: undefined,
+  'midi-out': undefined
 }
 
-//#endregion
-
-
-
-//#region acquire source
-
-const typeForm = document.getElementById('type-form')
-
-const typeInput = generateInput(() => {
-  const formData = new FormData(typeForm)
-  const type = formData.get('type')
-  return type ? ({ available: true, value: type }) : ({ available: false, value: null })
-}, 500)
-
-const type = (await typeInput.next()).value
-
-import { lookupSourceInput } from './input.js'
-const { element:sourceForm, getValue:getSource, closeModal } = await lookupSourceInput[type]()
-
-const sourceInput = generateInput(() => {
-  const formData = new FormData(sourceForm)
-  const sourceId = formData.get('source')
-  return sourceId 
-    ? ({ available: true, value: sourceId }) 
-    : ({ available: false, value: null })
-}, 500)
-
-const sourceId = (await sourceInput.next()).value
-const source = getSource(sourceId)
-
-closeModal()
-
-const typeFieldset = typeForm.querySelector('fieldset')
-typeFieldset.disabled = true
-
-//#endregion
-
-
-
-//#region acquire destination
-
-import { renderDestinationInput } from './input.js'
-const destinationForm = document.getElementById('destination-form')
-const getDestination = await renderDestinationInput(destinationForm)
-
-const destinationInput = generateInput(() => {
-  const formData = new FormData(destinationForm)
-  const destinationId = formData.get(destinationForm.name)
-  return destinationId 
-    ? ({ available: true, value: destinationId }) 
-    : ({ available: false, value: destinationId })
-}, 500)
-
-const destinationId = (await destinationInput.next()).value
-const destination = getDestination(destinationId)
-
-const destinationFieldset = destinationForm.querySelector('fieldset')
-destinationFieldset.disabled = true
-
-//#endregion
-
-
-
-//#region start-stop
-
-window.tokenized = []
-window.lastTokenization
-window.playing
-window.tokenizationState = (t, b) => {
-  window.lastTokenization = t
-  window.playing = b
+/**
+ * @returns {Boolean}
+ */
+function pipelineIsReady() {
+  return Object
+    .values(pipeline)
+    .reduce((acc, step) => acc &&= step, true)
 }
-window.productions
 
-import { lookupTokenize } from './tokenize.js'
-const { startTokenizing, stopTokenizing } = lookupTokenize[type]
-import { renderTokens, renderTree } from './render.js'
-import { transformTransfer } from './transform-transfer.js'
+const midiAccess = await navigator.requestMIDIAccess()
 
-const startStopButton = document.getElementById('start-stop-button')
-let running = false
+/**
+ * converts midi input/output map into string indexed object
+ * @param {MIDIInputMap|MIDIOutputMap} midiMap 
+ * @returns {{String:MIDIInput|MIDIOutput}}
+ */
+function midiIOMapToObject(midiMap) {
+  const midiObj = {}
+  midiMap.forEach(io => {
+    midiObj[io.name] = io
+  })
+  return midiObj
+}
 
-const timerDuration = 50 // ms
+const configs = {
+  'midi-in':  midiIOMapToObject(midiAccess.inputs),
+  annotate:   (await import('./pipeline/annotate.js')).default,
+  lex:        (await import('./pipeline/lex.js')).default,
+  parse:      (await import('./pipeline/parse.js')).default,
+  transform:  (await import('./pipeline/transform.js')).default,
+  'midi-out': midiIOMapToObject(midiAccess.outputs)
+}
+
+import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
+let lexems, lexemCursor = 0, playing, lastToneFinishedAt
+import { renderLexems, renderTree } from './util/render.js'
+import { transfer } from './util/midi-handling.js'
+const pollingInterval = 50 //ms
 let timerId
 
-// process only when there are two seconds of subsequent silence
-const process = () => {
-  if (isSilence(2000)) {
-    // stop tokenization to avoid huge rests while player is listening to grammar music
-    stopTokenizing(source)
-    transformTransfer(window.tokenized, destination, renderTokens, renderTree)
-    startTokenizing(source, window.tokenized, window.tokenizationState)
+function onMidiMessageHandeled(result) {
+  if (!result)
+    playing = true
+  else if (result instanceof Rest) {
+    playing = true
+    lexems.push(result)
   }
+  else if (result instanceof Tone) {
+    playing = false
+    lastToneFinishedAt = performance.now()
+    lexems.push(result)
+  }
+}
 
-  timerId = setTimeout(process, timerDuration)
-  
+function setOnMidiMessage(startTime, callback) {
+  const handler = mkMidiHandler(startTime, callback)
+  pipeline['midi-in'].onmidimessage = handler
+}
+
+function restartIfReady() {
+  if (!pipelineIsReady())
+    return
+
+  // recognize lexems from midi events
+  lexems = []
+  lexemCursor = 0
+  playing = true
+  lastToneFinishedAt = undefined
+  setOnMidiMessage(performance.now(), onMidiMessageHandeled)
+
+  clearInterval(timerId)
+
   function isSilence(ms) {
-    return !window.playing && performance.now() - window.lastTokenization >= ms
+    return !playing && performance.now() - lastToneFinishedAt >= ms
+  }
+
+  timerId = setInterval(async () => {
+    if (!isSilence(2000))
+      return
+    
+    playing = true
+    setOnMidiMessage(0, undefined)
+
+    const newLexems = lexems.slice(lexemCursor)
+    console.log(newLexems)
+    lexemCursor = lexems.length
+
+    const annotatedLexems = pipeline.annotate(newLexems)
+    renderLexems(annotatedLexems, 'in')
+    const tokens = pipeline.lex(annotatedLexems)
+    
+    const parserResult = pipeline.parse(tokens)
+    if (!parserResult) {
+      alert('processing failed while parsing')
+      return
+    }
+    await renderTree(parserResult.st)
+
+    const transformedLexems = pipeline.transform(parserResult.st)
+    renderLexems(transformedLexems, 'out')
+
+    await transfer(transformedLexems, pipeline['midi-out'])
+
+    setOnMidiMessage(performance.now(), onMidiMessageHandeled)
+  }, pollingInterval)
+}
+
+import { Grammar } from './parsing/grammar.mjs'
+import { Lexer } from './parsing/lexer.mjs'
+import { Parser } from './parsing/parser.mjs'
+let lexer
+/**
+ * sets options of select element and initializes corresponding pipeline state
+ * @param {String} id 
+ * @param {Array<String>} options
+ */
+function wireSelectElement(id, options) {
+  const selectElement = document.getElementById(id)
+  const optionElements = options.map(optionString => {
+    const optionElement = document.createElement('option')
+    optionElement.value = optionString
+    optionElement.innerText = optionString
+    return optionElement
+  })
+
+  selectElement.append(...optionElements)
+
+  const setPipelineStep = () => {
+    const id = selectElement.id
+    const name = selectElement.value
+    const configuration = configs[id][name]
+
+    if (id === 'lex') {
+      lexer = new Lexer(configuration)
+      pipeline.lex = lexems => lexer.run(...lexems)
+    }
+    else if (id === 'parse') {
+      const grammar = Grammar.from(lexer.terminals(), configuration)
+      const parser = new Parser(grammar)
+      pipeline.parse = tokens => parser.run(...tokens)
+    }
+    else
+      pipeline[id] = configs[id][name]
+  }
+
+  // initially set pipeline step
+  setPipelineStep()
+
+  selectElement.onchange = () => {
+    setPipelineStep()
+    restartIfReady()
   }
 }
 
-startStopButton.onclick = () => {
-  if (running) {
-    stopTokenizing(source)
-    clearTimeout(timerId)
-    startStopButton.innerText = 'Start'
-  }
-  else{
-    startTokenizing(source, window.tokenized, window.tokenizationState)
-    timerId = setTimeout(process, timerDuration)
-    startStopButton.innerText = 'Stop'
-  }
-  running = !running
+// initialize configuration ui and pipeline state
+for (const [id, config] of Object.entries(configs)) {
+  const options = Object.keys(config)
+  wireSelectElement(id, options)
 }
-
-import { editGrammar } from './edit-grammar.js'
-
-const editGrammarButton = document.getElementById('edit-grammar')
-editGrammarButton.onclick = editGrammar
-
-startStopButton.toggleAttribute('disabled')
-editGrammarButton.toggleAttribute('disabled')
-
-//#endregion
+// start processing imidiately if all configs filled with valid defaults
+restartIfReady()

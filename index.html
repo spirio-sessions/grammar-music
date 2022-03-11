@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="width=device-width, initial-scale=1.0">
 
   <script src="./main.js" type="module"></script>
   <link rel="stylesheet" href="style.css">
@@ -12,46 +12,51 @@
 </head>
 <body>
   
-  <section id="io-config" class="flexing">
-  
-    <form id="type-form" class="io-form">
+  <section id="config" class="flexing">
+      
       <fieldset>
-        <legend>Source</legend>
-
-        <input type="radio" name="type" id="midi" value="midi" class="pointer">
-        <label for="midi" class="pointer">MIDI Device</label>
-        <!-- <br>
-
-        <input type="radio" name="type" id="mic" value="mic">
-        <label for="mic">Microphone</label>
-        <br> -->
-        
-        <!--
-        <input type="radio" name="type" id="file" value="file">
-        <label for="file">Local File</label> -->
-
+        <legend>MIDI In</legend>
+        <select id="midi-in" class="pointer"></select>
       </fieldset>
-    </form>
+    
+      <fieldset>
+        <legend>Annotate</legend>
+        <select id="annotate" class="pointer"></select>
+      </fieldset>
+    
+      <fieldset>
+        <legend>Lex</legend>
+        <select id="lex" class="pointer"></select>
+      </fieldset>
+    
+      <fieldset>
+        <legend>Parse</legend>
+        <select id="parse" class="pointer"></select>
+      </fieldset>
+    
+      <fieldset>
+        <legend>Transform</legend>
+        <select id="transform" class="pointer"></select>
+      </fieldset>
 
-
-    <form id="destination-form" name="destination" class="io-form">
-      <!-- <fieldset>
-        <legend>Destination</legend>
-      </fieldset> -->
-    </form>
+      <fieldset>
+        <legend>Render</legend>
+        <select id="style" class="pointer"></select>
+      </fieldset>
+    
+      <fieldset>
+        <legend>MIDI Out</legend>
+        <select id="midi-out" class="pointer"></select>
+      </fieldset>
 
   </section>
 
   <section id="rendering" class="flexing">
-    <canvas class="stroked" width="600" height="400"></canvas>
+    <canvas id="render-in" class="stroked" width="600" height="200"></canvas>
+    <canvas id="render-out" class="stroked" width="600" height="200"></canvas>
     <div id="tree-display" class="stroked"></div>
     <script src="viz-js/viz.js"></script>
     <script src="viz-js/lite.render.js"></script>
-  </section>
-
-  <section id="buttons" class="flexing">
-    <button id="start-stop-button" disabled class="pointer">Start</button>
-    <button id="edit-grammar" disabled class="pointer">Edit Grammar</button>
   </section>
 
 </body>

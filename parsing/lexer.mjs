@@ -30,11 +30,11 @@ export class Lexer {
   }
 
   /**
-   * @param {Object} obj 
-   * @param {Number} index 
-   * @returns {Token}
-   */
-  lex(obj, index) {
+  * @param {Object} obj 
+  * @param {Number} index 
+  * @returns {Token}
+  */
+  lexOne(obj, index) {
     let tokenName
     for (const name in this.rules) {
       const predicate = this.rules[name]
@@ -45,7 +45,7 @@ export class Lexer {
     }
 
     if (tokenName === undefined)
-      throw new Error(`no fitting phenotype rule for token ${index}`)
+      throw new Error(`no fitting lexer rule for token ${index}`)
 
     return new Token(tokenName, obj)
   }
@@ -55,7 +55,6 @@ export class Lexer {
    * @returns {Array<Token>}
    */
   run(...objs) {
-    return objs.map(this.lex, this)
+    return objs.map((o, i) => this.lexOne(o, i))
   }
-
 }
