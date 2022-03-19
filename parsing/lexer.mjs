@@ -1,15 +1,15 @@
 export class Token {
   /**
    * @param {String} name 
-   * @param {Object} value 
+   * @param {Object} lexem 
    */
-  constructor(name, value) {
+  constructor(name, lexem) {
     this.name = name
-    this.value = value
+    this.lexem = lexem
   }
 
   print() {
-    return `${this.name}:${this.value.toString()}`
+    return `${this.name}:${this.lexem.toString()}`
   }
 }
 

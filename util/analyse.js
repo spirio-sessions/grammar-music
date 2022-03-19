@@ -1,4 +1,4 @@
-import { Tone } from "./tokenize.js"
+import { Tone } from "./midi-handling.js"
 
 /**
  * May fail if less than 2 tones in tokens and return NaN.
@@ -6,7 +6,7 @@ import { Tone } from "./tokenize.js"
  * @param {Array<Token>} tokens 
  * @returns {Number} bpm or NaN
  */
-function estimateBpm(tokens) {
+export function estimateBpm(tokens) {
 
   const tones = tokens.filter(t => t instanceof Tone)
 
@@ -59,9 +59,10 @@ function estimateNoteValue(noteDurationMs, bpm) {
  * @param {Array<Token>} tokens 
  * @param {Number} bpm 
  */
-function annotateNoteValues(tokens, bpm) {
+export function annotateNoteValues(tokens, bpm) {
   return tokens.map(token => {
     token.noteValue = estimateNoteValue(token.duration, bpm)
+    token.bpm = bpm
     return token
   })
 }

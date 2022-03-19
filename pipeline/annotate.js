@@ -1,7 +1,13 @@
+import { estimateBpm, annotateNoteValues} from '../util/analyse.js'
+import { Rest } from '../util/midi-handling.js'
+
 export default {
   default: lexems => lexems ,
 
-  //noteValue: lexems => lexems ,
+  'note-value': lexems => {
+    const annotatedLexems = annotateNoteValues(lexems, estimateBpm(lexems))
+    return  filterShortRests(annotatedLexems)
+  },
 
   peaks: lexems => {
     if (lexems.length < 3)
@@ -26,3 +32,6 @@ export default {
     return lexems
   }
 }
+
+const filterShortRests = lexems => 
+  lexems.filter(l => !(l instanceof Rest && l.noteValue < 1))

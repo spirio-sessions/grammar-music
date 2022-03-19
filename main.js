@@ -4,6 +4,7 @@ window.pipeline = {
   lex: undefined,
   parse: undefined,
   transform: undefined,
+  style: undefined,
   'midi-out': undefined
 }
 
@@ -31,18 +32,19 @@ function midiIOMapToObject(midiMap) {
   return midiObj
 }
 
-const configs = {
+window.configs = {
   'midi-in':  midiIOMapToObject(midiAccess.inputs),
   annotate:   (await import('./pipeline/annotate.js')).default,
   lex:        (await import('./pipeline/lex.js')).default,
   parse:      (await import('./pipeline/parse.js')).default,
   transform:  (await import('./pipeline/transform.js')).default,
+  style:      (await import('./pipeline/style.js')).default,
   'midi-out': midiIOMapToObject(midiAccess.outputs)
 }
 
 import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
 let lexems, lexemCursor = 0, playing, lastToneFinishedAt
-import { renderLexems, renderTree } from './util/render.js'
+import { renderTokens, renderTree } from './util/render.js'
 import { transfer } from './util/midi-handling.js'
 const pollingInterval = 50 //ms
 let timerId
@@ -91,23 +93,21 @@ function restartIfReady() {
     setOnMidiMessage(0, undefined)
 
     const newLexems = lexems.slice(lexemCursor)
-    console.log(newLexems)
     lexemCursor = lexems.length
 
     const annotatedLexems = pipeline.annotate(newLexems)
-    renderLexems(annotatedLexems, 'in')
+
     const tokens = pipeline.lex(annotatedLexems)
-    
+    console.log(tokens.map(t => t.name + " : " + t.lexem.noteValue))
+    renderTokens(tokens, 'in', pipeline.style.colorizeToken)
+
     const parserResult = pipeline.parse(tokens)
-    if (!parserResult) {
-      alert('processing failed while parsing')
-      return
-    }
-    await renderTree(parserResult.st)
+    await renderTree(parserResult.st, pipeline.style.printLeaf)
 
-    const transformedLexems = pipeline.transform(parserResult.st)
-    renderLexems(transformedLexems, 'out')
+    const transformedTokens = pipeline.transform(parserResult.st)
+    renderTokens(transformedTokens, 'out', pipeline.style.colorizeToken)
 
+    const transformedLexems = transformedTokens.map(token => token.lexem)
     await transfer(transformedLexems, pipeline['midi-out'])
 
     setOnMidiMessage(performance.now(), onMidiMessageHandeled)

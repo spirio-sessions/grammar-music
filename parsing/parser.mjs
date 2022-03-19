@@ -34,6 +34,12 @@ export class STLeaf extends SyntaxTree {
   }
 }
 
+export class STEmpty extends STLeaf{
+  constructor() {
+    super('empty', {print: () => '⌀'})
+  }
+}
+
 /**
  * depth-first traversal of SyntaxTrees
  * no return value, side-effect only
@@ -85,57 +91,31 @@ export function bft(st, cb) {
 }
 
 /**
- * @param {SyntaxTree} st
- * @param {'json'|'dot'} format 
+ * convenient wrapper function for passing a successful parser result
+ * @param {SyntaxTree} st 
+ * @param {Integer} index 
+ * @returns {{success:true,st:SyntaxTree,index:Integer}}
  */
-export function printST(st, format = 'json') {
-  switch (format) {
-    case 'json':
-      return JSON.stringify(this, null, 2)
-
-    case 'dot':
-      return printDot(st)
-
-    default:
-      throw new Error('unknown print format')
-  }
-
-  function printDot(st) {
-    const start = 'graph G {\n  size="6.25,4.16";'
-    let i = 0
-    let defs = '', leafs = []
-    const end = '\n}'
-
-    bft(st, st => st.i = i++)
-
-    bft(st, st => {
-      if (st instanceof STNode) {
-        defs += `\n  { n${st.i} [label=${st.label}] }`
-        for (const c of st.children)
-          defs += `\n  n${st.i} -- n${c.i} ;`
-      } else if (st instanceof STLeaf){
-        leafs.push(st)
-      }
-    })
-
-    const leafAttrs = leafs.map(l => `  { n${l.i} [label="${l.token.print()}" shape=none] }`)
-    const leafNodes = leafs.map(l => `n${l.i}`)
-    const leafRank = `  { rank=same ; ${leafNodes.join(' ; ')} }`
-
-    return [ start, defs, '', ...leafAttrs, '', leafRank, end ].join('\n')
+function succeed(st, index) {
+  return {
+    success: true,
+    st: st,
+    index: index
   }
 }
 
 /**
- * convenient wrapper function for parser result passing
- * @param {SyntaxTree} st 
+ * convenient wrapper function for passing a successful parser result
+ * @param {String} symbol 
  * @param {Integer} index 
- * @returns {{st:SyntaxTree,index:Integer}}
+ * @returns {{success:true,st:SyntaxTree,index:Integer}}
  */
-function result(st, index) {
+function fail(symbol, index, reason='') {
   return {
-    st: st,
-    index: index
+    success: false,
+    symbol: symbol,
+    index: index,
+    reason: reason
   }
 }
 
@@ -167,8 +147,17 @@ export class Parser {
 
   /**
    * @param {String} symbol 
+   * @returns {Boolean}
+   */
+  isEmptySymbol(symbol) {
+    return symbol === null
+  }
+
+  // TODO: check for empty ST and correctly construct effective ST
+  /**
+   * @param {String} symbol 
    * @param {Integer} index 
-   * @returns {{SyntaxTree,Integer}}
+   * @returns {{success:boolean,index:number,}}
    */
   parse(symbol, index) {
     if (this.isTerminal(symbol))
@@ -177,7 +166,10 @@ export class Parser {
     if (this.isNonTerminal(symbol))
       return this.parseNT(symbol, index)
 
-    error(`unknown symbol '${symbol}' at position ${index}`)
+    if (this.isEmptySymbol(symbol))
+      return succeed(new STEmpty(), index)
+
+    return fail(symbol, index, 'invalid symbol')
   }
 
   /**
@@ -187,14 +179,14 @@ export class Parser {
    */
   parseT(symbol, index) {
     if (index >= this.tokens.length)
-      return false
+      return fail(symbol, index, 'index out of bounds')
 
     const token = this.tokens[index]
 
     if (token.name === symbol)
-      return result(new STLeaf(symbol, token), index+1)
+      return succeed(new STLeaf(symbol, token), index+1)
     else
-      return false
+      return fail(symbol, index, 'terminal does not match')
   }
 
   /**
@@ -209,21 +201,21 @@ export class Parser {
     for (const body of production) {
       if (body.rhs.length > 1) {
         res = this.parseSeq(body.rhs, index)
-        if (res)
-          return result(new STNode(symbol, ...res.st), res.index)
+        if (res.success)
+          return succeed(new STNode(symbol, ...res.st), res.index)
       }
       else {
         res = this.parse(body.rhs[0], index)
-        if (res)
-          return result(new STNode(symbol, res.st), res.index)
+        if (res.success)
+          return succeed(new STNode(symbol, res.st), res.index)
       }
     }
 
-    return false
+    return fail(symbol, index, 'all productions exhausted')
   }
 
   /**
-   * @param {String} symbol 
+   * @param {Array<String>} rhs 
    * @param {Integer} index 
    * @returns {{SyntaxTree,Integer}}
    */
@@ -234,15 +226,15 @@ export class Parser {
     for (const symbol of rhs) {
       res = this.parse(symbol, i)
       
-      if (!res)
-        return false
+      if (!res.success)
+        return fail(symbol, i, `mismatch in right hand side sequence [${rhs.join(',')}]`)
       else {
         children.push(res.st)
         i = res.index
       }
     }
 
-    return result(children, i)
+    return succeed(children, i)
   }
 
   /**
@@ -254,7 +246,11 @@ export class Parser {
       throw new Error('empty parser input')
 
     this.tokens = tokens
-    return this.parse('S', 0)
+    const result = this.parse('S', 0)
+    
+    if (!result.success)
+      throw new Error(`parsing failed at position ${result.index} for symbol '${result.symbol}': ${result.reason}`)
+    else
+      return result
   }
-
 }

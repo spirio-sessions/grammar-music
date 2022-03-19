@@ -69,7 +69,7 @@ export class Rest extends Lexem {
   }
 
   toString() {
-    return `rest`
+    return 'rest'
   }
 }
 
