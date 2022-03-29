@@ -3,6 +3,7 @@ import { Tone, Rest } from "../util/midi-handling.js"
 const meterLikeTone = meter => lexem =>
   lexem instanceof Tone && Math.round(lexem.noteValue % meter) === 0
 
+// Lexem => bool
 export default {
   default: {
     tone: lexem => lexem instanceof Tone,

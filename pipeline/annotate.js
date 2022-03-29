@@ -1,6 +1,7 @@
 import { estimateBpm, annotateNoteValues} from '../util/analyse.js'
 import { Rest } from '../util/midi-handling.js'
 
+// [Lexem] => [Lexem]
 export default {
   default: lexems => lexems ,
 

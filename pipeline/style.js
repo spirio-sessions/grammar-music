@@ -1,9 +1,10 @@
 import { Tone } from '../util/midi-handling.js'
 
+// colorizeToken :: Token => cssColor
+// printLeaf :: STLeaf => string
 export default {
-  
   default: {
-    colorizeLexem: _ => 'black'
+    colorizeToken: _ => 'black'
   },
   
   meter: {

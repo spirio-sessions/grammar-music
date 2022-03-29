@@ -1,5 +1,6 @@
 import { SyntaxTree, STLeaf, STNode, dft, STEmpty } from '../parsing/parser.mjs'
 
+// SyntaxTree => [Token]
 export default {
   default: flatten,
 
