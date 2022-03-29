@@ -63,11 +63,15 @@ export default {
     [ 'PAIR' , NaN , [ 'STRAIGHT' ]] ,
     [ 'PAIR' , NaN , [ 'SWING' ]] ,
     [ 'STRAIGHT' , NaN , [ '1' , '1' ]] ,
-    [ 'SWING' , NaN , [ '2' , '1' ]] ,
+    [ 'STRAIGHT' , NaN , [ '1/2' , '1/2' ]] ,
+    [ 'SWING' , NaN , [ '1' , '1/2' ]] ,
     [ 'ANY' , NaN , [ 'r' ]] ,
     [ 'ANY' , NaN , [ '3' ]] ,
     [ 'ANY' , NaN , [ '2' ]] ,
     [ 'ANY' , NaN , [ '1' ]] ,
+    [ 'ANY' , NaN , [ '1/2' ]] ,
+    [ 'ANY' , NaN , [ '1/3' ]] ,
+    [ 'ANY' , NaN , [ '1/4' ]] ,
     [ 'ANY' , NaN , [ '?' ]]
   ]
 }

@@ -52,7 +52,7 @@ function straight2swing(syntaxTree) {
 
       const tokenL = st.children[0].token
       const tokenR = st.children[1].token
-      const beatPeriosMs = (bpmToPeriodMs(tokenL.lexem.bpm) * 2) / 3
+      const beatPeriosMs = tokenL.lexem.noteValue * (bpmToPeriodMs(tokenL.lexem.bpm) * 2) / 3
       
       tokenL.lexem.noteValue = 2
       tokenL.lexem.duration = beatPeriosMs * 2
