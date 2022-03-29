@@ -49,12 +49,15 @@
         <select id="midi-out" class="pointer"></select>
       </fieldset>
 
+      <button id="toggle-tree" class="pointer">Toggle Tree</button>
+
   </section>
 
   <section id="rendering" class="flexing">
     <canvas id="render-in" class="stroked" width="600" height="200"></canvas>
     <canvas id="render-out" class="stroked" width="600" height="200"></canvas>
-    <div id="tree-display" class="stroked"></div>
+    <div id="tree-in-display" class="stroked tree-display"></div>
+    <div id="tree-out-display" class="stroked tree-display" style="display: none;"></div>
     <script src="viz-js/viz.js"></script>
     <script src="viz-js/lite.render.js"></script>
   </section>

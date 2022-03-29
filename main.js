@@ -1,4 +1,4 @@
-window.pipeline = {
+const pipeline = {
   'midi-in': undefined,
   annotate: undefined,
   lex: undefined,
@@ -45,6 +45,8 @@ window.configs = {
 import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
 let lexems, lexemCursor = 0, playing, lastToneFinishedAt
 import { renderTokens, renderTree } from './util/render.js'
+const treeInDisplayId = 'tree-in-display'
+const treeOutDisplayId = 'tree-out-display'
 import { transfer } from './util/midi-handling.js'
 const pollingInterval = 50 //ms
 let timerId
@@ -102,9 +104,12 @@ function restartIfReady() {
     renderTokens(tokens, 'in', pipeline.style.colorizeToken)
 
     const parserResult = pipeline.parse(tokens)
-    await renderTree(parserResult.st, pipeline.style.printLeaf)
+    await renderTree(treeInDisplayId, parserResult.st, pipeline.style.printLeaf)
+    const transformedTree = pipeline.transform.tree(parserResult.st)
+    await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
+    document.getElementById(treeOutDisplayId).style.display = 'none'    
 
-    const transformedTokens = pipeline.transform(parserResult.st)
+    const transformedTokens = pipeline.transform.serialize(parserResult.st)
     renderTokens(transformedTokens, 'out', pipeline.style.colorizeToken)
 
     const transformedLexems = transformedTokens.map(token => token.lexem)
@@ -166,5 +171,22 @@ for (const [id, config] of Object.entries(configs)) {
   const options = Object.keys(config)
   wireSelectElement(id, options)
 }
+
+// wireup tree rendering
+const toggleTreeDisplay = document.getElementById('toggle-tree')
+toggleTreeDisplay.onclick = _ => {
+  const displayIn = document.getElementById(treeInDisplayId)
+  toggleDisplay(displayIn)
+  const displayOut = document.getElementById(treeOutDisplayId)
+  toggleDisplay(displayOut)
+
+  function toggleDisplay(element) {
+    if (element.style.display !== 'none')
+      element.style.display = 'none'
+    else
+      element.style.display = 'block'
+  }
+}
+
 // start processing imidiately if all configs filled with valid defaults
 restartIfReady()

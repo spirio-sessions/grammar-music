@@ -104,20 +104,21 @@ function printSTDot(st, printLeaf = defaultPrintLeaf) {
 }
 
 let viz = new Viz()
-let display = document.getElementById('tree-display')
 
 /**
  * Renders a syntax tree.
- * @param {SyntaxTree} st 
+ * @param {String} displayId
+ * @param {SyntaxTree} st
+ * @param {(l:STLeaf)=>String} printLeaf
  */
-export async function renderTree(st, printLeaf) {
+export async function renderTree(displayId, st, printLeaf) {
+  const display = document.getElementById(displayId)
   const dot = printSTDot(st, printLeaf)
   try {
     const svg = await viz.renderSVGElement(dot)
-    svg.id = 'tree-display'
-    svg.classList.add('stroked')
+    svg.id = displayId
+    svg.classList.add('stroked', 'tree-display')
     display.parentNode.replaceChild(svg, display)
-    display = svg
   } catch(e) {
     viz = new Viz()
     console.error(e)

@@ -36,7 +36,7 @@ export class STLeaf extends SyntaxTree {
 
 export class STEmpty extends STLeaf{
   constructor() {
-    super('empty', {print: () => '⌀'})
+    super('empty', new Token('e', '⌀'))
   }
 }
 

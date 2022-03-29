@@ -44,7 +44,7 @@ body {
   grid-area: out;
 }
 
-#tree-display {
+.tree-display {
   width: 600px;
   height: calc(404px + 1em);
   grid-area: tree;

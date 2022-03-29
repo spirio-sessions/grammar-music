@@ -1,16 +1,35 @@
+import { Token } from '../parsing/lexer.mjs'
 import { SyntaxTree, STLeaf, STNode, dft, STEmpty } from '../parsing/parser.mjs'
+
+const id = thing => thing
 
 // SyntaxTree => [Token]
 export default {
-  default: flatten,
+  default: {
+    tree: id,
+    serialize: flatten
+  },
 
-  reverse: st => flatten(st).reverse(),
+  reverse: {
+    tree: id,
+    serialize: st => flatten(st).reverse()
+  },
 
-  'straight-to-swing': st => flatten(straight2swing(st)),
+  'straight-to-swing': {
+    tree: straight2swing,
+    serialize: flatten
+  },
 
-  'swing-to-straight': st => flatten(swing2straight(st)),
+  'swing-to-straight': {
+    tree: swing2straight,
+    serialize: flatten
+  }
 }
 
+/**
+ * @param {SyntaxTree} syntaxTree 
+ * @returns {[Token]}
+ */
 function flatten(syntaxTree) {
     const output = []
     dft(syntaxTree, st => {
@@ -22,6 +41,10 @@ function flatten(syntaxTree) {
 
 const bpmToPeriodMs = bpm => 60000 / bpm
 
+/**
+ * @param {SyntaxTree} syntaxTree 
+ * @returns {SyntaxTree}
+ */
 function straight2swing(syntaxTree) {
   dft(syntaxTree, st => {
     if (st instanceof STNode && st.label === 'STRAIGHT') {
@@ -44,6 +67,10 @@ function straight2swing(syntaxTree) {
   return syntaxTree
 }
 
+/**
+ * @param {SyntaxTree} syntaxTree 
+ * @returns {SyntaxTree}
+ */
 function swing2straight(syntaxTree) {
   dft(syntaxTree, st => {
     if (st instanceof STNode && st.label === 'SWING') {
@@ -51,14 +78,14 @@ function swing2straight(syntaxTree) {
 
       const tokenL = st.children[0].token
       const tokenR = st.children[1].token
-      const beatPeriosMs = bpmToPeriodMs(tokenL.lexem.bpm) * 1.5
+      const beatPeriodMs = bpmToPeriodMs(tokenL.lexem.bpm) * 1.5
 
       tokenL.lexem.noteValue = 1
-      tokenL.lexem.duration = bpmToPeriodMs(tokenL.lexem.bpm)
+      tokenL.lexem.duration = beatPeriodMs
       tokenL.name = '1'
 
       tokenR.lexem.noteValue = 1
-      tokenR.lexem.duration = bpmToPeriodMs(tokenR.lexem.bpm)
+      tokenR.lexem.duration = beatPeriodMs
       tokenR.name = '1'
     }
   })
