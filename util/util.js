@@ -14,6 +14,20 @@ export const argTop = k => array => {
 
 export const avg = array => array.reduce((a, b) => a + b, 0) / array.length
 
+export const median = values => {
+  if(values.length === 0)
+    return NaN 
+
+  values.sort((a, b) => a - b)
+
+  const half = Math.floor(values.length / 2)
+  
+  if (values.length % 2)
+    return values[half]
+  else
+    return (values[half - 1] + values[half]) / 2.0
+}
+
 export const fToTone = (fA4 = 440) => f => {
   if (f <= 0)
     return { pitch: null, midi: null }

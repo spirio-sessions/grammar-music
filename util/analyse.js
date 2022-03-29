@@ -1,4 +1,5 @@
 import { Tone } from "./midi-handling.js"
+import { median } from "./util.js";
 
 /**
  * May fail if less than 2 tones in tokens and return NaN.
@@ -24,16 +25,18 @@ export function estimateBpm(tokens) {
     lastStart = currentStart
   }
 
-  const minOnsetPeriod = Math.min(...onsetPeriods)
-  const remainders = onsetPeriods.map(op => op % minOnsetPeriod)
-  let maxRemainder = Math.max(...remainders)
+  const medOnsetPeriod = median(onsetPeriods)
 
-  if (maxRemainder < 50)
-    maxRemainder = minOnsetPeriod
+  // const minOnsetPeriod = Math.min(...onsetPeriods)
+  // const remainders = onsetPeriods.map(op => op % minOnsetPeriod)
+  // let maxRemainder = Math.max(...remainders)
 
-  const onsetPeriodMin = maxRemainder / (1000 * 60)
+  // if (maxRemainder < 50)
+  //   maxRemainder = minOnsetPeriod
 
-  return 1 / onsetPeriodMin
+  const onsetPeriodMin = medOnsetPeriod / (1000 * 60)
+  const bpm = 1 / onsetPeriodMin
+  return bpm
 }
 
 /**
