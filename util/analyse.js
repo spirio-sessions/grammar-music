@@ -48,9 +48,9 @@ function estimateNoteValue(noteDurationMs, bpm) {
   const beatPeriodMs = (1 / bpm) * 60 * 1000
   const max = Math.max(beatPeriodMs, noteDurationMs)
   const min = Math.min(beatPeriodMs, noteDurationMs)
-
+  // get factor class 3rd, 4th, etc.
   let noteValue = Math.round(max / min)
-
+  // adjust inversion
   if (beatPeriodMs > noteDurationMs)
     return 1 / noteValue
   else

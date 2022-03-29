@@ -1,7 +1,7 @@
 import { Tone, Rest } from "../util/midi-handling.js"
 
 const meterLikeTone = meter => lexem =>
-  lexem instanceof Tone && Math.round(lexem.noteValue % meter) === 0
+  lexem instanceof Tone && lexem.noteValue > 1 && Math.round(lexem.noteValue % meter) === 0
 
 // Lexem => bool
 export default {
@@ -17,10 +17,13 @@ export default {
   },
 
   'meter-like': {
-    'rest': lexem => lexem instanceof Rest,
+    'r': lexem => lexem instanceof Rest,
     '3': meterLikeTone(3),
     '2': meterLikeTone(2),
     '1': lexem => lexem instanceof Tone && lexem.noteValue === 1,
+    '1/2': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 2 - 1) < 0.001,
+    '1/3': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 3 - 1) < 0.001,
+    '1/4': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 4 - 1) < 0.001,
     '?': lexem => lexem instanceof Tone
   }
 }
