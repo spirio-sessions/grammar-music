@@ -7,10 +7,11 @@ class Production {
    * @param {Number} p 
    * @param {Array<String>} rhs 
    */
-  constructor(lhs, p, rhs) {
+  constructor(lhs, p, rhs, t) {
     this.lhs = lhs
     this.p = p
     this.rhs = rhs
+    this.t = t ?? (x => x)
   }
 }
 
@@ -25,7 +26,7 @@ export class Grammar {
     this.nonTerminals = new Set(nonTerminals)
     this.productions = {}
 
-    productions = productions.map(p => new Production(p[0], p[1], p[2]))
+    productions = productions.map(p => new Production(...p))
 
     productions.forEach(prod => {
       if (!nonTerminals.includes(prod.lhs))
@@ -41,7 +42,7 @@ export class Grammar {
       this.productions[nt] = [])
     
     productions.forEach(prod => 
-      this.productions[prod.lhs].push({p:prod.p, rhs:prod.rhs}))
+      this.productions[prod.lhs].push({p:prod.p, rhs:prod.rhs, t:prod.t}))
 
     Object.values(this.productions).forEach(body =>
       body.sort((x, y) => y.p - x.p))

@@ -1,18 +1,17 @@
-import lexRules from './lex.mjs'
-import productions from './prod.mjs'
+import lexerRules from './lex.mjs'
 import { Lexer } from './lexer.mjs'
+import productionRules from './prod.mjs'
 import { Grammar } from './grammar.mjs'
-import { Parser , printST } from './parser.mjs'
+import { Parser } from './parser.mjs'
 
-const lexer = new Lexer(lexRules)
+const lexer = new Lexer(lexerRules)
 const terminals = lexer.terminals()
-const grammar = Grammar.from(terminals, productions)
+const grammar = Grammar.from(terminals, productionRules)
 const parser = new Parser(grammar)
 
-const input = [ 1, 2, 3, 2, 1, 'this', 'is', 'the', 'end' ]
-// const input = [ 'odd', 'text' ]
-const tokens = lexer.run(...input)
-const res = parser.run(...tokens)
+const lexems = ['b', 'b', 'a', 'b', 'b']
+const tokens = lexer.run(...lexems)
+const { st } = parser.run(...tokens)
+const ast = st.transform(st)
 
-if (res)
-  console.log(printST(res.ast, 'dot'))
+console.log(JSON.stringify(ast, null, 4))

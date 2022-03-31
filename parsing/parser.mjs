@@ -6,19 +6,22 @@ import { Grammar } from './grammar.mjs'
 export class SyntaxTree {
   /**
    * @param {String} label 
+   * @param {(st:SyntaxTree)=>any} transform
    */
-  constructor(label) {
+  constructor(label, transform) {
     this.label = label
+    this.transform = transform ?? (x => x)
   }
 }
 
 export class STNode extends SyntaxTree {
   /**
    * @param {String} label 
-   * @param  {...SyntaxTree} children 
+   * @param  {[SyntaxTree]} children
+   * @param {(st:STNode)=>any} transform
    */
-  constructor(label, ...children) {
-    super(label)
+  constructor(label, children, transform) {
+    super(label, transform)
     this.children = children
   }
 }
@@ -26,17 +29,41 @@ export class STNode extends SyntaxTree {
 export class STLeaf extends SyntaxTree {
   /**
    * @param {String} label 
-   * @param {Token} token 
+   * @param {Token} token
+   * @param {(st:STLeaf)=>any} transform
    */
-  constructor(label, token) {
-    super(label)
+  constructor(label, token, transform) {
+    super(label, transform)
     this.token = token
   }
 }
 
 export class STEmpty extends STLeaf{
-  constructor() {
-    super('empty', new Token('e', '⌀'))
+  /**
+   * @param {(st:STLeaf)=>any} transform 
+   */
+  constructor(transform) {
+    super('empty', new Token('e', '⌀'), transform)
+  }
+}
+
+export class AbstractSyntaxTree {
+  constructor(label, value) {
+    this.label = label
+    this.value = value
+  }
+}
+
+export class ASTNode extends AbstractSyntaxTree {
+  constructor(label, value, children) {
+    super(label, value)
+    this.children = children
+  }
+}
+
+export class ASTLeaf extends AbstractSyntaxTree {
+  constructor(label, value) {
+    super(label, value)
   }
 }
 
@@ -153,7 +180,6 @@ export class Parser {
     return symbol === null
   }
 
-  // TODO: check for empty ST and correctly construct effective ST
   /**
    * @param {String} symbol 
    * @param {Integer} index 
@@ -202,12 +228,12 @@ export class Parser {
       if (body.rhs.length > 1) {
         res = this.parseSeq(body.rhs, index)
         if (res.success)
-          return succeed(new STNode(symbol, ...res.st), res.index)
+          return succeed(new STNode(symbol, res.st, body.t), res.index)
       }
       else {
         res = this.parse(body.rhs[0], index)
         if (res.success)
-          return succeed(new STNode(symbol, res.st), res.index)
+          return succeed(new STNode(symbol, [res.st], body.t), res.index)
       }
     }
 
