@@ -1,19 +1,11 @@
 # MA Status
 
-
-
-## Literature Summary
-- Roads1979, Grammars as Representations for Music: overview paper, root of research
-- Roads1978, Composing Grammars: composing whole pieces with grammar, abstract grammar + lexical mapping
-- Winograd1968, Linguistics and Computer Analysis of Tonal Harmony: analysing pieces with systemic grammars, Forte's harmony principles implied
-- Baroni1983, The Concept of Musical Grammar: model melody by transformation of intervallic contour
-
 ## ToDo
 ### Research
-- research / figure out method for transformations and their adaption
-  - classic AST transformations -> dragon book
-  - "hacked" evolutionary transformations (like: symbol switching, drop out)
+- graph transformations
+- "hacked" evolutionary transformations to spice things up? (like: symbol switching, drop out)
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
+- evaluation method? -> Bastus, Martin
 ### Technical
 - implement two side expanding grammar
 - recursively apply grammars?
