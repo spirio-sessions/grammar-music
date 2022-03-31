@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIDI Pedal Test</title>
+</head>
+
+<style>
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+  }
+
+  #midi-input-select {
+    cursor: pointer;
+  }
+</style>
+
+<body>
+
+  <select id="midi-input-select">
+    <option value="">select MIDI input</option>
+  </select>
+
+  <textarea id="midi-log" cols="50" rows="20" readonly></textarea>
+
+  <script type="module">
+    const midiInputSelect = document.getElementById('midi-input-select')
+    const midiLog = document.getElementById('midi-log')
+
+    const midiAccess = await navigator.requestMIDIAccess()
+    
+    midiAccess.inputs.forEach(i => {
+      const option = document.createElement('option')
+      option.innerText = i.name
+      option.value = i.id
+      midiInputSelect.append(option)
+    });
+
+    midiInputSelect.onchange = () => {
+      console.log('change!')
+      const midiId = midiInputSelect.value
+      
+      if (midiId) {
+        const midiInput = midiAccess.inputs.get(midiId)
+        midiInput.onmidimessage = onMidiMessage
+      }
+    }
+
+    function onMidiMessage(midiMessage) {
+      midiLog.value += midiMessage.data + '\n'
+      midiLog.scrollTop = midiLog.scrollHeight
+    }
+
+  </script>
+
+</body>
+</html>
