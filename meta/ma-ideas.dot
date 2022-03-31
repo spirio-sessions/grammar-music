@@ -1,0 +1,51 @@
+graph G {
+
+  start [label="improvisation with grammars"]
+  polyphonic
+  monophonic
+  unisono
+  cnr [label="call and response"]
+  midiin [label="midi input"]
+  strf [label="stream from file"]
+  strl [label="stream live input"]
+  cyc74max [label="Cycling74 Max"]
+  webmidiin [label="web midi API"]
+  poc [label="parsing of call"]
+  st [label="syntax tree"]
+  ast [label="abstract syntax tree"]
+  recrew [label="recursive rewriting"]
+  srlz [label="serialization"]
+  toc [label="transformation of call"]
+  midiout [label="midi output"]
+  webmidiout [label="web midi API"]
+  cfg [label="context free grammar"]
+  pgen [label="parser generator"]
+  liveedit [label="edit on the fly"]
+  viz [label="live visualization"]
+
+  start -- polyphonic
+  start -- monophonic
+  monophonic -- unisono
+  monophonic -- cnr
+
+    cnr -- midiin // symbolic vs. raw audio omitted
+      midiin -- strf
+        strf -- cyc74max
+      midiin -- strl
+        strl -- webmidiin
+
+    cnr -- poc
+    poc -- cfg
+      cfg -- pgen
+      cfg -- liveedit
+      cfg -- viz
+    poc -- st
+
+    cnr -- toc
+      toc -- ast
+      ast -- recrew
+      recrew --srlz
+    cnr -- midiout
+      midiout -- webmidiout
+  
+}
