@@ -13,9 +13,9 @@ export default [
 ]
 
 function transfromBAB(st) {
-  const leftChildren = st.children[0].transform(st.children[0])
-  const middleChildren = st.children[1].transform(st.children[1])
-  const rightChildren = st.children[2].transform(st.children[2])
+  const leftChildren = st.children[0].transformAST(st.children[0])
+  const middleChildren = st.children[1].transformAST(st.children[1])
+  const rightChildren = st.children[2].transformAST(st.children[2])
   return new ASTNode('BAB', 'nothing here to see', [
     new ASTNode('B', leftChildren.length, leftChildren),
     new ASTNode('A', middleChildren.length, middleChildren),
@@ -25,7 +25,7 @@ function transfromBAB(st) {
 
 function transformbB(st) {
   const ASTChildren = [new ASTLeaf('b')]
-  const otherASTChildren = st.children[1].transform(st.children[1])
+  const otherASTChildren = st.children[1].transformAST(st.children[1])
   if (otherASTChildren)
     ASTChildren.push(...otherASTChildren)
   return ASTChildren
@@ -37,7 +37,7 @@ function transformBe() {
 
 function transformaA(st) {
   const ASTChildren = [new ASTLeaf('a')]
-  const otherASTChildren = st.children[1].transform(st.children[1])
+  const otherASTChildren = st.children[1].transformAST(st.children[1])
   if (otherASTChildren)
     ASTChildren.push(...otherASTChildren)
   return ASTChildren

@@ -3,12 +3,9 @@ import { Rest } from '../util/midi-handling.js'
 
 // [Lexem] => [Lexem]
 export default {
-  default: lexems => lexems ,
+  default: noteValues, //lexems => lexems ,
 
-  'note-value': lexems => {
-    const annotatedLexems = annotateNoteValues(lexems, estimateBpm(lexems))
-    return  filterShortRests(annotatedLexems)
-  },
+  'note-value': noteValues,
 
   peaks: lexems => {
     if (lexems.length < 3)
@@ -36,3 +33,8 @@ export default {
 
 const filterShortRests = lexems => 
   lexems.filter(l => !(l instanceof Rest && l.noteValue < 1))
+
+function noteValues(lexems) {
+  const annotatedLexems = annotateNoteValues(lexems, estimateBpm(lexems))
+  return  filterShortRests(annotatedLexems)
+}

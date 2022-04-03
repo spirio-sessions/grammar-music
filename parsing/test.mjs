@@ -12,6 +12,6 @@ const parser = new Parser(grammar)
 const lexems = ['b', 'b', 'a', 'b', 'b']
 const tokens = lexer.run(...lexems)
 const { st } = parser.run(...tokens)
-const ast = st.transform(st)
+const ast = st.transformAST(st)
 
 console.log(JSON.stringify(ast, null, 4))

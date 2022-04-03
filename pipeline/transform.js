@@ -1,5 +1,5 @@
 import { Token } from '../parsing/lexer.mjs'
-import { SyntaxTree, STLeaf, STNode, dft, STEmpty } from '../parsing/parser.mjs'
+import { SyntaxTree, STLeaf, STNode, dft, STEmpty, ASTLeaf } from '../parsing/parser.mjs'
 
 const id = thing => thing
 
@@ -35,6 +35,8 @@ function flatten(syntaxTree) {
     dft(syntaxTree, st => {
       if (st instanceof STLeaf && !(st instanceof STEmpty))
         output.push(st.token)
+      else if (st instanceof ASTLeaf)
+        output.push(st.value)
     })
     return output
 }

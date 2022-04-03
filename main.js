@@ -46,6 +46,7 @@ import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
 let lexems, lexemCursor = 0, playing, lastToneFinishedAt
 import { renderTokens, renderTree } from './util/render.js'
 const treeInDisplayId = 'tree-in-display'
+const treeInASTDisplayId = 'tree-in-ast-display'
 const treeOutDisplayId = 'tree-out-display'
 import { transfer } from './util/midi-handling.js'
 const pollingInterval = 50 //ms
@@ -103,13 +104,15 @@ function restartIfReady() {
     console.log(tokens.map(t => t.name + " : " + t.lexem.noteValue))
     renderTokens(tokens, 'in', pipeline.style.colorizeToken)
 
-    const parserResult = pipeline.parse(tokens)
-    await renderTree(treeInDisplayId, parserResult.st, pipeline.style.printLeaf)
-    const transformedTree = pipeline.transform.tree(parserResult.st)
+    const { st } = pipeline.parse(tokens)
+    await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
+    const ast = st.transformAST(st)
+    await renderTree(treeInASTDisplayId, ast, pipeline.style.printLeaf)
+    const transformedTree = pipeline.transform.tree(ast)
     await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
-    document.getElementById(treeOutDisplayId).style.display = 'none'    
+    show(0)
 
-    const transformedTokens = pipeline.transform.serialize(parserResult.st)
+    const transformedTokens = pipeline.transform.serialize(st)
     renderTokens(transformedTokens, 'out', pipeline.style.colorizeToken)
 
     const transformedLexems = transformedTokens.map(token => token.lexem)
@@ -173,19 +176,37 @@ for (const [id, config] of Object.entries(configs)) {
 }
 
 // wireup tree rendering
-const toggleTreeDisplay = document.getElementById('toggle-tree')
-toggleTreeDisplay.onclick = _ => {
-  const displayIn = document.getElementById(treeInDisplayId)
-  toggleDisplay(displayIn)
-  const displayOut = document.getElementById(treeOutDisplayId)
-  toggleDisplay(displayOut)
+const displays = [
+  [treeInDisplayId, 'ST IN'],
+  [treeInASTDisplayId, 'AST IN'],
+  [treeOutDisplayId, 'AST OUT']
+]
+let displayIndex = 1
 
-  function toggleDisplay(element) {
-    if (element.style.display !== 'none')
-      element.style.display = 'none'
-    else
-      element.style.display = 'block'
+const toggleTreeDisplay = document.getElementById('toggle-tree')
+
+function display(i, t) {
+  const displayElement = document.getElementById(displays[i][0])
+  if (t) {
+    displayElement.style.display = 'block'
+    toggleTreeDisplay.innerText = displays[i][1]
   }
+  else
+    displayElement.style.display = 'none'
+}
+
+function show(i) {
+  display(0, false)
+  display(1, false)
+  display(2, false)
+  display(i, true)
+}
+
+display(0, true)
+
+toggleTreeDisplay.onclick = _ => {
+  show(displayIndex)
+  displayIndex = (displayIndex+1) % 3
 }
 
 // start processing imidiately if all configs filled with valid defaults

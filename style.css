@@ -51,6 +51,10 @@ body {
   overflow-y: scroll;
 }
 
+#toggle-tree {
+  width: 6em;
+}
+
 .pointer {
   cursor: pointer;
 }

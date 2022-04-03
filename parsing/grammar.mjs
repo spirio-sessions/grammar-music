@@ -11,7 +11,7 @@ class Production {
     this.lhs = lhs
     this.p = p
     this.rhs = rhs
-    this.t = t ?? (x => x)
+    this.t = t
   }
 }
 

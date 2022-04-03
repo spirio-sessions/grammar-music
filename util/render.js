@@ -67,14 +67,14 @@ export function renderTokens(tokens, direction, colorizeToken) {
   x = 0
 }
 
-import { SyntaxTree, STLeaf, STNode, bft } from '../parsing/parser.mjs'
+import { SyntaxTree, STLeaf, STNode, bft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/parser.mjs'
 
 // leaf is only container, print token
-const defaultPrintLeaf = l => l.token.print()
+const defaultPrintLeaf = l => l.label
 
 /**
  * Prints a deafault graphviz dot representation for a syntax tree.
- * @param {SyntaxTree} st 
+ * @param {SyntaxTree|AbstractSyntaxTree} st 
  * @param {(l:STLeaf)=>String} printLeaf
  * @returns {String}
  */
@@ -87,12 +87,12 @@ function printSTDot(st, printLeaf = defaultPrintLeaf) {
   bft(st, st => st.i = i++)
 
   bft(st, st => {
-    if (st instanceof STNode) {
+    if (st instanceof STNode || st instanceof ASTNode) {
       defs += `\n  { n${st.i} [label=${st.label}] }`
       for (const c of st.children)
         defs += `\n  n${st.i} -- n${c.i} ;`
     }
-    else if (st instanceof STLeaf)
+    else if (st instanceof STLeaf || st instanceof ASTLeaf)
       leafs.push(st)
   })
 
