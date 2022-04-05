@@ -1,4 +1,4 @@
-import { ASTNode, ASTLeaf } from "./parser.mjs"
+import { ASTNode, ASTLeaf } from "./tree.mjs"
 
 export default [
 

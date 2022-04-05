@@ -1,4 +1,4 @@
-import { bubbleGrand, bubbleOne, contractR } from '../parsing/parser.mjs'
+import { bubbleGrand, bubbleOne, contractR } from '../parsing/tree.mjs'
 
 const defaultGrammar = [
   ['S', NaN, ['MORE']],

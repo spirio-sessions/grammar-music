@@ -1,5 +1,5 @@
 import { Token } from '../parsing/lexer.mjs'
-import { SyntaxTree, STLeaf, STNode, dft, STEmpty, ASTLeaf } from '../parsing/parser.mjs'
+import { SyntaxTree, STLeaf, STNode, dft, STEmpty, ASTLeaf } from '../parsing/tree.mjs'
 
 const id = thing => thing
 

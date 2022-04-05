@@ -67,7 +67,7 @@ export function renderTokens(tokens, direction, colorizeToken) {
   x = 0
 }
 
-import { SyntaxTree, STLeaf, STNode, bft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/parser.mjs'
+import { SyntaxTree, STLeaf, STNode, bft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/tree.mjs'
 
 // leaf is only container, print token
 const defaultPrintLeaf = l => l.label
