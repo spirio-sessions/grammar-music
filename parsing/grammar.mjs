@@ -1,5 +1,5 @@
-import { isEmpty } from './util.mjs'
-import { error } from './util.mjs'
+import { isEmpty, error } from './util.mjs'
+import { contractR, bubbleOne } from './tree.mjs'
 
 class Production {
   /**
@@ -11,7 +11,18 @@ class Production {
     this.lhs = lhs
     this.p = p
     this.rhs = rhs
-    this.t = t
+    this.t = t ??
+      (this.#isRightExpanding() ? contractR :
+      this.#isSingleChild() ? bubbleOne :
+      undefined)
+  }
+
+  #isRightExpanding() {
+    return this.rhs.length > 1 && this.rhs.at(-1) === this.lhs
+  }
+
+  #isSingleChild() {
+    return this.rhs.length === 1
   }
 }
 

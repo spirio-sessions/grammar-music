@@ -43,8 +43,8 @@ graph G {
 
     cnr -- toc
       toc -- ast
-      ast -- recrew
-      recrew --srlz
+      toc -- recrew
+      toc --srlz
     cnr -- midiout
       midiout -- webmidiout
   

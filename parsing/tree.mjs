@@ -22,7 +22,7 @@ export class STNode extends SyntaxTree {
     transformAST ??= (st => new ASTNode(
       st.label, 
       null, 
-      st.children.flatMap(c => c.transformAST(c))))
+      st.children.map(c => c.transformAST(c))))
     super(label, transformAST)
     this.children = children
   }
@@ -85,109 +85,37 @@ export function bubbleOne(node) {
 
 /**
  * @param {STNode} node 
- * @returns {AbstractSyntaxTree}
- */
-export function bubbleGrand(node) {
-  if (!node.children.length === 1)
-    error(`node must exactly have one child, instead got ${node.children.length}`)
-  
-  const onlyChild = node.children[0]
-  const onlyChildAST = onlyChild.transformAST(onlyChild)
-  
-  if (!onlyChildAST || onlyChildAST instanceof ASTLeaf)
-    return new ASTLeaf(node.label, null)
-  else
-    return new ASTNode(node.label, null, onlyChildAST.children.filter(c => c)) // filter out empty leafs
-}
-
-/**
- * @param {STNode} node 
  * @param {(st:SyntaxTree)=>any} calculateValue
  */
 export function contractR(node, calculateValue = () => null) {
-  if (!node.children.length === 2)
-    error(`node must exactly have two children, instead got ${node.children.length}`)
+  if (!node instanceof STNode)
+    error(`node must be instance of STNode`)
+  if (node.children.length < 2)
+    error(`node must exactly have at least two children, instead got ${node.children.length}`)
 
-  const leftChild = node.children[0]
-  const rightChild = node.children[1]
-  if (!rightChild instanceof STNode)
-    error('right child must be STNode')
+  const leftChildren = node.children.slice(0, -1)
+  const rightMostChild = node.children.at(-1)
+
+  if (!rightMostChild instanceof STNode)
+    error('rightmost child must be STNode')
+  if (!rightMostChild.label === node.label)
+    error(`rightmost child must have same label, instead got ${rightMostChild.label}`)
   
-  const leftAST = leftChild.transformAST(leftChild)
-  const rightAST = rightChild.transformAST(rightChild)
-  
-  if (!(leftAST || rightAST))
-    return false // both were empty
-
-  const newChildren = []
-
-  if (leftAST instanceof AbstractSyntaxTree)
-    newChildren.push(leftAST)
-  else
-    error('invalid leftAST')
-
-  if (!rightAST);
-    // empty, do nothing
-  else if (rightAST instanceof ASTLeaf)
-    newChildren.push(rightAST)
-  else if (rightAST instanceof ASTNode) {
-    if (rightAST.label === node.label)
-      newChildren.push(...rightAST.children.filter(c => c)) // filter empty
+  let astChildren = leftChildren.map(c => c.transformAST(c))
+  const astContract = rightMostChild.transformAST(rightMostChild)
+  if (astContract instanceof ASTNode) {
+    if (astContract.label === node.label)
+      astChildren.push(...astContract.children)
     else
-      newChildren.push(rightAST)
+      astChildren.push(astContract)
   }
   else
-    error('invalid rightAST')
+    astChildren.push(astContract)
+  astChildren = astChildren.filter(c => c) // filter out empty leafs
 
-  return new ASTNode(node.label, calculateValue(node), newChildren)
-}
+  const astValue = calculateValue(node)
 
-/**
- * @param {STNode} node 
- * @param {(st:SyntaxTree)=>any} calculateValue
- */
-export function contractLR(node, calculateValue = () => null) {
-  if (!node.children.length === 2)
-    error(`node must exactly have two children, instead got ${node.children.length}`)
-
-  const leftChild = node.children[0]
-  const rightChild = node.children[1]
-  
-  const leftAST = leftChild.transformAST(leftChild)
-  const rightAST = rightChild.transformAST(rightChild)
-  
-  if (!(leftAST || rightAST))
-    return false // both were empty
-
-  const newChildren = []
-
-  if (!leftAST);
-    // empty, do nothing
-  else if (leftAST instanceof ASTLeaf)
-    newChildren.push(leftAST)
-  else if (leftAST instanceof ASTNode) {
-    if (leftAST.label === node.label)
-      newChildren.push(...leftAST.children.filter(c => c)) // filter empty
-    else
-      newChildren.push(leftAST)
-  }
-  else
-    error('invalid leftAST')
-
-  if (!rightAST);
-    // empty, do nothing
-  else if (rightAST instanceof ASTLeaf)
-    newChildren.push(rightAST)
-  else if (rightAST instanceof ASTNode) {
-    if (rightAST.label === node.label)
-      newChildren.push(...rightAST.children.filter(c => c)) // filter empty
-    else
-      newChildren.push(rightAST)
-  }
-  else
-    error('invalid rightAST')
-
-  return new ASTNode(node.label, calculateValue(node), newChildren)
+  return new ASTNode(node.label, astValue, astChildren)
 }
 
 /**

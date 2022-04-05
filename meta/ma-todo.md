@@ -6,6 +6,7 @@
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 - evaluation method? -> Bastus, Martin
 ### Technical
+- tree transformation approach: `{nodeLabel:AST->AST}`
 - implement rhythmic figure grammar
   - series of rhythmic figures of some length
   - allow different lengths
