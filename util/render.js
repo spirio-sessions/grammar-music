@@ -1,4 +1,4 @@
-import { Tone } from './midi-handling.js'
+import { Lexem, Tone } from './midi-handling.js'
 import { Token } from '../parsing/lexer.mjs'
 
 const canvasIn = document.getElementById('render-in')
@@ -15,20 +15,19 @@ let x = 0
 
 /**
  * Place a tone or rest onto the canvas in a piano-roll-like fashion.
- * @param {Token} token
+ * @param {Lexem} lexem
  * @param {Number} widthMs
  * @param {Number} h
  * @param {Number} minNoteNumber
  * @param {CanvasRenderingContext2D} ctx
  * @param {(t:Token)=>string} colorizeToken
  */
-function renderToken(token, widthMs, h, minNoteNumber, ctx, colorizeToken = _ => 'black') {
-  const lexem = token.lexem
+function renderLexem(lexem, widthMs, h, minNoteNumber, ctx, colorizeToken = _ => 'black') {
   const w = widthMs * lexem.duration
     
   if (lexem instanceof Tone) {
     const y = h * (lexem.noteNumber - minNoteNumber)
-    ctx.fillStyle = colorizeToken(token)
+    ctx.fillStyle = colorizeToken(lexem)
     ctx.fillRect(x, y, w, h)
   }
   // do not render rests
@@ -38,20 +37,20 @@ function renderToken(token, widthMs, h, minNoteNumber, ctx, colorizeToken = _ =>
 
 /**
  * Renders a sequence of tones and rests in a piano-roll-like fashion onto the canvas.
- * @param {Array<Token>} tokens
+ * @param {Array<Token>} lexems
  * @param {'in'|'out'} direction
  * @param {(t:Token)=>string} colorizeToken
  */
-export function renderTokens(tokens, direction, colorizeToken) {
-  const totalDuration = tokens
-    .reduce((acc, t) => acc += t.lexem.duration, 0)
+export function renderLexems(lexems, direction, colorizeToken) {
+  const totalDuration = lexems
+    .reduce((acc, t) => acc += t.duration, 0)
   const widthMs = canvasIn.width / totalDuration
 
-  const minNoteNumber = tokens.reduce((minTone, token) =>
-    token.lexem.noteNumber < minTone.noteNumber ? token.lexem : minTone
+  const minNoteNumber = lexems.reduce((minTone, lexem) =>
+    lexem.noteNumber < minTone.noteNumber ? lexem : minTone
     , {noteNumber: 127}).noteNumber
-  const maxNoteNumber = tokens.reduce((maxTone, token) =>
-    token.lexem.noteNumber > maxTone.noteNumber ? token.lexem : maxTone
+  const maxNoteNumber = lexems.reduce((maxTone, lexem) =>
+    lexem.noteNumber > maxTone.noteNumber ? lexem : maxTone
     , {noteNumber: 0}).noteNumber
   const ambitus = maxNoteNumber - minNoteNumber
   const h = canvasIn.height / (ambitus + 1)
@@ -62,7 +61,7 @@ export function renderTokens(tokens, direction, colorizeToken) {
 
   ctx.clearRect(0, 0, canvasIn.width, canvasIn.height)
   
-  tokens.forEach(t => renderToken(t, widthMs, h, minNoteNumber, ctx, colorizeToken))
+  lexems.forEach(t => renderLexem(t, widthMs, h, minNoteNumber, ctx, colorizeToken))
   // important! reset x for next rendering
   x = 0
 }

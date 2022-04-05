@@ -51,7 +51,7 @@ function midiToPitch(noteNumber) {
   return pitch
 }
 
-class Lexem{
+export class Lexem{
   constructor(type, start, duration) {
     this.start = start // timestamp
     this.type = type

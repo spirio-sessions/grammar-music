@@ -18,6 +18,6 @@ const meter = {
 // colorizeToken :: Token => cssColor
 // printLeaf :: STLeaf => string
 export default {
-  default: meter,
+  default: defaultStyle,
   meter: meter
 }

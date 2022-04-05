@@ -44,7 +44,7 @@ window.configs = {
 
 import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
 let lexems, lexemCursor = 0, playing, lastToneFinishedAt
-import { renderTokens, renderTree } from './util/render.js'
+import { renderLexems, renderTree } from './util/render.js'
 const treeInDisplayId = 'tree-in-display'
 const treeInASTDisplayId = 'tree-in-ast-display'
 const treeOutDisplayId = 'tree-out-display'
@@ -101,8 +101,8 @@ function restartIfReady() {
     const annotatedLexems = pipeline.annotate(newLexems)
 
     const tokens = pipeline.lex(annotatedLexems)
-    console.log(tokens.map(t => t.name + " : " + t.lexem.noteValue))
-    renderTokens(tokens, 'in', pipeline.style.colorizeToken)
+    const tokenizedLexems = tokens.map(t => t.lexem)
+    renderLexems(tokenizedLexems, 'in', pipeline.style.colorizeToken)
 
     const { st } = pipeline.parse(tokens)
     await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
@@ -112,10 +112,9 @@ function restartIfReady() {
     await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
     show(0)
 
-    const transformedTokens = pipeline.transform.serialize(st)
-    renderTokens(transformedTokens, 'out', pipeline.style.colorizeToken)
+    const transformedLexems = pipeline.transform.serialize(ast)
+    renderLexems(transformedLexems, 'out', pipeline.style.colorizeToken)
 
-    const transformedLexems = transformedTokens.map(token => token.lexem)
     await transfer(transformedLexems, pipeline['midi-out'])
 
     setOnMidiMessage(performance.now(), onMidiMessageHandeled)

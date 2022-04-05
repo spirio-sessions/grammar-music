@@ -1,5 +1,5 @@
-import { Token } from '../parsing/lexer.mjs'
-import { SyntaxTree, STLeaf, STNode, dft, STEmpty, ASTLeaf } from '../parsing/tree.mjs'
+import { Lexem } from '../util/midi-handling.js'
+import { SyntaxTree, dft, ASTNode, ASTLeaf } from '../parsing/tree.mjs'
 
 const id = thing => thing
 
@@ -18,25 +18,18 @@ export default {
   'straight-to-swing': {
     tree: straight2swing,
     serialize: flatten
-  },
-
-  'swing-to-straight': {
-    tree: swing2straight,
-    serialize: flatten
   }
 }
 
 /**
- * @param {SyntaxTree} syntaxTree 
- * @returns {[Token]}
+ * @param {SyntaxTree} ast 
+ * @returns {[Lexem]}
  */
-function flatten(syntaxTree) {
+function flatten(ast) {
     const output = []
-    dft(syntaxTree, st => {
-      if (st instanceof STLeaf && !(st instanceof STEmpty))
-        output.push(st.token)
-      else if (st instanceof ASTLeaf)
-        output.push(st.value)
+    dft(ast, ast => {
+      if (ast instanceof ASTLeaf)
+        output.push(ast.value)
     })
     return output
 }
@@ -48,47 +41,21 @@ const bpmToPeriodMs = bpm => 60000 / bpm
  * @returns {SyntaxTree}
  */
 function straight2swing(syntaxTree) {
-  dft(syntaxTree, st => {
-    if (st instanceof STNode && st.label === 'STRAIGHT') {
-      st.label = 'SWING'
+  dft(syntaxTree, ast => {
+    if (ast instanceof ASTNode && ast.label === 'STRAIGHT') {
+      ast.label = 'SWING'
 
-      const tokenL = st.children[0].token
-      const tokenR = st.children[1].token
-      const beatPeriosMs = tokenL.lexem.noteValue * (bpmToPeriodMs(tokenL.lexem.bpm) * 2) / 3
+      const lexemL = ast.children[0].value
+      const lexemR = ast.children[1].value
+      const beatPeriosMs = lexemL.noteValue * (bpmToPeriodMs(lexemL.bpm) * 2) / 3
       
-      tokenL.lexem.noteValue = 2
-      tokenL.lexem.duration = beatPeriosMs * 2
-      tokenL.name = '2'
+      lexemL.noteValue = 2
+      lexemL.duration = beatPeriosMs * 2
+      ast.children[0].label = '2'
 
-      tokenR.lexem.noteValue = 1
-      tokenR.lexem.duration = beatPeriosMs
-      tokenR.name = '1'
-    }
-  })
-
-  return syntaxTree
-}
-
-/**
- * @param {SyntaxTree} syntaxTree 
- * @returns {SyntaxTree}
- */
-function swing2straight(syntaxTree) {
-  dft(syntaxTree, st => {
-    if (st instanceof STNode && st.label === 'SWING') {
-      st.label = 'STRAIGHT'
-
-      const tokenL = st.children[0].token
-      const tokenR = st.children[1].token
-      const beatPeriodMs = bpmToPeriodMs(tokenL.lexem.bpm) * 1.5
-
-      tokenL.lexem.noteValue = 1
-      tokenL.lexem.duration = beatPeriodMs
-      tokenL.name = '1'
-
-      tokenR.lexem.noteValue = 1
-      tokenR.lexem.duration = beatPeriodMs
-      tokenR.name = '1'
+      lexemR.noteValue = 1
+      lexemR.duration = beatPeriosMs
+      ast.children[1].label = '1'
     }
   })
 
