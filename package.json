@@ -1,0 +1,27 @@
+{
+  "name": "grammar-music",
+  "version": "1.0.0",
+  "description": "interactive music improvisation with syntactic analysis and transformation",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.informatik.fh-nuernberg.de/agcharis67705/grammar-music.git"
+  },
+  "keywords": [
+    "js",
+    "grammar",
+    "music",
+    "syntax",
+    "improvisation",
+    "interactive"
+  ],
+  "author": "Ismael Agchar",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}
