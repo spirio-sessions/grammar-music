@@ -2,16 +2,18 @@
 
 ## ToDo
 ### Research
-- "hacked" evolutionary transformations to spice things up? (like: symbol switching, drop out)
+- evaluation matrix in confluence
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
-- evaluation method? -> Bastus, Martin
 ### Technical
+- add backend
+  - add sessions ids (timestamp based, 4-5 digit representation)
+  - record MIDI (in & out) and write to session file (???)
+  - protocol: id + MIDI session file + evaluation notes -> evaluation matrix
 - tree transformation approach: `{nodeLabel:AST->AST}`
 - implement rhythmic figure grammar
   - series of rhythmic figures of some length
   - allow different lengths
   - dispatch probabilistically
-- play with figure grammar transformation
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)
