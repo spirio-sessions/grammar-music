@@ -7,8 +7,9 @@ const id = thing => thing
 const bpmToPeriodMs = bpm => 60000 / bpm
 
 /**
- * modifies array
+ * modern Fisher-Yates array shuffle, modifies array
  * @param {Array} array 
+ * @returns {void}
  */
 function shuffle(array) {
   if (!Array.isArray(array))
@@ -69,20 +70,32 @@ function straight2swing(ast) {
   return ast
 }
 
-
-
+// TODO: test this
 /**
- * apply AST transformations to AST members where matchLabel matches
- * @param {{matchLabel:(AbstractSyntaxTree)=>AbstractSyntaxTree}} config 
- * @returns {(AbstractSyntaxTree)=>AbstractSyntaxTree}
+ * apply AST transformations to AST members where matchLabel matches member's label
+ * modifies AST
+ * @param {{matchLabel:(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}} config 
+ * @returns {(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}
  */
 function matchTransform(config) {
   return ast => {
-    // for (matchLabel, t)
-    //   dft(ast, ast => filter-for-matchLabel__apply-t)
+    
+    dft(ast => {
+      for (const matchLabel of Object.keys(config)) {
+        if (ast.label === matchLabel) {
+          const transform = config[matchLabel]
+          transform(ast)
+          return
+        }
+      }
+    })
 
     return ast
   }
+}
+
+const appendCountMore = {
+  'MORE': node => node.children.push(new ASTLeaf(node.children.length.toString(), node.children.length))
 }
 
 //#endregion
@@ -104,7 +117,8 @@ function flatten(ast) {
 
 //#endregion
 
-// SyntaxTree => [Lexem]
+// tree :: AbstractSyntaxTree => AbstractSyntaxTree
+// serialize :: AbstractSyntaxTree => [Lexem]
 export default {
   default: {
     tree: id,
@@ -123,6 +137,11 @@ export default {
 
   'straight-to-swing': {
     tree: straight2swing,
+    serialize: flatten
+  },
+
+  'append-child-count-more': {
+    tree: matchTransform(appendCountMore),
     serialize: flatten
   }
 }
