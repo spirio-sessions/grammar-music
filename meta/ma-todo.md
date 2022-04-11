@@ -5,9 +5,6 @@
 - evaluation matrix in confluence
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 ### Technical
-- add backend
-  - record MIDI (in & out) and write to session file (???)
-  - protocol: id + MIDI session file + evaluation notes -> evaluation matrix
 - tree transformation approach: `{nodeLabel:AST->AST}`
 - implement rhythmic figure grammar
   - series of rhythmic figures of some length

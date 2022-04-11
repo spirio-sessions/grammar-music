@@ -58,3 +58,13 @@ body {
 .pointer {
   cursor: pointer;
 }
+
+#protocol {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+#download-protocol {
+  height: 2em;
+}

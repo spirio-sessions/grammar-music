@@ -13,43 +13,45 @@
 <body>
   
   <section id="config" class="flexing">
-      
-      <fieldset>
-        <legend>MIDI In</legend>
-        <select id="midi-in" class="pointer"></select>
-      </fieldset>
-    
-      <fieldset>
-        <legend>Annotate</legend>
-        <select id="annotate" class="pointer"></select>
-      </fieldset>
-    
-      <fieldset>
-        <legend>Lex</legend>
-        <select id="lex" class="pointer"></select>
-      </fieldset>
-    
-      <fieldset>
-        <legend>Parse</legend>
-        <select id="parse" class="pointer"></select>
-      </fieldset>
-    
-      <fieldset>
-        <legend>Transform</legend>
-        <select id="transform" class="pointer"></select>
-      </fieldset>
 
-      <fieldset>
-        <legend>Render</legend>
-        <select id="style" class="pointer"></select>
-      </fieldset>
+    <button id="run" class="pointer">RUN</button>    
     
-      <fieldset>
-        <legend>MIDI Out</legend>
-        <select id="midi-out" class="pointer"></select>
-      </fieldset>
+    <fieldset>
+      <legend>MIDI In</legend>
+      <select id="midi-in" class="pointer"></select>
+    </fieldset>
+  
+    <fieldset>
+      <legend>Annotate</legend>
+      <select id="annotate" class="pointer"></select>
+    </fieldset>
+  
+    <fieldset>
+      <legend>Lex</legend>
+      <select id="lex" class="pointer"></select>
+    </fieldset>
+  
+    <fieldset>
+      <legend>Parse</legend>
+      <select id="parse" class="pointer"></select>
+    </fieldset>
+  
+    <fieldset>
+      <legend>Transform</legend>
+      <select id="transform" class="pointer"></select>
+    </fieldset>
 
-      <button id="toggle-tree" class="pointer"></button>
+    <fieldset>
+      <legend>Render</legend>
+      <select id="style" class="pointer"></select>
+    </fieldset>
+  
+    <fieldset>
+      <legend>MIDI Out</legend>
+      <select id="midi-out" class="pointer"></select>
+    </fieldset>
+
+    <button id="toggle-tree" class="pointer"></button>
 
   </section>
 
@@ -61,6 +63,11 @@
     <div id="tree-out-display" class="stroked tree-display" style="display: none;"></div>
     <script src="viz-js/viz.js"></script>
     <script src="viz-js/lite.render.js"></script>
+  </section>
+
+  <section id="protocol">
+    <textarea id="comment-input" cols="100" rows="10"></textarea>
+    <button id="save-protocol" class="pointer">Save Protocol</button>
   </section>
 
 </body>

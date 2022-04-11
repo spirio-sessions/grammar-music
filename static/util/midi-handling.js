@@ -100,6 +100,9 @@ export class Tone extends Lexem {
  * @returns {(message:MIDIMessageEvent)=>void}
  */
 export const mkMidiHandler = (tStart, callback) => {
+  if (!callback)
+    return undefined
+
   let tLast = 0
   let nLast, vLast, mLast 
 
@@ -166,29 +169,25 @@ export const mkMidiHandler = (tStart, callback) => {
 
 import { sleep } from './util.js'
 
+/**
+ * @param {[Lexem]} lexems 
+ * @param {MIDIOutput} midiOut 
+ */
 export async function transfer(lexems, midiOut) {
 
   for (const lexem of lexems) {
-    const now = Math.round(performance.now())
 
-    // handle rest
     if (lexem instanceof Rest) {
-      console.log(lexem.serialize())
       await sleep(lexem.duration)
     }
-    // handle tone
+
     else if (lexem instanceof Tone) {
       const noteOn = [0x90, lexem.noteNumber, lexem.velocity]
       const noteOff = [0x80, lexem.noteNumber, 0]
   
-      console.log(lexem.serialize())
-
       midiOut.send(noteOn)
       await sleep(lexem.duration)
       midiOut.send(noteOff)
-    }
-    else {
-      console.log(`${now} unkown lexem`)
     }
   }
 }

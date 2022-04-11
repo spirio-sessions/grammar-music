@@ -1,3 +1,4 @@
+//#region global configuration
 const pipeline = {
   'midi-in': undefined,
   annotate: undefined,
@@ -32,7 +33,7 @@ function midiIOMapToObject(midiMap) {
   return midiObj
 }
 
-window.configs = {
+const configs = {
   'midi-in':  midiIOMapToObject(midiAccess.inputs),
   annotate:   (await import('./pipeline/annotate.js')).default,
   lex:        (await import('./pipeline/lex.js')).default,
@@ -41,89 +42,107 @@ window.configs = {
   style:      (await import('./pipeline/style.js')).default,
   'midi-out': midiIOMapToObject(midiAccess.outputs)
 }
+//#endregion
 
-import { mkMidiHandler, Tone, Rest } from './util/midi-handling.js'
-let lexems, lexemCursor = 0, playing, lastToneFinishedAt
+
+
+//#region setup main routine
+import { mkMidiHandler, Lexem } from './util/midi-handling.js'
+let lexems, lexemCursor = 0
+
 import { renderLexems, renderTree } from './util/render.js'
 const treeInDisplayId = 'tree-in-display'
 const treeInASTDisplayId = 'tree-in-ast-display'
 const treeOutDisplayId = 'tree-out-display'
+
 import { transfer } from './util/midi-handling.js'
-const pollingInterval = 50 //ms
-let timerId
+
+let protocol = {
+  config: {},
+  comment: '',
+  recording: []
+}
 
 function onMidiMessageHandeled(result) {
-  if (!result)
-    playing = true
-  else if (result instanceof Rest) {
-    playing = true
-    lexems.push(result)
-  }
-  else if (result instanceof Tone) {
-    playing = false
-    lastToneFinishedAt = performance.now()
+  if (result instanceof Lexem) {
     lexems.push(result)
   }
 }
 
 function setOnMidiMessage(startTime, callback) {
+  // if callback is falsy, undefined will be set as handler and midi handling thus stopped
   const handler = mkMidiHandler(startTime, callback)
   pipeline['midi-in'].onmidimessage = handler
 }
 
+/**
+ * @param {[Lexem]} call 
+ * @param {[Lexem]} response 
+ */
+function fillProtocol(call, response) {
+  Array.from(document.getElementsByTagName('select'))
+    .forEach(e => {
+      protocol.config[e.id] = e.value
+    })
+  
+  const commentInput = document.getElementById('comment-input')
+  protocol.config.comment = commentInput.value
+
+  if (!Array.isArray(protocol.recording))
+    protocol.recording = []
+  protocol.recording.push(call, response)
+}
+
+async function run() {
+  setOnMidiMessage(0, undefined)
+
+  const newLexems = lexems.slice(lexemCursor)
+  lexemCursor = lexems.length
+
+  const annotatedLexems = pipeline.annotate(newLexems)
+
+  const tokens = pipeline.lex(annotatedLexems)
+  const tokenizedLexems = tokens.map(t => t.lexem)
+  renderLexems(tokenizedLexems, 'in', pipeline.style.colorizeToken)
+
+  const { st } = pipeline.parse(tokens)
+  await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
+  const ast = st.transformAST(st)
+  await renderTree(treeInASTDisplayId, ast, pipeline.style.printLeaf)
+  const transformedTree = pipeline.transform.tree(ast)
+  await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
+  show(0)
+
+  const transformedLexems = pipeline.transform.serialize(ast)
+  renderLexems(transformedLexems, 'out', pipeline.style.colorizeToken)
+
+  await transfer(transformedLexems, pipeline['midi-out'])
+
+  fillProtocol(newLexems, transformedLexems)
+
+  setOnMidiMessage(performance.now(), onMidiMessageHandeled)
+}
+
+const runButton = document.getElementById('run')
+runButton.onclick = run
+//#endregion
+
+
+
+//#region setup pipeline configuration ui
 function restartIfReady() {
   if (!pipelineIsReady())
     return
 
-  // recognize lexems from midi events
   lexems = []
   lexemCursor = 0
-  playing = true
-  lastToneFinishedAt = undefined
   setOnMidiMessage(performance.now(), onMidiMessageHandeled)
-
-  clearInterval(timerId)
-
-  function isSilence(ms) {
-    return !playing && performance.now() - lastToneFinishedAt >= ms
-  }
-
-  timerId = setInterval(async () => {
-    if (!isSilence(2000))
-      return
-    
-    playing = true
-    setOnMidiMessage(0, undefined)
-
-    const newLexems = lexems.slice(lexemCursor)
-    lexemCursor = lexems.length
-
-    const annotatedLexems = pipeline.annotate(newLexems)
-
-    const tokens = pipeline.lex(annotatedLexems)
-    const tokenizedLexems = tokens.map(t => t.lexem)
-    renderLexems(tokenizedLexems, 'in', pipeline.style.colorizeToken)
-
-    const { st } = pipeline.parse(tokens)
-    await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
-    const ast = st.transformAST(st)
-    await renderTree(treeInASTDisplayId, ast, pipeline.style.printLeaf)
-    const transformedTree = pipeline.transform.tree(ast)
-    await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
-    show(0)
-
-    const transformedLexems = pipeline.transform.serialize(ast)
-    renderLexems(transformedLexems, 'out', pipeline.style.colorizeToken)
-
-    await transfer(transformedLexems, pipeline['midi-out'])
-
-    setOnMidiMessage(performance.now(), onMidiMessageHandeled)
-  }, pollingInterval)
 }
 
 import { Grammar } from './parsing/grammar.mjs'
 import { Lexer } from './parsing/lexer.mjs'
 import { Parser } from './parsing/parser.mjs'
+import { error } from './parsing/util.mjs'
 let lexer
 /**
  * sets options of select element and initializes corresponding pipeline state
@@ -168,13 +187,15 @@ function wireSelectElement(id, options) {
   }
 }
 
-// initialize configuration ui and pipeline state
 for (const [id, config] of Object.entries(configs)) {
   const options = Object.keys(config)
   wireSelectElement(id, options)
 }
+//#endregion
 
-// wireup tree rendering
+
+
+//#region setup tree rendering
 const displays = [
   [treeInDisplayId, 'ST IN'],
   [treeInASTDisplayId, 'AST IN'],
@@ -207,6 +228,64 @@ toggleTreeDisplay.onclick = _ => {
   show(displayIndex)
   displayIndex = (displayIndex+1) % 3
 }
+//#endregion
 
-// start processing imidiately if all configs filled with valid defaults
+
+
+//#region protocol saving
+/**
+ * @returns {Promise<string>}
+ */
+async function getNewId() {
+  return fetch('/id')
+    .then(res => res.json())
+    .then(idObj => idObj.id)
+}
+
+/**
+ * @param {string} id 
+ */
+function downloadProtocol(id) {
+  if (typeof id !== 'string')
+    error('id must be a string')
+
+  const protocolJson = JSON.stringify(protocol, null, 4)
+  const a = document.createElement('a')
+
+  a.setAttribute('href','data:application/json;charset=utf-8, ' + encodeURIComponent(protocolJson))
+  a.setAttribute('download', id + '.json')
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
+
+/**
+ * @param {string} id 
+ * @returns {Promise<void>}
+ */
+async function uploadProtocol(id) {
+  if (typeof id !== 'string')
+    error('id must be a string')
+  
+  return fetch(`/protocol?id=${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(protocol)
+  })
+  .catch(console.error)
+}
+
+const saveProtocolButton = document.getElementById('save-protocol')
+
+saveProtocolButton.onclick = async () => {
+  const id = await getNewId()
+  downloadProtocol(id)
+  await uploadProtocol(id)
+}
+//#endregion
+
+
+
 restartIfReady()
