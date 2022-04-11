@@ -10,6 +10,7 @@
   - series of rhythmic figures of some length
   - allow different lengths
   - dispatch probabilistically
+- replay mechanic for protocols in midi debugger?
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)
