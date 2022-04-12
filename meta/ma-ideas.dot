@@ -15,6 +15,7 @@ graph G {
   ast [label="abstract syntax tree"]
   recrew [label="recursive rewriting"]
   srlz [label="serialization"]
+  tradj [label="tree adjoining?"]
   toc [label="transformation of call"]
   midiout [label="midi output"]
   webmidiout [label="web midi API"]
@@ -48,7 +49,8 @@ graph G {
     cnr -- toc
       toc -- ast
       toc -- recrew
-      toc --srlz
+      toc -- srlz
+        recrew -- tradj
 
     cnr -- midiout
       midiout -- webmidiout
