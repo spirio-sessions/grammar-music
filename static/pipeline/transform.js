@@ -98,6 +98,8 @@ const appendCountMore = {
   'MORE': node => node.children.push(new ASTLeaf(node.children.length.toString(), node.children.length))
 }
 
+// TODO: implement motivic transformations via matchTransform (?)
+
 //#endregion
 
 //#region serialization

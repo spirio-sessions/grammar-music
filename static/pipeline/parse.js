@@ -74,6 +74,8 @@ const rhythm = [
   ['ANY', NaN, ['?']]
 ]
 
+// TODO: (rhythmic) figure grammar
+
 export default {
   default: meter,
   peaks: peaks,
