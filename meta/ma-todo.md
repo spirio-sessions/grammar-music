@@ -6,10 +6,12 @@
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 ### Technical
 - tree transformation approach: `{nodeLabel:AST->AST}`
+- make grammar truly probabilistic by "rolling dice" on rhs selection according to their probabilities
 - implement rhythmic figure grammar
   - series of rhythmic figures of some length
   - allow different lengths
   - dispatch probabilistically
+- implement motivic transformations (mirroring, cancer, etc.)
 - replay mechanic for protocols in midi debugger?
 
 ## Notes
