@@ -12,7 +12,6 @@
   - allow different lengths
   - non-deterministic productions -> dispatch probabilistically
 - implement motivic transformations (mirroring, cancer, etc.)
-- replay mechanic for protocols in midi debugger?
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)

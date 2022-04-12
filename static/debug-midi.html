@@ -5,65 +5,193 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MIDI Debugger</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+    }
+
+    .left {
+      float: left;
+    }
+
+    .right {
+      float: right;
+    }
+
+    .panel {
+      width: 50%;
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2em;
+    }
+
+    .pointer {
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    let midiAccess
+
+    function mkDefaultOption(text) {
+      const defaultOption = document.createElement('option')
+      defaultOption.innerText = text
+      defaultOption.selected = true
+      defaultOption.disabled = true
+      defaultOption.hidden = true
+      return defaultOption
+    }
+  </script>
 </head>
-
-<style>
-  html,
-  body {
-    height: 100%;
-    width: 100%;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2em;
-  }
-
-  #midi-input-select {
-    cursor: pointer;
-  }
-</style>
-
 <body>
 
-  <select id="midi-input-select">
-    <option value="">select MIDI input</option>
-  </select>
+  <div class="left panel">
+    <h2>Display MIDI Events</h2>
+    <select class="pointer" id="midi-input-select"></select>
+    <textarea id="midi-log" cols="50" rows="20" readonly></textarea>
+    <script type="module">
+      midiAccess = await navigator.requestMIDIAccess()
+      const midiInputSelect = document.getElementById('midi-input-select')
+      const midiLog = document.getElementById('midi-log')
 
-  <textarea id="midi-log" cols="50" rows="20" readonly></textarea>
+      populateMidiInputSelect()
 
-  <script type="module">
-    const midiInputSelect = document.getElementById('midi-input-select')
-    const midiLog = document.getElementById('midi-log')
+      midiInputSelect.onchange = setMidiInputHandler
+      midiAccess.addEventListener('statechange', populateMidiInputSelect)
 
-    const midiAccess = await navigator.requestMIDIAccess()
-    
-    midiAccess.inputs.forEach(i => {
-      const option = document.createElement('option')
-      option.innerText = i.name
-      option.value = i.id
-      midiInputSelect.append(option)
-    });
+      async function populateMidiInputSelect() {
+        const midiAccess = await navigator.requestMIDIAccess()
 
-    midiInputSelect.onchange = () => {
-      console.log('change!')
-      const midiId = midiInputSelect.value
-      
-      if (midiId) {
-        const midiInput = midiAccess.inputs.get(midiId)
-        midiInput.onmidimessage = onMidiMessage
+        midiInputSelect.innerHTML = ''
+        midiInputSelect.append(mkDefaultOption('select MIDI input'))
+
+        midiAccess.inputs.forEach(i => {
+          const option = document.createElement('option')
+          option.innerText = i.name
+          option.value = i.id
+          midiInputSelect.append(option)
+        })
       }
-    }
 
-    function onMidiMessage(midiMessage) {
-      midiLog.value += midiMessage.data + '\n'
-      midiLog.scrollTop = midiLog.scrollHeight
-    }
+      function setMidiInputHandler() {
+        const midiId = midiInputSelect.value
+        
+        if (midiId) {
+          const midiInput = midiAccess.inputs.get(midiId)
+          midiInput.onmidimessage = onMidiMessage
+        }
+      }
 
-  </script>
+      function onMidiMessage(midiMessage) {
+        midiLog.value += midiMessage.data + '\n'
+        midiLog.scrollTop = midiLog.scrollHeight
+      }
+    </script>
+  </div>
+
+  <div class="right panel">
+    <h2>Play Protocol Recording</h2>
+    <select class="pointer" id="protocol-select"></select>
+    <select class="pointer" id="midi-output-select">
+      <option value="">select MIDI output</option>
+    </select>
+    <button id="play-stop-button" class="pointer">Play</button>
+    <textarea id="protocol-comment" cols="30" rows="10" disabled></textarea>
+    <script type="module">
+      import { transfer } from './util/midi-handling.js'
+
+      const protocolSelect = document.getElementById('protocol-select')
+      let protocol
+
+      midiAccess = await navigator.requestMIDIAccess()
+      const midiOutputSelect = document.getElementById('midi-output-select')
+      let midiOutput
+
+      const commentTextArea = document.getElementById('protocol-comment')
+      const playStopButton = document.getElementById('play-stop-button')
+
+      await populateProtocolSelect()
+      protocolSelect.onclick = populateProtocolSelect
+      protocolSelect.onchange = setProtocol
+
+      populateMidiOutputSelect()
+      midiAccess.addEventListener('statechange', populateMidiOutputSelect)
+      midiOutputSelect.onchange = setMidiOutput
+
+      let playState = true
+      playStopButton.onclick = play 
+
+      async function populateProtocolSelect() {
+        const ids = await fetch('/protocol/ids')
+          .then(res => res.json())
+          .catch(_ => alert('failed to fetch protocol ids'))
+          
+        protocolSelect.innerHTML = ''
+        protocolSelect.append(mkDefaultOption('select protocol'))
+
+        ids.forEach(id => {
+          const option = document.createElement('option')
+          option.innerText = id
+          option.value = id
+          protocolSelect.append(option)
+        })
+      }
+
+      async function setProtocol() {
+        const id = protocolSelect.value
+        protocol = await fetch(`/protocol?id=${id}`)
+          .then(res => res.json())
+          .catch(_ => alert('failed to fetch protocol'))
+        commentTextArea.value = protocol.comment
+      }
+
+      async function populateMidiOutputSelect() {
+        const midiAccess = await navigator.requestMIDIAccess()
+
+        midiOutputSelect.innerHTML = ''
+        midiOutputSelect.append(mkDefaultOption('select MIDI output'))
+
+        midiAccess.outputs.forEach(o => {
+          const option = document.createElement('option')
+          option.innerText = o.name
+          option.value = o.id
+          midiOutputSelect.append(option)
+        })
+      }
+
+      function setMidiOutput() {
+        const outputId = midiOutputSelect.value
+        if (outputId)
+          midiOutput = midiAccess.outputs.get(outputId)
+      }
+
+      function play() {
+        if (!(protocol && midiOutput && protocol.recording.length !== 0))
+          return
+        
+        playStopButton.onclick = stop
+
+        for (const piece of protocol.recording) {
+          if (!playState)
+            continue
+          else
+            transfer(piece, midiOutput)
+        }
+
+        playStopButton.onclick = play
+      }
+
+      function stop() {
+        playState = false
+      }
+    </script>
+  </div>
 
 </body>
 </html>

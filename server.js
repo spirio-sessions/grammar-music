@@ -55,6 +55,18 @@ app.get('/protocol', (req, res) => {
   })
 })
 
+app.get('/protocol/ids', (_, res) => {
+  fs.readdir('protocols', (err, filenames) => {
+    if (err)
+      res.sendStatus(404)
+    else
+      res
+        .status(200)
+        .type('json')
+        .json(filenames.map(fn => fn.split('.')[0]))
+  })
+})
+
 app.listen(port, () => {
   console.log(`grammar music listening on port ${port}`)
 })

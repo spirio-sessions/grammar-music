@@ -177,11 +177,11 @@ export async function transfer(lexems, midiOut) {
 
   for (const lexem of lexems) {
 
-    if (lexem instanceof Rest) {
+    if (lexem instanceof Rest || lexem.type === 'rest') {
       await sleep(lexem.duration)
     }
 
-    else if (lexem instanceof Tone) {
+    else if (lexem instanceof Tone || lexem.type === 'tone') {
       const noteOn = [0x90, lexem.noteNumber, lexem.velocity]
       const noteOff = [0x80, lexem.noteNumber, 0]
   
