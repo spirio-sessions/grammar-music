@@ -124,8 +124,8 @@
       midiAccess.addEventListener('statechange', populateMidiOutputSelect)
       midiOutputSelect.onchange = setMidiOutput
 
-      let playState = true
-      playStopButton.onclick = play 
+      let playing = false
+      playStopButton.onclick = playStop 
 
       async function populateProtocolSelect() {
         const ids = await fetch('/protocol/ids')
@@ -171,24 +171,27 @@
           midiOutput = midiAccess.outputs.get(outputId)
       }
 
-      function play() {
+      async function playStop() {
+        // handle stop
+        if (playing) {
+          playing = false
+          playStopButton.innerText = 'Play'
+          return
+        }
+
+        // handle play
         if (!(protocol && midiOutput && protocol.recording.length !== 0))
           return
         
-        playStopButton.onclick = stop
+        playing = true
+        playStopButton.innerText = 'Stop'
 
         for (const piece of protocol.recording) {
-          if (!playState)
-            continue
+          if (!playing)
+            return
           else
-            transfer(piece, midiOutput)
+            await transfer(piece, midiOutput)
         }
-
-        playStopButton.onclick = play
-      }
-
-      function stop() {
-        playState = false
       }
     </script>
   </div>
