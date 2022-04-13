@@ -85,9 +85,6 @@ function fillProtocol(call, response) {
       protocol.config[e.id] = e.value
     })
   
-  const commentInput = document.getElementById('comment-input')
-  protocol.config.comment = commentInput.value
-
   if (!Array.isArray(protocol.recording))
     protocol.recording = []
   protocol.recording.push(call, response)
@@ -233,6 +230,9 @@ toggleTreeDisplay.onclick = _ => {
 
 
 //#region protocol saving
+const commentTextArea = document.getElementById('comment-input')
+commentTextArea.oninput = _ => protocol.comment = commentTextArea.value
+
 /**
  * @returns {Promise<string>}
  */
