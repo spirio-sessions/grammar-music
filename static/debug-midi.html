@@ -4,13 +4,22 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MIDI Debugger</title>
+
   <style>
+    * {
+      font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
     html,
     body {
       height: 100%;
       width: 100%;
       margin: 0;
+    }
+
+    button {
+      width: 5em;
+      height: 3em;
     }
 
     .left {
@@ -36,6 +45,7 @@
       cursor: pointer;
     }
   </style>
+
   <script>
     let midiAccess
 
@@ -48,13 +58,26 @@
       return defaultOption
     }
   </script>
+
+  <link rel="shortcut icon" href="favicon.jpg" type="image/jpeg">
+  <title>MIDI Debugger</title>
+
 </head>
 <body>
 
   <div class="left panel">
     <h2>Display MIDI Events</h2>
-    <select class="pointer" id="midi-input-select"></select>
-    <textarea id="midi-log" cols="50" rows="20" readonly></textarea>
+
+    <fieldset>
+      <legend>MIDI In</legend>
+      <select class="pointer" id="midi-input-select"></select>
+    </fieldset>
+    
+    <fieldset>
+      <legend>MIDI Log</legend>
+      <textarea id="midi-log" cols="50" rows="20" readonly></textarea>
+    </fieldset>
+    
     <script type="module">
       midiAccess = await navigator.requestMIDIAccess()
       const midiInputSelect = document.getElementById('midi-input-select')
@@ -96,13 +119,26 @@
   </div>
 
   <div class="right panel">
+
     <h2>Play Protocol Recording</h2>
-    <select class="pointer" id="protocol-select"></select>
-    <select class="pointer" id="midi-output-select">
-      <option value="">select MIDI output</option>
-    </select>
+
+    <fieldset>
+      <legend>Protocol Menu</legend>
+      <select class="pointer" id="protocol-select"></select>
+    </fieldset>
+    
+    <fieldset>
+      <legend>MIDI Out</legend>
+      <select class="pointer" id="midi-output-select"></select>
+    </fieldset>
+    
     <button id="play-stop-button" class="pointer">Play</button>
-    <textarea id="protocol-comment" cols="30" rows="10" disabled></textarea>
+    
+    <fieldset>
+      <legend>Protocol Comment</legend>
+      <textarea id="protocol-comment" cols="50" rows="20" readonly></textarea>
+    </fieldset>
+    
     <script type="module">
       import { transfer } from './util/midi-handling.js'
 
