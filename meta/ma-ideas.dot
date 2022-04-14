@@ -12,6 +12,7 @@ graph G {
   webmidiin [label="web midi API"]
   poc [label="parsing of call"]
   st [label="syntax tree"]
+  nvprb [label="naively probabilistic"]
   ast [label="abstract syntax tree"]
   recrew [label="recursive rewriting"]
   srlz [label="serialization"]
@@ -21,7 +22,6 @@ graph G {
   webmidiout [label="web midi API"]
   cfg [label="context free grammar"]
   pgen [label="parser generator"]
-  liveedit [label="edit on the fly"]
   viz [label="live visualization"]
   ptcl [label="protocol"]
   cfgs [label="pipeline configuration"]
@@ -42,12 +42,12 @@ graph G {
     cnr -- poc
     poc -- cfg
       cfg -- pgen
-      cfg -- liveedit
       cfg -- viz
+    poc -- nvprb
     poc -- st
+      st -- ast
 
     cnr -- toc
-      toc -- ast
       toc -- recrew
       toc -- srlz
         recrew -- tradj

@@ -5,12 +5,7 @@
 - evaluation matrix in confluence
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 ### Technical
-- tree transformation approach: `{nodeLabel:AST->AST}`
-- make grammar truly probabilistic by "rolling dice" on rhs selection according to their probabilities
-- implement rhythmic figure grammar
-  - series of rhythmic figures of some length
-  - allow different lengths
-  - non-deterministic productions -> dispatch probabilistically
+- play with non-deterministic, multiple-way-expanding grammars
 - implement motivic transformations (mirroring, cancer, etc.)
 
 ## Notes
