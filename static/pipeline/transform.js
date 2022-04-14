@@ -70,7 +70,6 @@ function straight2swing(ast) {
   return ast
 }
 
-// TODO: test this
 /**
  * apply AST transformations to AST members where matchLabel matches member's label
  * modifies AST
@@ -80,7 +79,7 @@ function straight2swing(ast) {
 function matchTransform(config) {
   return ast => {
     
-    dft(ast => {
+    dft(ast, ast => {
       for (const matchLabel of Object.keys(config)) {
         if (ast.label === matchLabel) {
           const transform = config[matchLabel]
@@ -92,10 +91,6 @@ function matchTransform(config) {
 
     return ast
   }
-}
-
-const appendCountMore = {
-  'MORE': node => node.children.push(new ASTLeaf(node.children.length.toString(), node.children.length))
 }
 
 // TODO: implement motivic transformations via matchTransform (?)
@@ -139,11 +134,6 @@ export default {
 
   'straight-to-swing': {
     tree: straight2swing,
-    serialize: flatten
-  },
-
-  'append-child-count-more': {
-    tree: matchTransform(appendCountMore),
     serialize: flatten
   }
 }
