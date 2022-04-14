@@ -15,7 +15,6 @@ const meterLike = {
   '1': lexem => lexem instanceof Tone && lexem.noteValue === 1,
   '1/2': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 2 - 1) < 0.001,
   '1/3': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 3 - 1) < 0.001,
-  '1/4': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 4 - 1) < 0.001,
   '?': lexem => lexem instanceof Tone
 }
 

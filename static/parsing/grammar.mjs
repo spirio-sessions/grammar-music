@@ -4,12 +4,12 @@ import { contractR, bubbleOne } from './tree.mjs'
 class Production {
   /**
    * @param {String} lhs 
-   * @param {Number} p 
+   * @param {Number} w 
    * @param {Array<String>} rhs 
    */
-  constructor(lhs, p, rhs, t) {
+  constructor(lhs, w, rhs, t) {
     this.lhs = lhs
-    this.p = p
+    this.w = w
     this.rhs = rhs
     this.t = t ??
       (this.#isRightExpanding() ? contractR :
@@ -53,10 +53,10 @@ export class Grammar {
       this.productions[nt] = [])
     
     productions.forEach(prod => 
-      this.productions[prod.lhs].push({p:prod.p, rhs:prod.rhs, t:prod.t}))
+      this.productions[prod.lhs].push({w:prod.w, rhs:prod.rhs, t:prod.t}))
 
     Object.values(this.productions).forEach(body =>
-      body.sort((x, y) => y.p - x.p))
+      body.sort((x, y) => y.w - x.w))
   }
 
   /**

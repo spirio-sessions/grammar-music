@@ -1,84 +1,108 @@
 const defaultGrammar = [
-  ['S', NaN, ['MORE']],
-  ['MORE', NaN, ['TOKEN', 'MORE']],
-  ['MORE', NaN, ['TOKEN']],
-  ['TOKEN', NaN, ['tone']],
-  ['TOKEN', NaN, ['rest']]
+  ['S', 0, ['MORE']],
+  ['MORE', 0, ['TOKEN', 'MORE']],
+  ['MORE', 0, ['TOKEN']],
+  ['TOKEN', 0, ['tone']],
+  ['TOKEN', 0, ['rest']]
 ]
 
 const peaks = [
-  ['S', NaN, ['MORE']],
-  ['MORE', NaN, ['TOKEN', 'MORE']],
-  ['MORE', NaN, ['TOKEN']],
-  ['TOKEN', NaN, ['peak']],
-  ['TOKEN', NaN, ['fill']],
-  ['TOKEN', NaN, ['rest']]
+  ['S', 0, ['MORE']],
+  ['MORE', 0, ['TOKEN', 'MORE']],
+  ['MORE', 0, ['TOKEN']],
+  ['TOKEN', 0, ['peak']],
+  ['TOKEN', 0, ['fill']],
+  ['TOKEN', 0, ['rest']]
 ]
 
 const meter = [
-  ['S', NaN, ['MORE']],
-  ['MORE', NaN, ['TRIPLES', 'MORE']],
-  ['MORE', NaN, ['TRIPLES']],
-  ['MORE', NaN, ['DOUBLES', 'MORE']],
-  ['MORE', NaN, ['DOUBLES']],
-  ['MORE', NaN, ['SINGLES', 'MORE']],
-  ['MORE', NaN, ['SINGLES']],
-  ['MORE', NaN, ['HALVES', 'MORE']],
-  ['MORE', NaN, ['HALVES']],
-  ['MORE', NaN, ['THIRDS', 'MORE']],
-  ['MORE', NaN, ['THIRDS']],
-  ['MORE', NaN, ['QUARTERS', 'MORE']],
-  ['MORE', NaN, ['QUARTERS']],
-  ['MORE', NaN, ['RESTS', 'MORE']],
-  ['MORE', NaN, ['RESTS']],
-  ['MORE', NaN, ['UNKNOWN', 'MORE']],
-  ['MORE', NaN, ['UNKNOWN']],
-  ['TRIPLES', NaN, ['3', 'TRIPLES']],
-  ['TRIPLES', NaN, ['3']],
-  ['DOUBLES', NaN, ['2', 'DOUBLES']],
-  ['DOUBLES', NaN, ['2']],
-  ['SINGLES', NaN, ['1', 'SINGLES']],
-  ['SINGLES', NaN, ['1']],
-  ['HALVES', NaN, ['1/2', 'HALVES']],
-  ['HALVES', NaN, ['1/2']],
-  ['THIRDS', NaN, ['1/3', 'THIRDS']],
-  ['THIRDS', NaN, ['1/3']],
-  ['QUARTERS', NaN, ['1/4', 'QUARTERS']],
-  ['QUARTERS', NaN, ['1/4']],
-  ['RESTS', NaN, ['r', 'RESTS']],
-  ['RESTS', NaN, ['r']],
-  ['UNKNOWN', NaN, ['?', 'UNKNOWN']],
-  ['UNKNOWN', NaN, ['?']]
+  ['S', 0, ['MORE']],
+  ['MORE', 0, ['TRIPLES', 'MORE']],
+  ['MORE', 0, ['TRIPLES']],
+  ['MORE', 0, ['DOUBLES', 'MORE']],
+  ['MORE', 0, ['DOUBLES']],
+  ['MORE', 0, ['SINGLES', 'MORE']],
+  ['MORE', 0, ['SINGLES']],
+  ['MORE', 0, ['HALVES', 'MORE']],
+  ['MORE', 0, ['HALVES']],
+  ['MORE', 0, ['THIRDS', 'MORE']],
+  ['MORE', 0, ['THIRDS']],
+  ['MORE', 0, ['RESTS', 'MORE']],
+  ['MORE', 0, ['RESTS']],
+  ['MORE', 0, ['UNKNOWN', 'MORE']],
+  ['MORE', 0, ['UNKNOWN']],
+  ['TRIPLES', 0, ['3', 'TRIPLES']],
+  ['TRIPLES', 0, ['3']],
+  ['DOUBLES', 0, ['2', 'DOUBLES']],
+  ['DOUBLES', 0, ['2']],
+  ['SINGLES', 0, ['1', 'SINGLES']],
+  ['SINGLES', 0, ['1']],
+  ['HALVES', 0, ['1/2', 'HALVES']],
+  ['HALVES', 0, ['1/2']],
+  ['THIRDS', 0, ['1/3', 'THIRDS']],
+  ['THIRDS', 0, ['1/3']],
+  ['RESTS', 0, ['r', 'RESTS']],
+  ['RESTS', 0, ['r']],
+  ['UNKNOWN', 0, ['?', 'UNKNOWN']],
+  ['UNKNOWN', 0, ['?']]
 ]
 
 const rhythm = [
-  ['S', NaN, ['MORE']],
-  ['S', NaN, ['ANY', 'MORE']], // upbeat
-  ['MORE', NaN, ['PAIR', 'MORE']],
-  ['MORE', NaN, ['ANY', 'MORE']], // account for dirtily short tokens
-  ['MORE', NaN, ['PAIR']],
-  ['MORE', NaN, ['ANY']], // single one left
-  ['MORE', NaN, [null]], // avoid termination in any-any instaed of pair(x)
-  ['PAIR', NaN, ['STRAIGHT']],
-  ['PAIR', NaN, ['SWING']],
-  ['STRAIGHT', NaN, ['1', '1']],
-  ['STRAIGHT', NaN, ['1/2', '1/2']],
-  ['SWING', NaN, ['1', '1/2']],
-  ['ANY', NaN, ['r']],
-  ['ANY', NaN, ['3']],
-  ['ANY', NaN, ['2']],
-  ['ANY', NaN, ['1']],
-  ['ANY', NaN, ['1/2']],
-  ['ANY', NaN, ['1/3']],
-  ['ANY', NaN, ['1/4']],
-  ['ANY', NaN, ['?']]
+  ['S', 0, ['MORE']],
+  ['S', 0, ['ANY', 'MORE']], // upbeat
+  ['MORE', 0, ['PAIR', 'MORE']],
+  ['MORE', 0, ['ANY', 'MORE']], // account for dirtily short tokens
+  ['MORE', 0, ['PAIR']],
+  ['MORE', 0, ['ANY']], // single one left
+  ['MORE', 0, [null]], // avoid termination in any-any instaed of pair(x)
+  ['PAIR', 0, ['STRAIGHT']],
+  ['PAIR', 0, ['SWING']],
+  ['STRAIGHT', 0, ['1', '1']],
+  ['STRAIGHT', 0, ['1/2', '1/2']],
+  ['SWING', 0, ['1', '1/2']],
+  ['ANY', 0, ['r']],
+  ['ANY', 0, ['3']],
+  ['ANY', 0, ['2']],
+  ['ANY', 0, ['1']],
+  ['ANY', 0, ['1/2']],
+  ['ANY', 0, ['1/3']],
+  ['ANY', 0, ['?']]
 ]
 
-// TODO: (rhythmic) figure grammar
+const twoThemes = [
+  ['S',  0, ['T2', 'T2']],
+  ['T2', 0, ['2']],
+  ['T2', 0, ['1', '1']],
+  ['T2', 0, ['1', '1/2', '1/2']],
+  ['T2', 0, ['1/2', '1', '1/2']],
+  ['T2', 0, ['1/2', '1/2', '1']],
+  ['T2', 0, ['1/2', '1/2', '1/2', '1/2']]
+]
+
+// TODO: assemble 2 any nodes under S of random length
+const anyTwo = [
+  ['S', 0, ['LEFT', 'RIGHT']],
+  
+  ['LEFT', 1, ['ANY', 'LEFT']],
+  ['LEFT', 1, ['ANY']],
+
+  ['RIGHT', 1, ['ANY', 'RIGHT']],
+  ['RIGHT', -1, [null]],
+
+  ['ANY', 0, ['3']],
+  ['ANY', 0, ['2']],
+  ['ANY', 0, ['1']],
+  ['ANY', 0, ['1/2']],
+  ['ANY', 0, ['1/3']],
+  ['ANY', 0, ['r']],
+  ['ANY', 0, ['?']]
+]
 
 export default {
   default: meter,
   peaks: peaks,
   meter: meter,
-  rhythm: rhythm
+  rhythm: rhythm,
+  'two-themes': twoThemes,
+  'any-two': anyTwo
 }

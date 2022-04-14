@@ -108,11 +108,14 @@ export class Parser {
    */
   parseNT(symbol, index) {
     let res
-    const production = this.grammar.productions[symbol]
+    const originalProduction = this.grammar.productions[symbol]
     
-    // TODO: copy and shuffle bodys according to their probabilities
+    // probabilistic permutation of rhs, may extract into independent function
+    const copyProduction = originalProduction.map(body => ({...body}))
+    copyProduction.forEach(body => body.w = body.w * Math.random())
+    copyProduction.sort((bl, br) => br.w - bl.w)
     
-    for (const body of production) {
+    for (const body of copyProduction) {
       if (body.rhs.length > 1) {
         res = this.parseSeq(body.rhs, index)
         if (res.success)
