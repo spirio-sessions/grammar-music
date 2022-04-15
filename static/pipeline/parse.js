@@ -1,9 +1,8 @@
 const defaultGrammar = [
   ['S', 0, ['MORE']],
-  ['MORE', 0, ['TOKEN', 'MORE']],
-  ['MORE', 0, ['TOKEN']],
-  ['TOKEN', 0, ['tone']],
-  ['TOKEN', 0, ['rest']]
+
+  ['MORE', 1, ['*', 'MORE']],
+  ['MORE', -1, [null]],
 ]
 
 const peaks = [
@@ -15,7 +14,7 @@ const peaks = [
   ['TOKEN', 0, ['rest']]
 ]
 
-const meter = [
+const beatLike = [
   ['S', 0, ['MORE']],
   ['MORE', 0, ['TRIPLES', 'MORE']],
   ['MORE', 0, ['TRIPLES']],
@@ -69,40 +68,20 @@ const rhythm = [
   ['ANY', 0, ['?']]
 ]
 
-const twoThemes = [
-  ['S',  0, ['T2', 'T2']],
-  ['T2', 0, ['2']],
-  ['T2', 0, ['1', '1']],
-  ['T2', 0, ['1', '1/2', '1/2']],
-  ['T2', 0, ['1/2', '1', '1/2']],
-  ['T2', 0, ['1/2', '1/2', '1']],
-  ['T2', 0, ['1/2', '1/2', '1/2', '1/2']]
-]
-
-// TODO: assemble 2 any nodes under S of random length
 const anyTwo = [
   ['S', 0, ['LEFT', 'RIGHT']],
   
-  ['LEFT', 1, ['ANY', 'LEFT']],
-  ['LEFT', 1, ['ANY']],
+  ['LEFT', 5, ['*', 'LEFT']],
+  ['LEFT', 1, [null]],
 
-  ['RIGHT', 1, ['ANY', 'RIGHT']],
-  ['RIGHT', -1, [null]],
-
-  ['ANY', 0, ['3']],
-  ['ANY', 0, ['2']],
-  ['ANY', 0, ['1']],
-  ['ANY', 0, ['1/2']],
-  ['ANY', 0, ['1/3']],
-  ['ANY', 0, ['r']],
-  ['ANY', 0, ['?']]
+  ['RIGHT', 1, ['*', 'RIGHT']],
+  ['RIGHT', -1, [null]]
 ]
 
 export default {
-  default: meter,
-  peaks: peaks,
-  meter: meter,
-  rhythm: rhythm,
-  'two-themes': twoThemes,
-  'any-two': anyTwo
+  default: defaultGrammar,
+  'vol-peak-seq': peaks,
+  'beat-like-seq': beatLike,
+  'rhythmic-seq': rhythm,
+  'any-two-motives': anyTwo
 }

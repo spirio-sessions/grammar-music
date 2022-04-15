@@ -1,6 +1,6 @@
 import { Tone, Rest } from "../util/midi-handling.js"
 
-const meterLikeTone = meter => lexem =>
+const beatLikeTone = meter => lexem =>
   lexem instanceof Tone && lexem.noteValue > 1 && Math.round(lexem.noteValue % meter) === 0
 
 const defaultLex = {
@@ -8,10 +8,10 @@ const defaultLex = {
   rest: lexem => lexem instanceof Rest
 }
 
-const meterLike = {
+const beatLike = {
   'r': lexem => lexem instanceof Rest,
-  '3': meterLikeTone(3),
-  '2': meterLikeTone(2),
+  '3': beatLikeTone(3),
+  '2': beatLikeTone(2),
   '1': lexem => lexem instanceof Tone && lexem.noteValue === 1,
   '1/2': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 2 - 1) < 0.001,
   '1/3': lexem => lexem instanceof Tone && Math.abs(lexem.noteValue * 3 - 1) < 0.001,
@@ -20,7 +20,7 @@ const meterLike = {
 
 // Lexem => bool
 export default {
-  default: meterLike,
+  default: defaultLex,
 
   peaks: {
     peak: lexem => lexem instanceof Tone && lexem.peak,
@@ -28,5 +28,5 @@ export default {
     rest: lexem => lexem instanceof Rest
   },
 
-  'meter-like': meterLike
+  'beat-like': beatLike
 }

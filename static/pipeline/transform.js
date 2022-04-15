@@ -122,17 +122,17 @@ export default {
     serialize: flatten
   },
 
-  reverse: {
+  'flat-reverse': {
     tree: id,
     serialize: st => flatten(st).reverse()
   },
 
-  shuffle: {
+  'shuffle-rec': {
     tree: shuffleChildren,
     serialize: flatten
   },
 
-  'straight-to-swing': {
+  'rhythm-straight2swing': {
     tree: straight2swing,
     serialize: flatten
   }

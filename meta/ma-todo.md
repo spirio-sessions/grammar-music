@@ -7,6 +7,7 @@
 ### Technical
 - play with non-deterministic, multiple-way-expanding grammars
 - implement motivic transformations (mirroring, cancer, etc.)
+- graph rendering -> jpg (or other pixel format) for thesis export
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)
