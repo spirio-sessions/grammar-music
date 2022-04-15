@@ -95,8 +95,8 @@ export class Parser {
 
     const token = this.tokens[index]
 
-    if (token.name === symbol)
-      return succeed(new STLeaf(symbol, token), index+1)
+    if (token.name === symbol || symbol === '*')
+      return succeed(new STLeaf(token.name, token), index+1)
     else
       return fail(symbol, index, 'terminal does not match')
   }
@@ -110,9 +110,11 @@ export class Parser {
     let res
     const originalProduction = this.grammar.productions[symbol]
     
-    // probabilistic permutation of rhs, may extract into independent function
+    // probabilistic permutation of rhs, maybe extract into independent function
     const copyProduction = originalProduction.map(body => ({...body}))
-    copyProduction.forEach(body => body.w = body.w * Math.random())
+    // scale each weight by a random integer factor in [0, 10] 
+    copyProduction.forEach(body => 
+      body.w = body.w * Math.floor(Math.random() * 11))
     copyProduction.sort((bl, br) => br.w - bl.w)
     
     for (const body of copyProduction) {

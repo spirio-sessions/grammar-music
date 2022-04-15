@@ -167,9 +167,14 @@ function wireSelectElement(id, options) {
       pipeline.lex = lexems => lexer.run(...lexems)
     }
     else if (id === 'parse') {
-      const grammar = Grammar.from(lexer.terminals(), configuration)
-      const parser = new Parser(grammar)
-      pipeline.parse = tokens => parser.run(...tokens)
+      try {
+        const grammar = Grammar.from(lexer.terminals(), configuration)
+        const parser = new Parser(grammar)
+        pipeline.parse = tokens => parser.run(...tokens)
+      }
+      catch (error) {
+        alert('Lexer and parser do not match!')
+      }
     }
     else
       pipeline[id] = configs[id][name]

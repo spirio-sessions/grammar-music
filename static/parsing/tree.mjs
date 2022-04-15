@@ -22,7 +22,10 @@ export class STNode extends SyntaxTree {
     transformAST ??= (st => new ASTNode(
       st.label, 
       null, 
-      st.children.map(c => c.transformAST(c))))
+      st.children
+        .map(c => c.transformAST(c))
+        .filter(c => c)))
+        
     super(label, transformAST)
     this.children = children
   }
@@ -35,7 +38,10 @@ export class STLeaf extends SyntaxTree {
    * @param {(st:STLeaf)=>ASTLeaf?} transformAST
    */
   constructor(label, token, transformAST) {
-    transformAST ??= (st => new ASTLeaf(st.label, st.token.lexem))
+    transformAST ??= (st => st instanceof STEmpty
+      ? null
+      : new ASTLeaf(st.label, st.token.lexem))
+
     super(label, transformAST)
     this.token = token
   }

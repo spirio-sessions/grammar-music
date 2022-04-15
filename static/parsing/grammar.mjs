@@ -44,7 +44,7 @@ export class Grammar {
         error(`invalid lhs: ${prod.lhs}`)
 
       prod.rhs.forEach(symbol => {
-        if (!nonTerminals.includes(symbol) && ![...terminals, null].includes(symbol))
+        if (!nonTerminals.includes(symbol) && ![...terminals, null, '*'].includes(symbol))
           error(`invalid symbol in rhs: ${symbol}`)
       })
     })

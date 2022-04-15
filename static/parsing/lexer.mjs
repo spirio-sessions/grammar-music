@@ -26,7 +26,8 @@ export class Lexer {
    * @returns {Array<String>}
    */
   terminals() {
-    return Object.keys(this.rules)
+    // add terminal that matches any token
+    return [...Object.keys(this.rules), '*']
   }
 
   /**
