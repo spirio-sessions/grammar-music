@@ -5,7 +5,6 @@
 - evaluation matrix in confluence
 - learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 ### Technical
-- add ST, AST and transformed AST to protocol
 - play with non-deterministic, multiple-way-expanding grammars
   - rest separated motives?
 - add a new lexer config for interval tokens
