@@ -66,33 +66,34 @@ export function renderLexems(lexems, direction, colorizeToken) {
   x = 0
 }
 
-import { SyntaxTree, STLeaf, STNode, bft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/tree.mjs'
+import { SyntaxTree, STLeaf, bft, ASTLeaf, AbstractSyntaxTree, isNode, isLeaf } from '../parsing/tree.mjs'
 
 // leaf is only container, print token
 const defaultPrintLeaf = l => l.label
 
 /**
- * Prints a deafault graphviz dot representation for a syntax tree.
- * @param {SyntaxTree|AbstractSyntaxTree} st 
- * @param {(l:STLeaf)=>String} printLeaf
+ * Prints a default graphviz dot representation for a syntax tree.
+ * Uses phenotypic checking to recognize nodes and leafs -> works with JSON.
+ * @param {SyntaxTree|AbstractSyntaxTree} tree 
+ * @param {(l:STLeaf|ASTLeaf)=>String} printLeaf
  * @returns {String}
  */
-function printSTDot(st, printLeaf = defaultPrintLeaf) {
+function printTreeDot(tree, printLeaf = defaultPrintLeaf) {
   const start = 'graph G {\n  size="6.25,4.16";'
   let i = 0
   let defs = '', leafs = []
   const end = '\n}'
 
-  bft(st, st => st.i = i++)
+  bft(tree, tree => tree.i = i++)
 
-  bft(st, st => {
-    if (st instanceof STNode || st instanceof ASTNode) {
-      defs += `\n  { n${st.i} [label=${st.label}] }`
-      for (const c of st.children)
-        defs += `\n  n${st.i} -- n${c.i} ;`
+  bft(tree, tree => {
+    if (isNode(tree)) {
+      defs += `\n  { n${tree.i} [label=${tree.label}] }`
+      for (const c of tree.children)
+        defs += `\n  n${tree.i} -- n${c.i} ;`
     }
-    else if (st instanceof STLeaf || st instanceof ASTLeaf)
-      leafs.push(st)
+    else if (isLeaf(tree))
+      leafs.push(tree)
   })
 
   const leafAttrs = leafs.map(l => `  { n${l.i} [label="${printLeaf(l)}" shape=none] }`)
@@ -112,7 +113,7 @@ let viz = new Viz()
  */
 export async function renderTree(displayId, st, printLeaf) {
   const display = document.getElementById(displayId)
-  const dot = printSTDot(st, printLeaf)
+  const dot = printTreeDot(st, printLeaf)
   try {
     const svg = await viz.renderSVGElement(dot)
     svg.id = displayId

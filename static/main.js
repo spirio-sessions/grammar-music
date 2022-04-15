@@ -79,7 +79,7 @@ function setOnMidiMessage(startTime, callback) {
  * @param {[Lexem]} call 
  * @param {[Lexem]} response 
  */
-function fillProtocol(call, response) {
+function fillProtocol(call, response, st, ast, transformedAst) {
   Array.from(document.getElementsByTagName('select'))
     .forEach(e => {
       protocol.config[e.id] = e.value
@@ -88,6 +88,10 @@ function fillProtocol(call, response) {
   if (!Array.isArray(protocol.recording))
     protocol.recording = []
   protocol.recording.push(call, response)
+
+  protocol.st = st
+  protocol.ast = ast
+  protocol.transformAST = transformedAst
 }
 
 async function run() {
@@ -106,16 +110,17 @@ async function run() {
   await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
   const ast = st.transformAST(st)
   await renderTree(treeInASTDisplayId, ast, pipeline.style.printLeaf)
-  const transformedTree = pipeline.transform.tree(ast)
-  await renderTree(treeOutDisplayId, transformedTree, pipeline.style.printLeaf)
+  // important, copy ast as transformations will modify it
+  const transformedAst = pipeline.transform.tree(copyTree(ast)) 
+  await renderTree(treeOutDisplayId, transformedAst, pipeline.style.printLeaf)
   show(0)
 
-  const transformedLexems = pipeline.transform.serialize(ast)
+  const transformedLexems = pipeline.transform.serialize(transformedAst)
   renderLexems(transformedLexems, 'out', pipeline.style.colorizeToken)
 
   await transfer(transformedLexems, pipeline['midi-out'])
 
-  fillProtocol(newLexems, transformedLexems)
+  fillProtocol(newLexems, transformedLexems, st, ast, transformedAst)
 
   setOnMidiMessage(performance.now(), onMidiMessageHandeled)
 }
@@ -140,6 +145,7 @@ import { Grammar } from './parsing/grammar.mjs'
 import { Lexer } from './parsing/lexer.mjs'
 import { Parser } from './parsing/parser.mjs'
 import { error } from './parsing/util.mjs'
+import { copyTree } from './parsing/tree.mjs'
 let lexer
 /**
  * sets options of select element and initializes corresponding pipeline state

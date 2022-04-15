@@ -78,6 +78,31 @@ export class ASTLeaf extends AbstractSyntaxTree {
 }
 
 /**
+ * necessary when tree is parsed from JSON and type information is lost
+ * @param {*} tree 
+ * @returns {boolean}
+ */
+export function isLeaf(tree) {
+  return (
+    ('label' in tree && 'token' in tree && 'transformAST' in tree)
+    ||
+    ('label' in tree && 'value' in tree && !('children' in tree)))
+  // children comparison necessary since ASTNode has label and value, too
+}
+
+/**
+ * necessary when tree is parsed from JSON and type information is lost
+ * @param {*} tree 
+ * @returns {boolean}
+ */
+export function isNode(tree) {
+  return (
+    ('label' in tree && 'children' in tree && 'transformAST' in tree)
+    ||
+    ('label' in tree && 'children' in tree && 'value' in tree))
+}
+
+/**
  * @param {STNode} node 
  * @returns {AbstractSyntaxTree?}
  */
@@ -125,31 +150,33 @@ export function contractR(node, calculateValue = () => null) {
 }
 
 /**
- * depth-first traversal of (Abstract)SyntaxTrees
- * no return value, side-effect only
- * @param {SyntaxTree|AbstractSyntaxTree} st 
+ * depth-first traversal of (Abstract)SyntaxTrees,
+ * no return value, side-effect only,
+ * no type information is needed -> can be used with JSON
+ * @param {SyntaxTree|AbstractSyntaxTree} tree 
  * @param {(SyntaxTree|AbstractSyntaxTree) => void} cb 
  */
-export function dft(st, cb) {
-  if (st instanceof STLeaf || st instanceof ASTLeaf)
-    cb(st)
-  else if (st instanceof STNode || st instanceof ASTNode) {
-    cb(st)
-    for (const c of st.children)
+export function dft(tree, cb) {
+  if (isLeaf(tree))
+    cb(tree)
+  else if (isNode(tree)) {
+    for (const c of tree.children)
       dft(c, cb)
+    cb(tree)
   }
   else
     error('input is not a(n) (Abstract)SyntaxTree')
 }
 
 /**
- * breadth-first traversal of (Abstract)SyntaxTrees
- * no return value, side-effect only
- * @param {SyntaxTree|AbstractSyntaxTree} st 
+ * breadth-first traversal of (Abstract)SyntaxTrees,
+ * no return value, side-effect only,
+ * no type information is needed -> can be used with JSON
+ * @param {SyntaxTree|AbstractSyntaxTree} tree 
  * @param {(SyntaxTree|AbstractSyntaxTree) => void} cb 
  */
-export function bft(st, cb) {
-  const queue = [st]
+export function bft(tree, cb) {
+  const queue = [tree]
 
   iter()
 
@@ -157,19 +184,56 @@ export function bft(st, cb) {
     if (isEmpty(queue))
       return
 
-    const st = queue.shift()
+    const tree = queue.shift()
 
-    if (st instanceof STLeaf || st instanceof ASTLeaf) {
-      cb(st)
+    if (isLeaf(tree)) {
+      cb(tree)
       iter()
     }
-    else if (st instanceof STNode || st instanceof ASTNode) {
-      cb(st)
-      for (const c of st.children)
+    else if (isNode(tree)) {
+      cb(tree)
+      for (const c of tree.children)
         queue.push(c)
       iter()
     }
     else
       error('input is not a(n) (Abstract)SyntaxTree')  
+  }
+}
+
+/**
+ * @param {SyntaxTree|AbstractSyntaxTree} tree 
+ * @returns {SyntaxTree|AbstractSyntaxTree}
+ */
+export function copyTree(tree) {
+  if (tree instanceof STLeaf) {
+    const lexemCopy = copyObjectWithPrototype(tree.token.lexem)
+    const tokenCopy = new Token(tree.token.name, lexemCopy)
+    return new STLeaf(tree.label, tokenCopy, tree.transformAST)
+  }
+  else if (tree instanceof ASTLeaf) {
+    const valueCopy = copyAstValue(tree)
+    return new ASTLeaf(tree.label, valueCopy)
+  }
+  else if (tree instanceof STNode) {
+    const childrenCopy = tree.children.map(copyTree)
+    return new STNode(tree.label, childrenCopy, tree.transformAST)
+  }
+  else if (tree instanceof ASTNode) {
+    const childrenCopy = tree.children.map(copyTree)
+    const valueCopy = copyAstValue(tree)
+    return new ASTNode(tree.label, valueCopy, childrenCopy)
+  }
+  else
+    error('tree is not an (Abstract)SyntaxTree')
+
+  function copyObjectWithPrototype(obj) {
+    return Object.setPrototypeOf({ ...obj }, Object.getPrototypeOf(obj))
+  }
+
+  function copyAstValue(tree) {
+    return tree.value instanceof Object
+      ? copyObjectWithPrototype(tree.value)
+      : tree.value
   }
 }
