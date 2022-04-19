@@ -34,12 +34,23 @@ function shuffle(array) {
  * @param {AbstractSyntaxTree} ast
  * @returns {AbstractSyntaxTree}
  */
-function shuffleChildren(ast) {
+function shuffleRec(ast) {
   dft(ast, ast => {
     if (ast instanceof ASTNode)
       shuffle(ast.children)
   })
 
+  return ast
+}
+
+/**
+ * @param {ASTNode} ast
+ * @returns {ASTNode}
+ */
+function shuffleRoot(ast) {
+  if (ast instanceof ASTNode)
+    shuffle(ast.children)
+  
   return ast
 }
 
@@ -128,7 +139,12 @@ export default {
   },
 
   'shuffle-rec': {
-    tree: shuffleChildren,
+    tree: shuffleRec,
+    serialize: flatten
+  },
+
+  'shuffle-root': {
+    tree: shuffleRoot,
     serialize: flatten
   },
 

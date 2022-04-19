@@ -1,15 +1,14 @@
 # MA Status
 
 ## ToDo
-### Research
-- evaluation matrix in confluence
-- learn probabilities from call probabilities, see [this video series](https://youtu.be/2hLBHSKbS44)
 ### Technical
 - play with non-deterministic, multiple-way-expanding grammars
-  - rest separated motives?
 - add a new lexer config for interval tokens
+- amend general model: rests, tones, intervals between tones
 - implement motivic transformations (mirroring, cancer, etc.)
 - graph rendering -> jpg (or other pixel format) for thesis export
+### Experiments
+- rest-separated: rearranging fixed sections
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)

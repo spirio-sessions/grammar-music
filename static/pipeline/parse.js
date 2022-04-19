@@ -5,6 +5,16 @@ const defaultGrammar = [
   ['MORE', -1, [null]],
 ]
 
+const restSeparated = [
+  ['S', 0, ['MORE']],
+
+  ['MORE', 0, ['TONES', 'rest', 'MORE']],
+  ['MORE', 0, ['TONES']],
+
+  ['TONES', 0, ['tone', 'TONES']],
+  ['TONES', -1, ['tone']]
+]
+
 const peaks = [
   ['S', 0, ['MORE']],
   ['MORE', 0, ['TOKEN', 'MORE']],
@@ -80,6 +90,7 @@ const anyTwo = [
 
 export default {
   default: defaultGrammar,
+  'rest-separated': restSeparated,
   'vol-peak-seq': peaks,
   'beat-like-seq': beatLike,
   'rhythmic-seq': rhythm,
