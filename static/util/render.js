@@ -1,4 +1,4 @@
-import { Lexem, Tone } from './midi-handling.js'
+import { Lexem, MusicEvent, Tone } from './midi-handling.js'
 import { Token } from '../parsing/lexer.mjs'
 
 const canvasIn = document.getElementById('render-in')
@@ -42,14 +42,17 @@ function renderLexem(lexem, widthMs, h, minNoteNumber, ctx, colorizeToken = _ =>
  * @param {(t:Token)=>string} colorizeToken
  */
 export function renderLexems(lexems, direction, colorizeToken) {
-  const totalDuration = lexems
+  const musicEvents = lexems.filter(l => l instanceof MusicEvent)
+  
+  const totalDuration = musicEvents
     .reduce((acc, t) => acc += t.duration, 0)
   const widthMs = canvasIn.width / totalDuration
 
-  const minNoteNumber = lexems.reduce((minTone, lexem) =>
+  const tones = lexems.filter(l => l instanceof Tone)
+  const minNoteNumber = tones.reduce((minTone, lexem) =>
     lexem.noteNumber < minTone.noteNumber ? lexem : minTone
     , {noteNumber: 127}).noteNumber
-  const maxNoteNumber = lexems.reduce((maxTone, lexem) =>
+  const maxNoteNumber = tones.reduce((maxTone, lexem) =>
     lexem.noteNumber > maxTone.noteNumber ? lexem : maxTone
     , {noteNumber: 0}).noteNumber
   const ambitus = maxNoteNumber - minNoteNumber
@@ -61,7 +64,7 @@ export function renderLexems(lexems, direction, colorizeToken) {
 
   ctx.clearRect(0, 0, canvasIn.width, canvasIn.height)
   
-  lexems.forEach(t => renderLexem(t, widthMs, h, minNoteNumber, ctx, colorizeToken))
+  musicEvents.forEach(t => renderLexem(t, widthMs, h, minNoteNumber, ctx, colorizeToken))
   // important! reset x for next rendering
   x = 0
 }

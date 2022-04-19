@@ -51,15 +51,21 @@ function midiToPitch(noteNumber) {
   return pitch
 }
 
-export class Lexem{
-  constructor(type, start, duration) {
-    this.start = start // timestamp
+export class Lexem {
+  constructor(type) {
     this.type = type
+  }
+}
+
+export class MusicEvent extends Lexem {
+  constructor(type, start, duration) {
+    super(type)
+    this.start = start // timestamp
     this.duration = duration // ms
   }
 }
 
-export class Rest extends Lexem {
+export class Rest extends MusicEvent {
   constructor(start, duration) {
     super('rest', start, duration)
   }
@@ -73,7 +79,7 @@ export class Rest extends Lexem {
   }
 }
 
-export class Tone extends Lexem {
+export class Tone extends MusicEvent {
   constructor(start, duration, noteNumber, velocity) {
     super('tone', start, duration)
     
@@ -91,6 +97,14 @@ export class Tone extends Lexem {
 
   toString() {
     return `${this.pitch}`
+  }
+}
+
+// for analysis and annotation only
+export class Interval extends Lexem {
+  constructor(halfToneSteps) {
+    super('interval')
+    this.halfToneSteps = halfToneSteps
   }
 }
 

@@ -1,4 +1,4 @@
-import { Tone, Rest } from "../util/midi-handling.js"
+import { Tone, Rest, Interval } from "../util/midi-handling.js"
 
 const beatLikeTone = meter => lexem =>
   lexem instanceof Tone && lexem.noteValue > 1 && Math.round(lexem.noteValue % meter) === 0
@@ -18,15 +18,53 @@ const beatLike = {
   '?': lexem => lexem instanceof Tone
 }
 
+const isInterval = i => lexem => lexem instanceof Interval && lexem.halfToneSteps % 12 === i
+
+const intervals = {
+  'i-11': isInterval(-11),
+  'i-10': isInterval(-10),
+  'i-9': isInterval(-9),
+  'i-8': isInterval(-8),
+  'i-7': isInterval(-7),
+  'i-6': isInterval(-6),
+  'i-5': isInterval(-5),
+  'i-4': isInterval(-4),
+  'i-3': isInterval(-3),
+  'i-2': isInterval(-2),
+  'i-1': isInterval(-1),
+  'i0': isInterval(0),
+  'i1': isInterval(1),
+  'i2': isInterval(2),
+  'i3': isInterval(3),
+  'i4': isInterval(4),
+  'i5': isInterval(5),
+  'i6': isInterval(6),
+  'i7': isInterval(7),
+  'i8': isInterval(8),
+  'i9': isInterval(9),
+  'i10': isInterval(10),
+  'i11': isInterval(11)
+}
+
+const eventsIntervals = {
+  'tone': lexem => lexem instanceof Tone,
+  'rest': lexem => lexem instanceof Rest,
+  ...intervals
+}
+
 // Lexem => bool
 export default {
   default: defaultLex,
+  
+  'beat-like': beatLike,
+
+  'events-intervals': eventsIntervals,
+
+  intervals: intervals,
 
   peaks: {
     peak: lexem => lexem instanceof Tone && lexem.peak,
     fill: lexem => lexem instanceof Tone && !lexem.peak,
     rest: lexem => lexem instanceof Rest
-  },
-
-  'beat-like': beatLike
+  }
 }

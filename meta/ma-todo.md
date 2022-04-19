@@ -3,8 +3,6 @@
 ## ToDo
 ### Technical
 - play with non-deterministic, multiple-way-expanding grammars
-- add a new lexer config for interval tokens
-- amend general model: rests, tones, intervals between tones
 - implement motivic transformations (mirroring, cancer, etc.)
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
