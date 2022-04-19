@@ -1,4 +1,3 @@
-import { isEmpty } from './util.mjs'
 import { Token } from './lexer.mjs'
 import { Grammar } from './grammar.mjs'
 import { SyntaxTree, STNode, STLeaf, STEmpty } from './tree.mjs'
@@ -161,11 +160,13 @@ export class Parser {
    * @returns {{st:SyntaxTree,index:Integer}} 
    */
   run(...tokens) {
-    if (isEmpty(tokens))
+    if (tokens.isEmpty())
       throw new Error('empty parser input')
 
     this.tokens = tokens
     const result = this.parse('S', 0)
+
+    // TODO: reject result if not all tokens have been consumed
     
     if (!result.success)
       throw new Error(`parsing failed at position ${result.index} for symbol '${result.symbol}': ${result.reason}`)

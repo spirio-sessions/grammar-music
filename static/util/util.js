@@ -1,3 +1,21 @@
+Number.prototype.mod = function(n) {
+  return ((this % n) + n) % n
+}
+
+Array.prototype.isEmpty = function () {
+  return this.length === 0
+}
+
+/**
+ * @param {String} message 
+ */
+export function error(message) {
+  throw new Error(message)
+}
+
+/**
+ * @param {Number} ms 
+ */
 export async function sleep(ms) {
   await new Promise(r => setTimeout(r, ms))
 }
@@ -95,29 +113,4 @@ export const aggregateTokens = tokens => {
       acc.push(t)
     return acc
   }, [])
-}
-
-export const hanning = buffer => 
-  buffer.map((sample, i) => sample * Math.sin(Math.PI * i / buffer.length) ** 2)
-
-export const zeroPad = (buffer, length) => {
-  const array = Array.from(buffer)
-  array.unshift(...new Array(length).fill(0))
-  array.push(...new Array(length).fill(0))
-  return array
-}
-
-export const applyWindow = (reach, hop = 1, window = hanning) => buffer => {
-  const zeroPadded = zeroPad(buffer, reach)
-
-  let frame, newValue
-  const windowed = []
-
-  for (let i = reach; i < zeroPadded.length - reach; i += hop){
-      frame = zeroPadded.slice(i - reach, i + reach) 
-      newValue = avg(window(frame))
-      windowed.push(newValue)
-  }
-
-  return windowed
 }

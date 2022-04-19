@@ -1,5 +1,5 @@
 import { Token } from "./lexer.mjs"
-import { error, isEmpty } from "./util.mjs"
+import { error } from "../util/util.js"
 
 export class SyntaxTree {
   /**
@@ -181,7 +181,7 @@ export function bft(tree, cb) {
   iter()
 
   function iter() {
-    if (isEmpty(queue))
+    if (queue.isEmpty())
       return
 
     const tree = queue.shift()

@@ -1,4 +1,4 @@
-import { isEmpty, error } from './util.mjs'
+import { error } from '../util/util.js'
 import { contractR, bubbleOne } from './tree.mjs'
 
 class Production {
@@ -65,12 +65,12 @@ export class Grammar {
   * @returns {Grammar}
   */
   static from(terminals, productions) {
-    if (isEmpty(terminals))
+    if (terminals.isEmpty())
       error('no terminals provided')
     if (containsFalsyValue(terminals))
       error('terminals must no contain falsy values')
 
-    if (isEmpty(productions))
+    if (productions.isEmpty())
       error('no productions provided')
     if (containsFalsyValue(productions))
       error('productions may not contain falsy values')

@@ -144,8 +144,8 @@ function restartIfReady() {
 import { Grammar } from './parsing/grammar.mjs'
 import { Lexer } from './parsing/lexer.mjs'
 import { Parser } from './parsing/parser.mjs'
-import { error } from './parsing/util.mjs'
 import { copyTree } from './parsing/tree.mjs'
+import { error } from './util/util.js'
 let lexer
 /**
  * sets options of select element and initializes corresponding pipeline state

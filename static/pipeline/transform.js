@@ -1,6 +1,6 @@
 import { Lexem } from '../util/midi-handling.js'
 import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/tree.mjs'
-import { error } from '../parsing/util.mjs'
+import { error } from '../util/util.js'
 
 const id = thing => thing
 
@@ -14,8 +14,15 @@ const bpmToPeriodMs = bpm => 60000 / bpm
 function shuffle(array) {
   if (!Array.isArray(array))
     error('input must be array')
+
   if (array.length < 2)
     return array
+
+  // kinda fake but sounds better, if trees with two children are always shuffled
+  if (array.length === 2) {
+    [array[0], array[1]] = [array[1], array[0]]
+    return
+  }
 
   let currentIndex = array.length, randomIndex
 
