@@ -1,8 +1,6 @@
 import { Lexem } from '../util/midi-handling.js'
 import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree, copyTree } from '../parsing/tree.mjs'
-import { randomChoice } from '../util/util.js'
-
-const id = thing => thing
+import { id, randomChoice } from '../util/util.js'
 
 const bpmToPeriodMs = bpm => 60000 / bpm
 
@@ -66,17 +64,17 @@ function straight2swing(ast) {
  * @returns {(ast:ASTNode)=>ASTNode}
  */
 function mkDropSubTrees(weightedSelectors) {
-  return ast => {
-    if (!ast instanceof ASTNode)
-      return ast
+  return node => {
+    if (!node instanceof ASTNode)
+      return node
 
-    for (let i = 0; i < ast.children.length; i++) {
+    for (let i = 0; i < node.children.length; i++) {
       if (!weightedSelectors)
         dropProbabilistically()
 
       else
         Object.keys(weightedSelectors).forEach(label => {
-          if (label === ast.children[i].label) {
+          if (label === node.children[i].label) {
             dropProbabilistically(weightedSelectors[label])
             return
           }
@@ -84,13 +82,13 @@ function mkDropSubTrees(weightedSelectors) {
 
       function dropProbabilistically(w) {
         if (randomChoice(w))
-          ast.children[i] = undefined
+          node.children[i] = undefined
       }
     }
 
-    ast.children = ast.children.filter(c => c !== undefined)
+    node.children = node.children.filter(c => c !== undefined)
 
-    return ast
+    return node
   }
 }
 
@@ -100,13 +98,13 @@ function mkDropSubTrees(weightedSelectors) {
  * @returns {(ast:ASTNode)=>ASTNode}
  */
 function mkDoubleSubTrees(weightedSelectors) {
-  return ast => {
-    if (!ast instanceof ASTNode)
-      return ast
+  return node => {
+    if (!node instanceof ASTNode)
+      return node
     
     const newChildren = []
     
-    ast.children.forEach(c => {
+    node.children.forEach(c => {
       newChildren.push(c)
 
       if (!weightedSelectors)
@@ -128,10 +126,34 @@ function mkDoubleSubTrees(weightedSelectors) {
       }
     })
 
-    ast.children = newChildren
+    node.children = newChildren
 
-    return ast
+    return node
   }
+}
+
+/**
+ * equivalent of musical cancer transformation,
+ * modifies input AST
+ * @param {ASTNode} node node with only leafs as children
+ * @returns {ASTNode}
+ */
+function reverseSubTreesVert(node) {
+  if (node instanceof ASTNode)
+    node.children.reverse()
+
+  return node
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} ast 
+ * @returns {ASTNode}
+ */
+function reverseVertRec(ast) {
+  dft(ast, reverseSubTreesVert)
+
+  return ast
 }
 
 /**
@@ -186,11 +208,6 @@ export default {
     serialize: flatten
   },
 
-  'flat-reverse': {
-    tree: id,
-    serialize: st => flatten(st).reverse()
-  },
-
   'shuffle-rec': {
     tree: shuffleRec,
     serialize: flatten
@@ -207,7 +224,7 @@ export default {
   },
 
   'drop-root-tones': {
-    tree: mkDropSubTrees({tone: Infinity}),
+    tree: mkDropSubTrees(),
     serialize: flatten
   },
 
@@ -216,13 +233,24 @@ export default {
     serialize: flatten
   },
 
-  'rhythm-straight2swing': {
-    tree: straight2swing,
+  'double-root-tones': {
+    tree: mkDoubleSubTrees(),
     serialize: flatten
   },
 
-  'double-root-tones': {
-    tree: mkDoubleSubTrees({tone: Infinity}),
+  'reverse-root-sub': {
+    tree: reverseSubTreesVert,
+    serialize: flatten
+  },
+
+  'reverse-rec': {
+    tree: reverseVertRec,
+    serialize: flatten
+  },
+
+  'rhythm-straight2swing': {
+    tree: straight2swing,
     serialize: flatten
   }
+
 }
