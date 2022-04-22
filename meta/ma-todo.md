@@ -2,8 +2,9 @@
 
 ## ToDo
 ### Technical
-- play with non-deterministic, multiple-way-expanding grammars
+- fix protocol building: combine recordings with parse trees
 - implement motivic transformations (mirroring, cancer, etc.)
+- play with non-deterministic, multiple-way-expanding grammars
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
 - rest-separated: rearranging fixed sections
