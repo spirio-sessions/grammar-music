@@ -87,11 +87,7 @@ function fillProtocol(call, response, st, ast, transformedAst) {
   
   if (!Array.isArray(protocol.recording))
     protocol.recording = []
-  protocol.recording.push(call, response)
-
-  protocol.st = st
-  protocol.ast = ast
-  protocol.transformAST = transformedAst
+  protocol.recording.push({ call, st, ast, transformedAst, response })
 }
 
 async function run() {
@@ -294,6 +290,14 @@ saveProtocolButton.onclick = async () => {
   const id = await getNewId()
   downloadProtocol(id)
   await uploadProtocol(id)
+
+  protocol = {
+    config: {},
+    comment: '',
+    recording: []
+  }
+
+  restartIfReady()
 }
 //#endregion
 
