@@ -30,6 +30,10 @@ Array.prototype.shuffle = function() {
   return this
 }
 
+export function id(any) {
+  return any
+}
+
 /**
  * @param {String} message 
  */

@@ -1,6 +1,6 @@
 import { estimateBpm, annotateNoteValues} from '../util/analyse.js'
 import { Interval, Rest, Tone } from '../util/midi-handling.js'
-import { error } from '../util/util.js'
+import { error, id } from '../util/util.js'
 
 const filterShortRests = lexems => 
   lexems.filter(l => !(l instanceof Rest && l.noteValue < 1))
@@ -78,7 +78,7 @@ function intervals(lexems) {
 
 // [Lexem] => [Lexem]
 export default {
-  default: noteValues, //lexems => lexems ,
+  default: id,
 
   'note-value': noteValues,
 
