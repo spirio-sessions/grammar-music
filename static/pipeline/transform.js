@@ -1,38 +1,10 @@
 import { Lexem } from '../util/midi-handling.js'
-import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree } from '../parsing/tree.mjs'
-import { error } from '../util/util.js'
+import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree, copyTree } from '../parsing/tree.mjs'
+import { randomChoice } from '../util/util.js'
 
 const id = thing => thing
 
 const bpmToPeriodMs = bpm => 60000 / bpm
-
-/**
- * modern Fisher-Yates array shuffle, modifies array
- * @param {Array} array 
- * @returns {void}
- */
-function shuffle(array) {
-  if (!Array.isArray(array))
-    error('input must be array')
-
-  if (array.length < 2)
-    return array
-
-  // kinda fake but sounds better, if trees with two children are always shuffled
-  if (array.length === 2) {
-    [array[0], array[1]] = [array[1], array[0]]
-    return
-  }
-
-  let currentIndex = array.length, randomIndex
-
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex)
-    currentIndex--
-
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]
-  }
-}
 
 //#region tree transformations
 
@@ -44,19 +16,19 @@ function shuffle(array) {
 function shuffleRec(ast) {
   dft(ast, ast => {
     if (ast instanceof ASTNode)
-      shuffle(ast.children)
+      ast.children.shuffle()
   })
 
   return ast
 }
 
 /**
- * @param {ASTNode} ast
+ * @param {ASTNode} ast root AST node
  * @returns {ASTNode}
  */
 function shuffleRoot(ast) {
   if (ast instanceof ASTNode)
-    shuffle(ast.children)
+    ast.children.shuffle()
   
   return ast
 }
@@ -86,6 +58,80 @@ function straight2swing(ast) {
   })
 
   return ast
+}
+
+/**
+ * probabilistically drop subtree
+ * @param {Object.<string,number>} weightedSelectors
+ * @returns {(ast:ASTNode)=>ASTNode}
+ */
+function mkDropSubTrees(weightedSelectors) {
+  return ast => {
+    if (!ast instanceof ASTNode)
+      return ast
+
+    for (let i = 0; i < ast.children.length; i++) {
+      if (!weightedSelectors)
+        dropProbabilistically()
+
+      else
+        Object.keys(weightedSelectors).forEach(label => {
+          if (label === ast.children[i].label) {
+            dropProbabilistically(weightedSelectors[label])
+            return
+          }
+        })
+
+      function dropProbabilistically(w) {
+        if (randomChoice(w))
+          ast.children[i] = undefined
+      }
+    }
+
+    ast.children = ast.children.filter(c => c !== undefined)
+
+    return ast
+  }
+}
+
+/**
+ * probabilistically drop subtree
+ * @param {Object.<string,number>} weightedSelectors
+ * @returns {(ast:ASTNode)=>ASTNode}
+ */
+function mkDoubleSubTrees(weightedSelectors) {
+  return ast => {
+    if (!ast instanceof ASTNode)
+      return ast
+    
+    const newChildren = []
+    
+    ast.children.forEach(c => {
+      newChildren.push(c)
+
+      if (!weightedSelectors)
+        doubleProbabilistically()
+      
+      else
+        Object.keys(weightedSelectors).forEach(label => {
+          if (label === c.label) {
+            doubleProbabilistically(weightedSelectors[label])
+            return
+          }
+        })
+      
+      function doubleProbabilistically(w) {
+        if (randomChoice(w)) {
+          const subTreeCopy = copyTree(c)
+          newChildren.push(subTreeCopy)
+        }
+      }
+    })
+
+    ast.children = newChildren
+
+    return ast
+  }
 }
 
 /**
@@ -155,8 +201,28 @@ export default {
     serialize: flatten
   },
 
+  'drop-root-sub': {
+    tree: mkDropSubTrees(),
+    serialize: flatten
+  },
+
+  'drop-root-tones': {
+    tree: mkDropSubTrees({tone: Infinity}),
+    serialize: flatten
+  },
+
+  'double-root-sub': {
+    tree: mkDoubleSubTrees(),
+    serialize: flatten
+  },
+
   'rhythm-straight2swing': {
     tree: straight2swing,
+    serialize: flatten
+  },
+
+  'double-root-tones': {
+    tree: mkDoubleSubTrees({tone: Infinity}),
     serialize: flatten
   }
 }

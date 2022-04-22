@@ -1,9 +1,33 @@
-Number.prototype.mod = function(n) {
-  return ((this % n) + n) % n
+//#region misc utils
+
+Array.prototype.isEmpty = function() {
+  return this.length === 0
 }
 
-Array.prototype.isEmpty = function () {
-  return this.length === 0
+/**
+ * modern Fisher-Yates array shuffle, modifies array
+ * @returns {Array} modified this
+ */
+Array.prototype.shuffle = function() {
+  if (this.length < 2)
+    return this
+
+  // kinda fake but sounds better, if trees with two children are always shuffled
+  if (this.length === 2) {
+    [this[0], this[1]] = [this[1], this[0]]
+    return
+  }
+
+  let currentIndex = this.length, randomIndex
+
+  while (currentIndex > 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+
+    [this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]]
+  }
+
+  return this
 }
 
 /**
@@ -18,6 +42,14 @@ export function error(message) {
  */
 export async function sleep(ms) {
   await new Promise(r => setTimeout(r, ms))
+}
+
+//#endregion
+
+//#region math utils
+
+Number.prototype.mod = function(n) {
+  return ((this % n) + n) % n
 }
 
 export const argTop = k => array => {
@@ -45,6 +77,16 @@ export const median = values => {
   else
     return (values[half - 1] + values[half]) / 2.0
 }
+
+/**
+ * @param {Number} w weight factor of true in [0, infty], 0 => false, infty => true
+ * @returns {Boolean}
+ */
+export const randomChoice = (w = 1) => Math.round(Math.random() * w)
+
+//#endregion
+
+//#region music utils
 
 export const fToTone = (fA4 = 440) => f => {
   if (f <= 0)
@@ -114,3 +156,5 @@ export const aggregateTokens = tokens => {
     return acc
   }, [])
 }
+
+//#endregion
