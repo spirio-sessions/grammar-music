@@ -222,11 +222,18 @@
         playing = true
         playStopButton.innerText = 'Stop'
 
-        for (const piece of protocol.recording) {
+        for (const midiChunk of getMidiChunksFromProtocol()) {
           if (!playing)
             return
           else
-            await transfer(piece, midiOutput)
+            await transfer(midiChunk, midiOutput)
+        }
+
+        playing = false
+        playStopButton.innerText = 'Play'
+
+        function getMidiChunksFromProtocol() {
+          return protocol.recording.flatMap(pass => [pass.call, pass.response])
         }
       }
     </script>
