@@ -2,6 +2,8 @@
 
 ## ToDo
 ### Technical
+- make comments in debug midi editable
+- fix playing in debug midi
 - implement motivic transformations (mirroring, cancer, etc.)
 - play with non-deterministic, multiple-way-expanding grammars
 - graph rendering -> jpg (or other pixel format) for thesis export
