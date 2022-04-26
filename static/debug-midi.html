@@ -18,7 +18,6 @@
     }
 
     button {
-      width: 5em;
       height: 3em;
     }
 
@@ -43,6 +42,23 @@
 
     .pointer {
       cursor: pointer;
+    }
+
+    #protocol-select-play {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+    }
+
+    #play-stop-button {
+      width: 6em;
+    }
+
+    #comment-fieldset {
+      display: flex;
+      flex-flow: column;
+      align-items: stretch;
+      gap: 1em;
     }
   </style>
 
@@ -120,30 +136,35 @@
 
   <div class="right panel">
 
-    <h2>Play Protocol Recording</h2>
+    <h2>Review Protocol Recording</h2>
 
-    <fieldset>
-      <legend>Protocol Menu</legend>
-      <select class="pointer" id="protocol-select"></select>
-    </fieldset>
-    
-    <fieldset>
-      <legend>MIDI Out</legend>
-      <select class="pointer" id="midi-output-select"></select>
-    </fieldset>
-    
-    <button id="play-stop-button" class="pointer">Play</button>
-    
-    <fieldset>
+    <div id="protocol-select-play">
+
+      <fieldset>
+        <legend>Protocol Menu</legend>
+        <select class="pointer" id="protocol-select"></select>
+      </fieldset>
+      
+      <fieldset>
+        <legend>MIDI Out</legend>
+        <select class="pointer" id="midi-output-select"></select>
+      </fieldset>
+      
+      <button id="play-stop-button" class="pointer">Play</button>
+      
+    </div>
+
+    <fieldset id="comment-fieldset">
       <legend>Protocol Comment</legend>
-      <textarea id="protocol-comment" cols="50" rows="20" readonly></textarea>
+      <textarea id="protocol-comment" cols="50" rows="20"></textarea>
+      <button id="update-protocol-button" class="pointer">Update</button>
     </fieldset>
     
     <script type="module">
       import { transfer } from './util/midi-handling.js'
 
       const protocolSelect = document.getElementById('protocol-select')
-      let protocol
+      let protocol, protocolId
 
       midiAccess = await navigator.requestMIDIAccess()
       const midiOutputSelect = document.getElementById('midi-output-select')
@@ -161,7 +182,10 @@
       midiOutputSelect.onchange = setMidiOutput
 
       let playing = false
-      playStopButton.onclick = playStop 
+      playStopButton.onclick = playStop
+
+      const updateProtocolButton = document.getElementById('update-protocol-button')
+      updateProtocolButton.onclick = updateProtocol
 
       async function populateProtocolSelect() {
         const ids = await fetch('/protocol/ids')
@@ -180,8 +204,8 @@
       }
 
       async function setProtocol() {
-        const id = protocolSelect.value
-        protocol = await fetch(`/protocol?id=${id}`)
+        protocolId = protocolSelect.value
+        protocol = await fetch(`/protocol?id=${protocolId}`)
           .then(res => res.json())
           .catch(_ => alert('failed to fetch protocol'))
         commentTextArea.value = protocol.comment
@@ -235,6 +259,25 @@
         function getMidiChunksFromProtocol() {
           return protocol.recording.flatMap(pass => [pass.call, pass.response])
         }
+      }
+    
+      async function updateProtocol() {
+        const newComment = commentTextArea.value
+
+        if (newComment === protocol.comment)
+          return
+
+        protocol.comment = newComment
+
+        await fetch(`/protocol?id=${protocolId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(protocol)
+        })
+        .then(_ => alert('successfully updated protocol ' + protocolId))
+        .catch(_ => alert('failed to post updated protocol'))
       }
     </script>
   </div>
