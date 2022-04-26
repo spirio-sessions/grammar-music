@@ -72,7 +72,9 @@ export function renderLexems(lexems, direction, colorizeToken) {
 import { SyntaxTree, STLeaf, bft, ASTLeaf, AbstractSyntaxTree, isNode, isLeaf } from '../parsing/tree.mjs'
 
 // leaf is only container, print token
-const defaultPrintLeaf = l => l.label
+const defaultPrintLeaf = l => 'value' in l && 'toString' in l.value
+  ? l.value.toString()
+  : l.label
 
 /**
  * Prints a default graphviz dot representation for a syntax tree.
