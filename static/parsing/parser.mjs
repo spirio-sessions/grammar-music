@@ -165,8 +165,6 @@ export class Parser {
 
     this.tokens = tokens
     const result = this.parse('S', 0)
-
-    // TODO: reject result if not all tokens have been consumed
     
     if (!result.success)
       throw new Error(`parsing failed at position ${result.index} for symbol '${result.symbol}': ${result.reason}`)
