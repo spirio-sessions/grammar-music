@@ -109,6 +109,17 @@ export class Interval extends Lexem {
 }
 
 /**
+ * @param {MIDIMessageEvent} midiMessage
+ * @returns {boolean}
+ */
+export function isControlChange(midiMessage) {
+  const statusCode = midiMessage.data[0]
+  const statusPrefix = statusCode >> 4
+  
+  return statusPrefix === 11
+}
+
+/**
  * @param {Number} tStart
  * @param {(result:Tone|Rest|undefined)=>void} callback 
  * @returns {(message:MIDIMessageEvent)=>void}

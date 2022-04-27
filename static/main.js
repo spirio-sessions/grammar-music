@@ -47,7 +47,7 @@ const configs = {
 
 
 //#region setup main routine
-import { mkMidiHandler, Lexem } from './util/midi-handling.js'
+import { mkMidiHandler, Lexem, isControlChange } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
 import { renderLexems, renderTree } from './util/render.js'
@@ -72,7 +72,13 @@ function onMidiMessageHandeled(result) {
 function setOnMidiMessage(startTime, callback) {
   // if callback is falsy, undefined will be set as handler and midi handling thus stopped
   const handler = mkMidiHandler(startTime, callback)
-  pipeline['midi-in'].onmidimessage = handler
+  
+  pipeline['midi-in'].onmidimessage = message => {
+    if (isControlChange(message))
+      run()
+    else
+      handler(message)
+  }
 }
 
 /**
