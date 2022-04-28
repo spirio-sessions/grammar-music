@@ -7,19 +7,15 @@ const port = 8080
 app.use(express.static('static'))
 app.use(express.json())
 
-let nextId = 0
-app.get('/id', (req, res) => {
-  if (req.query.lastId && typeof(req.query.lastId) === 'string')
-    nextId = Number.parseInt(req.query.lastId) + 1
-
+app.get('/id', (_, res) => {
+  const counter = nextCounter()
   const today = new Date()
 
   res
     .status(200)
     .type('json')
-    .json({id: `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}-${nextId}`})
-
-  nextId++
+    // month + 1 because january = 0
+    .json({id: `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}-${counter}`})
 })
 
 app.post('/protocol', (req, res) => {
@@ -67,6 +63,42 @@ app.get('/protocol/ids', (_, res) => {
   })
 })
 
-app.listen(port, () => {
+app.listen(port, _ => {
   console.log(`grammar music listening on port ${port}`)
 })
+
+
+
+function nextCounter() {
+  const filePath = 'nextCounter'
+  let counter
+
+  if (fs.existsSync(filePath)) {
+    try {
+      const counterString = fs.readFileSync(filePath)
+      counter = Number.parseInt(counterString)
+    }
+    catch(err) {
+      throw new Error('could not retrieve counter: ' + err)
+    }
+      
+    try {
+      const nextCounterString = `${counter+1}`
+      fs.writeFileSync(filePath, nextCounterString)
+    }
+    catch(err) {
+      throw new Error('could not set new counter: ' + err)
+    }
+  }
+  else {
+    try {
+      fs.writeFileSync(filePath, `${1}`)
+      counter = 0
+    }
+    catch(err) {
+      throw new Error('could not set new counter: ' + err)
+    }
+  }
+
+  return counter
+}
