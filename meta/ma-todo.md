@@ -2,11 +2,12 @@
 
 ## ToDo
 ### Technical
-- implement motivic transformations (mirroring, cancer, etc.)
-- play with non-deterministic, multiple-way-expanding grammars
+- implement new grammar prototypes inspired by felix (see notes)
+- implement harmonic transformation cancer aka vertical flip for sequence of tones
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
 - rest-separated: rearranging fixed sections
+- new felix grammars
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)
