@@ -119,6 +119,13 @@ export function isControlChange(midiMessage) {
   return statusPrefix === 11
 }
 
+
+export function isPedalDown(midiMessage) {
+  const velocity = midiMessage.data[2]
+
+  return isControlChange(midiMessage) && velocity === 0 
+}
+
 /**
  * @param {Number} tStart
  * @param {(result:Tone|Rest|undefined)=>void} callback 

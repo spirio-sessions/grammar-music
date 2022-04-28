@@ -47,7 +47,7 @@ const configs = {
 
 
 //#region setup main routine
-import { mkMidiHandler, Lexem, isControlChange } from './util/midi-handling.js'
+import { mkMidiHandler, Lexem, isPedalDown } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
 import { renderLexems, renderTree } from './util/render.js'
@@ -74,7 +74,7 @@ function setOnMidiMessage(startTime, callback) {
   const handler = mkMidiHandler(startTime, callback)
   
   pipeline['midi-in'].onmidimessage = message => {
-    if (isControlChange(message))
+    if (isPedalDown(message))
       run()
     else
       handler(message)
