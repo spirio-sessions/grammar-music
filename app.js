@@ -2,7 +2,6 @@ import express from 'express'
 import fs from 'fs'
 
 const app = express()
-const port = 80
 
 app.use(express.static('static'))
 app.use(express.json())
@@ -63,12 +62,6 @@ app.get('/protocol/ids', (_, res) => {
   })
 })
 
-app.listen(port, _ => {
-  console.log(`grammar music listening on port ${port}`)
-})
-
-
-
 function nextCounter() {
   const filePath = 'nextCounter'
   let counter
@@ -102,3 +95,5 @@ function nextCounter() {
 
   return counter
 }
+
+export { app as default }
