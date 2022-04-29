@@ -2,7 +2,7 @@ import fs from 'fs'
 import https from 'https'
 import app from './app.js'
 
-const port = 80
+const port = 443
 
 https
   .createServer({
