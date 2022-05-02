@@ -223,21 +223,16 @@ function tonesFromIntervals(intervals) {
  * @returns {[Lexem]}
  */
 function flatten(ast) {
-    const output = []
+    const flat = []
     dft(ast, ast => {
       if (ast instanceof ASTLeaf)
-        output.push(ast.value)
+        flat.push(ast.value)
     })
-    return output
-}
 
-/**
- * @param {SyntaxTree} ast 
- * @returns {[Tone]}
- */
-function flattenIntervals(ast) {
-  const intervals = flatten(ast)
-  return tonesFromIntervals(intervals)
+    if (flat.every(lexem => lexem instanceof Interval))
+      return tonesFromIntervals(flat)
+    else
+      return flat
 }
 
 //#endregion
@@ -252,7 +247,7 @@ export default {
 
   'default-intervals': {
     tree: id,
-    serialize: flattenIntervals
+    serialize: flatten
   },
 
   'shuffle-rec': {
