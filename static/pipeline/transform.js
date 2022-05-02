@@ -1,4 +1,4 @@
-import { Lexem } from '../util/midi-handling.js'
+import { Interval, Lexem, Tone } from '../util/midi-handling.js'
 import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree, copyTree } from '../parsing/tree.mjs'
 import { id, randomChoice } from '../util/util.js'
 
@@ -186,6 +186,39 @@ function matchTransform(config) {
 //#region serialization
 
 /**
+ * @param {[Interval]} intervals
+ * @returns {[Tone]}
+ */
+function tonesFromIntervals(intervals) {
+  if (intervals.isEmpty())
+    return []
+  
+  if (intervals.length === 1)
+    return [intervals[0].from, intervals[0].to]
+
+  const tones = [intervals[0].from, intervals[0].to]
+  const remainingIntervals = intervals.slice(1)
+
+  remainingIntervals.forEach(interval => {
+    if (!isSameTone(tones.at(-1), interval.from))
+      tones.push(interval.from)
+    
+    tones.push(interval.to)
+  })
+
+  return tones
+
+  /**
+   * @param {Tone} left 
+   * @param {Tone} right 
+   * @returns {boolean}
+   */
+  function isSameTone(left, right) {
+    return left.noteNumber === right.noteNumber
+  }
+}
+
+/**
  * @param {SyntaxTree} ast 
  * @returns {[Lexem]}
  */
@@ -198,6 +231,15 @@ function flatten(ast) {
     return output
 }
 
+/**
+ * @param {SyntaxTree} ast 
+ * @returns {[Tone]}
+ */
+function flattenIntervals(ast) {
+  const intervals = flatten(ast)
+  return tonesFromIntervals(intervals)
+}
+
 //#endregion
 
 // tree :: AbstractSyntaxTree => AbstractSyntaxTree
@@ -206,6 +248,11 @@ export default {
   default: {
     tree: id,
     serialize: flatten
+  },
+
+  'default-intervals': {
+    tree: id,
+    serialize: flattenIntervals
   },
 
   'shuffle-rec': {
