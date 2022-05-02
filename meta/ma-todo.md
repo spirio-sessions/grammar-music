@@ -2,6 +2,7 @@
 
 ## ToDo
 ### Technical
+- fix intervallic rendering, token labels vs. lexem toString
 - implement new grammar prototypes inspired by felix (see notes)
 - implement harmonic transformation cancer aka vertical flip for sequence of tones
 - graph rendering -> jpg (or other pixel format) for thesis export

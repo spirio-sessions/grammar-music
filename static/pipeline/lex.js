@@ -18,7 +18,9 @@ const beatLike = {
   '?': lexem => lexem instanceof Tone
 }
 
-const isInterval = i => lexem => lexem instanceof Interval && lexem.halfToneSteps % 12 === i
+const isInterval = i => lexem => 
+  lexem instanceof Interval &&
+  lexem.halfToneSteps % 12 === i
 
 const intervals = {
   'i-11': isInterval(-11),
@@ -52,6 +54,45 @@ const eventsIntervals = {
   ...intervals
 }
 
+const isUnison = lexem =>
+  isInterval(0)(lexem)
+
+const isScaleUp = lexem =>
+  lexem instanceof Interval &&
+  (lexem.halfToneSteps === 1 || lexem.halfToneSteps === 2)
+
+const isScaleDown = lexem =>
+  lexem instanceof Interval &&
+  (lexem.halfToneSteps === -1 || lexem.halfToneSteps === -2)
+
+const isArpegUp = lexem =>
+  lexem instanceof Interval &&
+  lexem.halfToneSteps >= 3 &&
+  lexem.halfToneSteps <= 7
+
+const isArpegDown = lexem =>
+  lexem instanceof Interval &&
+  lexem.halfToneSteps <= -3 &&
+  lexem.halfToneSteps >= -7
+
+const isJumpUp = lexem =>
+  lexem instanceof Interval &&
+  lexem.halfToneSteps > 7
+
+const isJumpDown = lexem =>
+  lexem instanceof Interval &&
+  lexem.halfToneSteps < -7
+
+const intervallic = {
+  'unison': isUnison, 
+  'scale-up': isScaleUp,
+  'scale-down': isScaleDown,
+  'arpeg-up': isArpegUp,
+  'arpeg-down': isArpegDown,
+  'jump-up': isJumpUp,
+  'jump-down': isJumpDown
+}
+
 // Lexem => bool
 export default {
   default: defaultLex,
@@ -61,6 +102,8 @@ export default {
   'events-intervals': eventsIntervals,
 
   intervals: intervals,
+
+  intervallic: intervallic,
 
   peaks: {
     peak: lexem => lexem instanceof Tone && lexem.peak,
