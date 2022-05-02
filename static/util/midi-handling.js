@@ -102,9 +102,15 @@ export class Tone extends MusicEvent {
 
 // for analysis and annotation only
 export class Interval extends Lexem {
-  constructor(halfToneSteps) {
+  constructor(halfToneSteps, from, to) {
     super('interval')
     this.halfToneSteps = halfToneSteps
+    this.from = from
+    this.to = to
+  }
+
+  toString() {
+    return this.from.toString() + "-" + this.to.toString()
   }
 }
 

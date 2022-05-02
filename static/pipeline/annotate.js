@@ -66,7 +66,7 @@ function intervals(lexems) {
     right = lexems[i]
 
     if (left instanceof Tone && right instanceof Tone) {
-      const interval = new Interval(right.noteNumber - left.noteNumber)
+      const interval = new Interval(right.noteNumber - left.noteNumber, left, right)
       intervals.push(interval)
     }
 

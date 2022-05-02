@@ -102,11 +102,12 @@ async function run() {
   const newLexems = lexems.slice(lexemCursor)
   lexemCursor = lexems.length
 
+  renderLexems(newLexems, 'in', pipeline.style.colorizeToken)
+
   const annotatedLexems = pipeline.annotate(newLexems)
 
   const tokens = pipeline.lex(annotatedLexems)
-  const tokenizedLexems = tokens.map(t => t.lexem)
-  renderLexems(tokenizedLexems, 'in', pipeline.style.colorizeToken)
+  // const tokenizedLexems = tokens.map(t => t.lexem)
 
   const { st } = pipeline.parse(tokens)
   await renderTree(treeInDisplayId, st, pipeline.style.printLeaf)
