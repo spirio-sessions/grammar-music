@@ -167,6 +167,7 @@
     
     <script type="module">
       import { transfer } from './util/midi-handling.js'
+      import { sleep } from './util/util.js'
 
       const protocolSelect = document.getElementById('protocol-select')
       let protocol, protocolId
@@ -257,8 +258,10 @@
         for (const midiChunk of getMidiChunksFromProtocol()) {
           if (!playing)
             return
-          else
+          else {
             await transfer(midiChunk, midiOutput)
+            await sleep(2000)
+          }
         }
 
         playing = false

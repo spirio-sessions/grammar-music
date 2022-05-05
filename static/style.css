@@ -31,10 +31,6 @@ select {
   border: 2px solid black;
 }
 
-#run {
-  width: 6em;
-}
-
 #rendering {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -59,16 +55,24 @@ select {
   overflow-y: scroll;
 }
 
-#toggle-tree {
-  width: 6em;
-}
-
 .pointer {
   cursor: pointer;
 }
 
-#protocol {
+#protocol-and-buttons {
+  width: 1224px;
   display: flex;
+  justify-content: stretch;
   align-items: stretch;
+  gap: 1em;
+}
+
+#comment-input {
+  flex-grow: 1;
+}
+
+.button-container {
+  width: 8em;
+  display: grid;
   gap: 1em;
 }

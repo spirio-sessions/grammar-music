@@ -2,12 +2,9 @@
 
 ## ToDo
 ### Technical
-- reduce overall velocity by factor (+ ui settable)
 - rests ignored in felix-intervallic (fix?)
 - do not delete rests in building blocks
 - make resilient, in case of failure: restart
-- separation indicator between call & response in debug midi play
-- add same replay functionality as in debug midi to grammar music (replay button next to comment input)
 - rename and give proper route to debug midi
 - add reversed doubling, establish relations through transformations
 - add zoom to tree view

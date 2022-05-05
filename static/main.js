@@ -47,7 +47,7 @@ const configs = {
 
 
 //#region setup main routine
-import { mkMidiHandler, Lexem, isPedalDown } from './util/midi-handling.js'
+import { mkMidiHandler, Lexem, isPedalDown, Tone } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
 import { renderLexems, renderTree } from './util/render.js'
@@ -96,6 +96,22 @@ function fillProtocol(call, response, st, ast, transformedAst) {
   protocol.recording.push({ call, st, ast, transformedAst, response })
 }
 
+const volumeInput = document.getElementById('volume')
+
+/**
+ * @param {[Lexem]} lexems
+ * @returns {[Lexem]}
+ */
+function adjustVolume(lexems) {
+  const factor = Number.parseInt(volumeInput.value) / 100
+
+  return lexems.map(l => {
+    if (l instanceof Tone)
+      l.velocity *= factor
+    return l 
+  })
+}
+
 async function run() {
   setOnMidiMessage(0, undefined)
 
@@ -118,7 +134,7 @@ async function run() {
   await renderTree(treeOutDisplayId, transformedAst, pipeline.style.printLeaf)
   show(0)
 
-  const transformedLexems = pipeline.transform.serialize(transformedAst)
+  const transformedLexems = adjustVolume(pipeline.transform.serialize(transformedAst))
   renderLexems(transformedLexems, 'out', pipeline.style.colorizeToken)
 
   await transfer(transformedLexems, pipeline['midi-out'])
@@ -130,6 +146,18 @@ async function run() {
 
 const runButton = document.getElementById('run')
 runButton.onclick = run
+
+async function replay() {
+  const lexemChunks = protocol.recording.flatMap(r => [r.call, r.response])
+
+  for (const lexemChunk of lexemChunks) {
+    await transfer(lexemChunk, pipeline['midi-out'])
+    await sleep(2000)
+  }
+}
+
+const replayButton = document.getElementById('replay')
+replayButton.onclick = replay
 //#endregion
 
 
@@ -154,7 +182,7 @@ import { Grammar } from './parsing/grammar.mjs'
 import { Lexer } from './parsing/lexer.mjs'
 import { Parser } from './parsing/parser.mjs'
 import { copyTree } from './parsing/tree.mjs'
-import { error } from './util/util.js'
+import { error, sleep } from './util/util.js'
 let lexer
 /**
  * sets options of select element and initializes corresponding pipeline state

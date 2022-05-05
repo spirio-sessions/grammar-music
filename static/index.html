@@ -14,8 +14,6 @@
 <body>
   
   <section id="config" class="flexing">
-
-    <button id="run" class="pointer">RUN</button>    
     
     <fieldset>
       <legend>MIDI In</legend>
@@ -46,13 +44,16 @@
       <legend>Render</legend>
       <select id="style" class="pointer"></select>
     </fieldset>
+
+    <fieldset>
+      <legend>Volume</legend>
+      <input type="range" id="volume" min="0" max="100" value="70">
+    </fieldset>
   
     <fieldset>
       <legend>MIDI Out</legend>
       <select id="midi-out" class="pointer"></select>
     </fieldset>
-
-    <button id="toggle-tree" class="pointer"></button>
 
   </section>
 
@@ -66,9 +67,18 @@
     <script src="viz-js/lite.render.js"></script>
   </section>
 
-  <section id="protocol">
+  <section id="protocol-and-buttons">
     <textarea id="comment-input" cols="100" rows="10"></textarea>
-    <button id="save-protocol" class="pointer">Save Protocol</button>
+
+    <div class="button-container">
+      <button id="replay" class="pointer">Replay</button>
+      <button id="save-protocol" class="pointer">Save Protocol</button>
+    </div>
+
+    <div class="button-container">
+      <button id="toggle-tree" class="pointer"></button>
+      <button id="run" class="pointer">RUN</button>
+    </div>
   </section>
 
 </body>
