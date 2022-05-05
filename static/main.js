@@ -136,6 +136,12 @@ runButton.onclick = run
 
 //#region setup pipeline configuration ui
 function restartIfReady() {
+  protocol = {
+    config: {},
+    comment: '',
+    recording: []
+  }
+
   if (!pipelineIsReady())
     return
 
@@ -245,6 +251,8 @@ toggleTreeDisplay.onclick = _ => {
 
 //#region protocol saving
 const commentTextArea = document.getElementById('comment-input')
+const placeholder = 'Grammar, Transform, Title\n\nPlaystyle:\n\nExpectations:\n\nObservations:\n\nJudgement:'
+commentTextArea.value = placeholder
 commentTextArea.oninput = _ => protocol.comment = commentTextArea.value
 
 /**
@@ -254,23 +262,6 @@ async function getNewId() {
   return fetch('/id')
     .then(res => res.json())
     .then(idObj => idObj.id)
-}
-
-/**
- * @param {string} id 
- */
-function downloadProtocol(id) {
-  if (typeof id !== 'string')
-    error('id must be a string')
-
-  const protocolJson = JSON.stringify(protocol, null, 4)
-  const a = document.createElement('a')
-
-  a.setAttribute('href','data:application/json;charset=utf-8, ' + encodeURIComponent(protocolJson))
-  a.setAttribute('download', id + '.json')
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
 }
 
 /**
@@ -295,15 +286,11 @@ const saveProtocolButton = document.getElementById('save-protocol')
 
 saveProtocolButton.onclick = async () => {
   const id = await getNewId()
-  downloadProtocol(id)
   await uploadProtocol(id)
 
-  protocol = {
-    config: {},
-    comment: '',
-    recording: []
-  }
+  alert('successfully uploaded protocol ' + id)
 
+  commentTextArea.value = placeholder
   restartIfReady()
 }
 //#endregion

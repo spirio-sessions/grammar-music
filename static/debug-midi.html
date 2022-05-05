@@ -55,10 +55,14 @@
     }
 
     #comment-fieldset {
-      display: flex;
-      flex-flow: column;
-      align-items: stretch;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
       gap: 1em;
+    }
+
+    #protocol-comment {
+      grid-column: span 2;
     }
   </style>
 
@@ -157,6 +161,7 @@
     <fieldset id="comment-fieldset">
       <legend>Protocol Comment</legend>
       <textarea id="protocol-comment" cols="50" rows="20"></textarea>
+      <button id="download-protocol-button" class="pointer">Download</button>
       <button id="update-protocol-button" class="pointer">Update</button>
     </fieldset>
     
@@ -186,6 +191,9 @@
 
       const updateProtocolButton = document.getElementById('update-protocol-button')
       updateProtocolButton.onclick = updateProtocol
+
+      const downloadProtocolButton = document.getElementById('download-protocol-button')
+      downloadProtocolButton.onclick = downloadProtocol
 
       async function populateProtocolSelect() {
         const ids = await fetch('/protocol/ids')
@@ -278,6 +286,17 @@
         })
         .then(_ => alert('successfully updated protocol ' + protocolId))
         .catch(_ => alert('failed to post updated protocol'))
+      }
+
+      function downloadProtocol() {
+        const protocolJson = JSON.stringify(protocol, null, 4)
+        const a = document.createElement('a')
+
+        a.setAttribute('href','data:application/json;charset=utf-8, ' + encodeURIComponent(protocolJson))
+        a.setAttribute('download', protocolId + '.json')
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
       }
     </script>
   </div>
