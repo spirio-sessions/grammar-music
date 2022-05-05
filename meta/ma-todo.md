@@ -2,6 +2,22 @@
 
 ## ToDo
 ### Technical
+- reduce overall velocity by factor (+ ui settable)
+- rests ignored in felix-intervallic (fix?)
+- make resilient, in case of failure: restart
+- fix protocol fetching from debug midi, wrong call to rest api /ids
+- comment not saved when not changed
+- separation indicator between call & response in debug midi play
+- max midi synth setting -> no sustain
+- do not delete rests in building blocks
+- add comment structure placeholder, see protocol 2022-5-5-5
+- add same replay functionality as in debug midi to grammar music (replay button next to comment input)
+- revert auto download of protocol in grammar music
+- add downloading of protocols to debug midi
+- rename and give proper route to debug midi
+- check if download in debug midi only happens if both inputs are set and change to protocol selection only
+- add reversed doubling, establish relations through transformations
+- add zoom to tree view
 - implement harmonic transformation cancer aka vertical flip for sequence of tones
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
