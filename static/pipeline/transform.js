@@ -1,4 +1,4 @@
-import { Interval, Lexem, Tone } from '../util/midi-handling.js'
+import { Interval, Lexem, MusicEvent, Tone } from '../util/midi-handling.js'
 import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree, copyTree } from '../parsing/tree.mjs'
 import { id, randomChoice } from '../util/util.js'
 
@@ -192,21 +192,30 @@ function matchTransform(config) {
 function tonesFromIntervals(intervals) {
   if (intervals.isEmpty())
     return []
-  
-  if (intervals.length === 1)
-    return [intervals[0].from, intervals[0].to]
 
-  const tones = [intervals[0].from, intervals[0].to]
+  const tones = serializeInterval(intervals[0])
   const remainingIntervals = intervals.slice(1)
 
   remainingIntervals.forEach(interval => {
-    if (!isSameTone(tones.at(-1), interval.from))
-      tones.push(interval.from)
-    
-    tones.push(interval.to)
+    const serialized = serializeInterval(interval)
+
+    if (isSameTone(tones.at(-1), interval.from))
+      tones.push(...serialized.slice(1)) // skip from, as already contained
+    else
+      tones.push(...serialized)
   })
 
   return tones
+
+  /**
+   * @param {Interval} interval 
+   * @returns {[MusicEvent]}
+   */
+  function serializeInterval(interval) {
+    return interval.rest
+      ? [interval.from, interval.rest, interval.to]
+      : [interval.from, interval.to]
+  }
 
   /**
    * @param {Tone} left 

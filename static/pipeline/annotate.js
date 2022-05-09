@@ -56,21 +56,29 @@ function eventsIntervals(lexems) {
 }
 
 function intervals(lexems) {
-  const tones = lexems.filter(l => l instanceof Tone)
+  const numTones = lexems
+    .filter(l => l instanceof Tone)
+    .length
 
-  if (tones.length < 2)
+  if (numTones < 2)
     error('lexems must contain at least 2 tones')
 
-  let left = tones[0], right
+  let left = lexems.find(l => l instanceof Tone), rest, right
   const intervals = []
   
-  for (let i = 1; i < tones.length; i++) {
-    right = tones[i]
+  for (let i = 1; i < lexems.length; i++) {
+    if (lexems[i] instanceof Rest) {
+      rest = lexems[i]
+    }
+    else {
+      right = lexems[i]
 
-    const interval = new Interval(right.noteNumber - left.noteNumber, left, right)
-    intervals.push(interval)
+      const interval = new Interval(right.noteNumber - left.noteNumber, left, right, rest)
+      intervals.push(interval)
 
-    left = right
+      left = right
+      rest = undefined
+    }
   }
 
   return intervals

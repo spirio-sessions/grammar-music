@@ -2,11 +2,8 @@
 
 ## ToDo
 ### Technical
-- rests ignored in felix-intervallic (fix?)
-- do not delete rests in building blocks
-- make resilient, in case of failure: restart
 - rename and give proper route to debug midi
-- add reversed doubling, establish relations through transformations
+- add reversed doubling (mirror), establish relations through transformations
 - add zoom to tree view
 - max midi synth setting -> no sustain
 - implement harmonic transformation cancer aka vertical flip for sequence of tones
