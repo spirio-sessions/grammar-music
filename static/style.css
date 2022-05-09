@@ -28,7 +28,7 @@ select {
 }
 
 .stroked {
-  border: 2px solid black;
+  outline: 2px solid black;
 }
 
 #rendering {
@@ -40,6 +40,10 @@ select {
     "out tree";
 }
 
+svg {
+  overflow: visible;
+}
+
 #in {
   grid-area: in;
 }
@@ -48,11 +52,11 @@ select {
   grid-area: out;
 }
 
-.tree-display {
-  width: 600px;
-  height: calc(404px + 1em);
+#tree-dispaly-container {
   grid-area: tree;
-  overflow-y: scroll;
+  width: 600px;
+  height: 416px;
+  overflow: scroll;
 }
 
 .pointer {
@@ -60,7 +64,7 @@ select {
 }
 
 #protocol-and-buttons {
-  width: 1224px;
+  width: 1216px;
   display: flex;
   justify-content: stretch;
   align-items: stretch;

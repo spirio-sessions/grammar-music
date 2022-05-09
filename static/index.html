@@ -60,11 +60,13 @@
   <section id="rendering" class="flexing">
     <canvas id="render-in" class="stroked" width="600" height="200"></canvas>
     <canvas id="render-out" class="stroked" width="600" height="200"></canvas>
-    <div id="tree-in-display" class="stroked tree-display"></div>
-    <div id="tree-in-ast-display" class="stroked tree-display"></div>
-    <div id="tree-out-display" class="stroked tree-display" style="display: none;"></div>
-    <script src="viz-js/viz.js"></script>
-    <script src="viz-js/lite.render.js"></script>
+    <div id="tree-dispaly-container" class="stroked">
+      <div id="tree-in-display"></div>
+      <div id="tree-in-ast-display"></div>
+      <div id="tree-out-display"></div>
+      <script src="viz-js/viz.js"></script>
+      <script src="viz-js/lite.render.js"></script>
+    </div>
   </section>
 
   <section id="protocol-and-buttons">
@@ -73,6 +75,11 @@
     <div class="button-container">
       <button id="replay" class="pointer">Replay</button>
       <button id="save-protocol" class="pointer">Save Protocol</button>
+    </div>
+
+    <div class="button-container">
+      <button id="zoom-in" class="pointer">Zoom In</button>
+      <button id="zoom-out" class="pointer">Zoom Out</button>
     </div>
 
     <div class="button-container">

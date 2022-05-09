@@ -71,6 +71,8 @@ export function renderLexems(lexems, direction, colorizeToken) {
 
 import { SyntaxTree, STLeaf, bft, ASTLeaf, AbstractSyntaxTree, isNode, isLeaf } from '../parsing/tree.mjs'
 
+const initialTreeWidth = 600, initialTreeHeight = 416
+
 // leaf is only container, print token
 const defaultPrintLeaf = l => 'value' in l && 'toString' in l.value
   ? l.value.toString()
@@ -122,10 +124,35 @@ export async function renderTree(displayId, st, printLeaf) {
   try {
     const svg = await viz.renderSVGElement(dot)
     svg.id = displayId
-    svg.classList.add('stroked', 'tree-display')
+    svg.style.width = initialTreeWidth
+    svg.style.height = initialTreeHeight
     display.parentNode.replaceChild(svg, display)
   } catch(e) {
     viz = new Viz()
     console.error(e)
   }
+}
+
+/**
+ * @param {string} displayId 
+ * @param {Number} factor 
+ */
+export function zoomTree(displayId, factor) {
+  const svg = document.getElementById(displayId)
+  
+  if (!(svg instanceof SVGElement))
+    return
+  
+  const matrix = svg
+    .getElementById('graph0').transform.baseVal
+    .consolidate().matrix
+  
+  matrix.a = matrix.d *= factor
+
+  const boundingRect = svg.getBoundingClientRect()
+  const width = boundingRect.width
+  const height = boundingRect.height
+
+  svg.style.width = `${width * factor * factor}px`
+  svg.style.height = `${height * factor * factor}px`
 }

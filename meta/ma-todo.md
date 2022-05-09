@@ -3,9 +3,7 @@
 ## ToDo
 ### Technical
 - rename and give proper route to debug midi
-- add zoom to tree view
 - max midi synth setting -> no sustain
-- implement harmonic transformation cancer aka vertical flip for sequence of tones
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
 - new felix grammars

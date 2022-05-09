@@ -50,7 +50,7 @@ const configs = {
 import { mkMidiHandler, Lexem, isPedalDown, Tone } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
-import { renderLexems, renderTree } from './util/render.js'
+import { renderLexems, renderTree, zoomTree } from './util/render.js'
 const treeInDisplayId = 'tree-in-display'
 const treeInASTDisplayId = 'tree-in-ast-display'
 const treeOutDisplayId = 'tree-out-display'
@@ -246,9 +246,11 @@ const displays = [
   [treeInASTDisplayId, 'AST IN'],
   [treeOutDisplayId, 'AST OUT']
 ]
-let displayIndex = 1
+let displayIndex = 0
 
 const toggleTreeDisplay = document.getElementById('toggle-tree')
+const zoomInButton = document.getElementById('zoom-in')
+const zoomOutButton = document.getElementById('zoom-out')
 
 function display(i, t) {
   const displayElement = document.getElementById(displays[i][0])
@@ -267,12 +269,33 @@ function show(i) {
   display(i, true)
 }
 
-display(0, true)
+display(displayIndex, true)
 
 toggleTreeDisplay.onclick = _ => {
-  show(displayIndex)
   displayIndex = (displayIndex+1) % 3
+  show(displayIndex)
 }
+
+function getCurrentDisplayId() {
+  return displays[displayIndex][0]
+} 
+
+function zoomIn() {
+  zoomTree(getCurrentDisplayId(), 5/4)
+}
+
+function zoomOut() {
+  zoomTree(getCurrentDisplayId(), 4/5)
+}
+
+zoomInButton.onclick = zoomIn
+zoomOutButton.onclick = zoomOut
+document.addEventListener('keydown', event => {
+  if (event.key === '+')
+    zoomIn()
+  else if (event.key === '-')
+    zoomOut()
+})
 //#endregion
 
 
