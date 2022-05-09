@@ -69,6 +69,10 @@ export class ASTNode extends AbstractSyntaxTree {
     super(label, value)
     this.children = children
   }
+
+  isTerminalNode() {
+    return this.children.every(c => c instanceof ASTLeaf)
+  }
 }
 
 export class ASTLeaf extends AbstractSyntaxTree {
@@ -212,7 +216,7 @@ export function copyTree(tree) {
     return new STLeaf(tree.label, tokenCopy, tree.transformAST)
   }
   else if (tree instanceof ASTLeaf) {
-    const valueCopy = copyAstValue(tree)
+    const valueCopy = copyObjectWithPrototype(tree.value)
     return new ASTLeaf(tree.label, valueCopy)
   }
   else if (tree instanceof STNode) {
@@ -221,19 +225,21 @@ export function copyTree(tree) {
   }
   else if (tree instanceof ASTNode) {
     const childrenCopy = tree.children.map(copyTree)
-    const valueCopy = copyAstValue(tree)
+    const valueCopy = copyObjectWithPrototype(tree.value)
     return new ASTNode(tree.label, valueCopy, childrenCopy)
   }
   else
     error('tree is not an (Abstract)SyntaxTree')
 
   function copyObjectWithPrototype(obj) {
-    return Object.setPrototypeOf({ ...obj }, Object.getPrototypeOf(obj))
-  }
+    if (!(obj instanceof Object))
+      return obj
 
-  function copyAstValue(tree) {
-    return tree.value instanceof Object
-      ? copyObjectWithPrototype(tree.value)
-      : tree.value
+    const copy = {}
+    
+    for (const [key, val] of Object.entries(obj))
+      copy[key] = copyObjectWithPrototype(val)
+
+    return Object.setPrototypeOf(copy, Object.getPrototypeOf(obj))
   }
 }

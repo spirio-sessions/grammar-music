@@ -3,7 +3,6 @@
 ## ToDo
 ### Technical
 - rename and give proper route to debug midi
-- add reversed doubling (mirror), establish relations through transformations
 - add zoom to tree view
 - max midi synth setting -> no sustain
 - implement harmonic transformation cancer aka vertical flip for sequence of tones

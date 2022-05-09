@@ -81,22 +81,21 @@ export class Rest extends MusicEvent {
 
 export class Tone extends MusicEvent {
   constructor(start, duration, noteNumber, velocity) {
-    super('tone', start, duration)
-    
-    // this may fail!
-    const pitch = midiToPitch(noteNumber)
-    
+    super('tone', start, duration)    
     this.noteNumber = noteNumber
-    this.pitch = pitch
     this.velocity = velocity
   }
 
+  pitch() {
+    return midiToPitch(this.noteNumber)
+  }
+
   serialize() {
-    return `(T ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch} ${this.velocity})`
+    return `(T ${this.start} ${this.duration} ${this.noteNumber} ${this.pitch()} ${this.velocity})`
   }
 
   toString() {
-    return `${this.pitch}`
+    return `${this.pitch()}`
   }
 }
 

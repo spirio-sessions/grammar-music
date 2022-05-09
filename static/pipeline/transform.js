@@ -157,6 +157,119 @@ function reverseVertRec(ast) {
 }
 
 /**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function cancer(node) {
+  if (!isTerminalIntervalNode(node))
+    return
+
+  reverseSubTreesVert(node)
+
+  node.children.forEach(child => {
+    const interval = child.value
+    
+    const swap = interval.from
+    interval.from = interval.to
+    interval.to = swap
+    
+    interval.halfToneSteps *= -1
+  })
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function mirror(node) {
+  if (!isTerminalIntervalNode(node))
+    return
+  
+  let tone = node.children[0].value.from
+
+  node.children.forEach(child => {
+    const interval = child.value
+
+    interval.from = tone
+    const shift = -1 * interval.halfToneSteps
+    interval.to.noteNumber = interval.from.noteNumber + shift
+    
+    tone = interval.to
+  })
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function mirrorCancer(node) {
+  cancer(node)
+  mirror(node)
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function cancerDouble(node) {
+  if (!isTerminalIntervalNode(node))
+    return node
+
+  const left = copyTree(node)
+  left.label = 'CCRDBL'
+  const right = copyTree(node)
+  right.label = 'CCRDBR'
+  cancer(right)
+
+  node.label = 'CCRDB'
+  node.children = [left, right]
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function mirrorDouble(node) {
+  if (!isTerminalIntervalNode(node))
+    return
+  
+  const left = copyTree(node)
+  left.label = 'MRRDBL'
+  const right = copyTree(node)
+  right.label = 'MRRDBR'
+  mirror(right)
+
+  node.label = 'MRRDB'
+  node.children = [left, right]
+}
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function mirrorCancerDouble (node) {
+  if (!isTerminalIntervalNode(node))
+    return
+  
+  const left = copyTree(node)
+  left.label = 'MCDBL'
+  const right = copyTree(node)
+  right.label = 'MCDBR'
+  mirrorCancer(right)
+
+  node.label = 'MCDB'
+  node.children = [left, right]
+}
+
+/**
+ * @param {ASTNode} node 
+ * @returns {boolean}
+ */
+function isTerminalIntervalNode(node) {
+  return node.children.every(c => c instanceof ASTLeaf && c.value instanceof Interval)
+}
+
+/**
  * apply AST transformations to AST members where matchLabel matches member's label
  * modifies AST
  * @param {{matchLabel:(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}} config 
@@ -167,7 +280,7 @@ function matchTransform(config) {
     
     dft(ast, ast => {
       for (const matchLabel of Object.keys(config)) {
-        if (ast.label === matchLabel) {
+        if (ast.label === matchLabel || ast.label === '*') {
           const transform = config[matchLabel]
           transform(ast)
           return
@@ -178,8 +291,6 @@ function matchTransform(config) {
     return ast
   }
 }
-
-// TODO: implement motivic transformations via matchTransform (?)
 
 //#endregion
 
@@ -254,53 +365,65 @@ export default {
     serialize: flatten
   },
 
-  'default-intervals': {
-    tree: id,
+  // 'shuffle-root': {
+  //   tree: shuffleRoot,
+  //   serialize: flatten
+  // },
+
+  // 'drop-root-sub': {
+  //   tree: mkDropSubTrees(),
+  //   serialize: flatten
+  // },
+
+  // 'double-root-sub': {
+  //   tree: mkDoubleSubTrees(),
+  //   serialize: flatten
+  // },
+
+  // 'reverse-root-sub': {
+  //   tree: reverseSubTreesVert,
+  //   serialize: flatten
+  // },
+
+  // 'reverse-rec': {
+  //   tree: reverseVertRec,
+  //   serialize: flatten
+  // },
+
+  // 'rhythm-straight2swing': {
+  //   tree: straight2swing,
+  //   serialize: flatten
+  // },
+
+  'scale-mirror': {
+    tree: matchTransform({
+      SCALEU: mirror,
+      SCALED: mirror
+    }),
     serialize: flatten
   },
 
-  'shuffle-rec': {
-    tree: shuffleRec,
+  'scale-cancer': {
+    tree: matchTransform({
+      SCALEU: cancer,
+      SCALED: cancer
+    }),
     serialize: flatten
   },
 
-  'shuffle-root': {
-    tree: shuffleRoot,
+  'scale-mirror-cancer': {
+    tree: matchTransform({
+      SCALEU: mirrorCancer,
+      SCALED: mirrorCancer
+    }),
     serialize: flatten
   },
 
-  'drop-root-sub': {
-    tree: mkDropSubTrees(),
-    serialize: flatten
-  },
-
-  'drop-root-tones': {
-    tree: mkDropSubTrees(),
-    serialize: flatten
-  },
-
-  'double-root-sub': {
-    tree: mkDoubleSubTrees(),
-    serialize: flatten
-  },
-
-  'double-root-tones': {
-    tree: mkDoubleSubTrees(),
-    serialize: flatten
-  },
-
-  'reverse-root-sub': {
-    tree: reverseSubTreesVert,
-    serialize: flatten
-  },
-
-  'reverse-rec': {
-    tree: reverseVertRec,
-    serialize: flatten
-  },
-
-  'rhythm-straight2swing': {
-    tree: straight2swing,
+  'scale-mirror-cancer-double': {
+    tree: matchTransform({
+      SCALEU: mirrorCancerDouble,
+      SCALED: mirrorCancerDouble
+    }),
     serialize: flatten
   }
 
