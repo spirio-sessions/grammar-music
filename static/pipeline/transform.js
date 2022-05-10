@@ -403,10 +403,26 @@ export default {
     serialize: flatten
   },
 
+  'scale-mirror-double': {
+    tree: matchTransform({
+      SCALEU: mirrorDouble,
+      SCALED: mirrorDouble
+    }),
+    serialize: flatten
+  },
+
   'scale-cancer': {
     tree: matchTransform({
       SCALEU: cancer,
       SCALED: cancer
+    }),
+    serialize: flatten
+  },
+
+  'scale-cancer-double': {
+    tree: matchTransform({
+      SCALEU: cancerDouble,
+      SCALED: cancerDouble
     }),
     serialize: flatten
   },
