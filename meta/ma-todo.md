@@ -2,7 +2,6 @@
 
 ## ToDo
 ### Technical
-- do not abandon midi handling while processing call to already record next overlapping call
 - rename and give proper route to debug midi
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
