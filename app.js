@@ -6,6 +6,18 @@ const app = express()
 app.use(express.static('static'))
 app.use(express.json())
 
+app.get('/review', (_, res) => {
+  fs.readFile('static/review.html', (err, data) => {
+    if (err)
+      res.sendStatus(500)
+    else
+      res
+        .status(200)
+        .type('html')
+        .send(data)
+  })
+})
+
 app.get('/id', (_, res) => {
   const counter = nextCounter()
   const today = new Date()

@@ -2,7 +2,6 @@
 
 ## ToDo
 ### Technical
-- rename and give proper route to debug midi
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
 - for next session:
