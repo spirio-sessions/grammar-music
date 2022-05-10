@@ -2,8 +2,6 @@
 
 ## ToDo
 ### Technical
-- max midi synth setting -> no sustain
-- pedal up causes error in setOnMidiMessage, main.js:80
 - do not abandon midi handling while processing call to already record next overlapping call
 - rename and give proper route to debug midi
 - graph rendering -> jpg (or other pixel format) for thesis export

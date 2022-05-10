@@ -132,6 +132,14 @@ export function isPedalDown(midiMessage) {
   return isControlChange(midiMessage) && velocity === 0 
 }
 
+export function isNote(midiMessage) {
+  const statusCode = midiMessage.data[0]
+  const statusPrefix = statusCode >> 4
+  
+  // true if either note-on or note-off message
+  return statusPrefix === 8 || statusPrefix === 9
+}
+
 /**
  * @param {Number} tStart
  * @param {(result:Tone|Rest|undefined)=>void} callback 

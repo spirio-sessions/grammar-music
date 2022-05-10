@@ -47,7 +47,7 @@ const configs = {
 
 
 //#region setup main routine
-import { mkMidiHandler, Lexem, isPedalDown, Tone } from './util/midi-handling.js'
+import { mkMidiHandler, Lexem, isPedalDown, Tone, isNote } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
 import { renderLexems, renderTree, zoomTree } from './util/render.js'
@@ -70,15 +70,21 @@ function onMidiMessageHandeled(result) {
 }
 
 function setOnMidiMessage(startTime, callback) {
-  // if callback is falsy, undefined will be set as handler and midi handling thus stopped
   const handler = mkMidiHandler(startTime, callback)
   
-  pipeline['midi-in'].onmidimessage = message => {
-    if (isPedalDown(message))
-      run()
-    else
-      handler(message)
+  // if callback is falsy, midi handling should be stopped
+  if (handler) {
+    pipeline['midi-in'].onmidimessage = message => {
+      if(isPedalDown(message))
+        run()
+      else if(isNote(message))
+        handler(message)
+      else
+        console.log('unsupported midi message', message)
+    }
   }
+  else
+    pipeline['midi-in'].onmidimessage = undefined
 }
 
 /**
