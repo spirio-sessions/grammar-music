@@ -2,11 +2,18 @@
 
 ## ToDo
 ### Technical
-- rename and give proper route to debug midi
 - max midi synth setting -> no sustain
+- pedal up causes error in setOnMidiMessage, main.js:80
+- do not abandon midi handling while processing call to already record next overlapping call
+- rename and give proper route to debug midi
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
-- new felix grammars
+- for next session:
+  - first turn tests with scale-cancer-double, scale-mirror-cancer & scale-mirror-cancer-double transformations
+  - realtime interactive tests
+- for later sessions:
+  - not only monotonous runs -> up & down for all building blocks as intermediate structure
+  - root/phrase-level (tree) transformations + intermediate-level (tagged) transform
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)
