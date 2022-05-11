@@ -126,6 +126,7 @@ export async function renderTree(displayId, st, printLeaf) {
     svg.id = displayId
     svg.style.width = initialTreeWidth
     svg.style.height = initialTreeHeight
+    svg.setAttribute('transform', 'matrix(1 0 0 1 0 0)')
     display.parentNode.replaceChild(svg, display)
   } catch(e) {
     viz = new Viz()
@@ -137,22 +138,38 @@ export async function renderTree(displayId, st, printLeaf) {
  * @param {string} displayId 
  * @param {Number} factor 
  */
-export function zoomTree(displayId, factor) {
+export function setZoom(displayId, deltaS) {
   const svg = document.getElementById(displayId)
-  
-  if (!(svg instanceof SVGElement))
-    return
-  
-  const matrix = svg
-    .getElementById('graph0').transform.baseVal
-    .consolidate().matrix
-  
-  matrix.a = matrix.d *= factor
 
-  const boundingRect = svg.getBoundingClientRect()
-  const width = boundingRect.width
-  const height = boundingRect.height
+  const transformString = svg.getAttribute('transform')
+  const matrix = parseMatrix(transformString)
+  
+  matrix[0] += deltaS
+  matrix[3] += deltaS
 
-  svg.style.width = `${width * factor * factor}px`
-  svg.style.height = `${height * factor * factor}px`
+  svg.setAttribute('transform', `matrix(${matrix.join(' ')})`)
+}
+
+/**
+ * @param {string} displayId 
+ * @param {Number} deltaX 
+ * @param {Number} deltaY 
+ */
+export function setPan(displayId, deltaX, deltaY) {
+  const svg = document.getElementById(displayId)
+
+  const transformString = svg.getAttribute('transform')
+  const matrix = parseMatrix(transformString)
+
+  matrix[4] += deltaX
+  matrix[5] += deltaY
+  
+  svg.setAttribute('transform', `matrix(${matrix.join(' ')})`)
+}
+
+function parseMatrix(matrixString) {
+  return matrixString
+    .slice(7, -1)
+    .split(' ')
+    .map(s => Number.parseFloat(s))
 }

@@ -56,7 +56,7 @@ svg {
   grid-area: tree;
   width: 600px;
   height: 416px;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .pointer {

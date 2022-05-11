@@ -50,7 +50,7 @@ const configs = {
 import { mkMidiHandler, Lexem, isPedalDown, Tone, isNote } from './util/midi-handling.js'
 let lexems, lexemCursor = 0
 
-import { renderLexems, renderTree, zoomTree } from './util/render.js'
+import { renderLexems, renderTree, setZoom, setPan } from './util/render.js'
 const treeInDisplayId = 'tree-in-display'
 const treeInASTDisplayId = 'tree-in-ast-display'
 const treeOutDisplayId = 'tree-out-display'
@@ -255,8 +255,6 @@ const displays = [
 let displayIndex = 0
 
 const toggleTreeDisplay = document.getElementById('toggle-tree')
-const zoomInButton = document.getElementById('zoom-in')
-const zoomOutButton = document.getElementById('zoom-out')
 
 function display(i, t) {
   const displayElement = document.getElementById(displays[i][0])
@@ -284,24 +282,35 @@ toggleTreeDisplay.onclick = _ => {
 
 function getCurrentDisplayId() {
   return displays[displayIndex][0]
-} 
-
-function zoomIn() {
-  zoomTree(getCurrentDisplayId(), 5/4)
 }
 
-function zoomOut() {
-  zoomTree(getCurrentDisplayId(), 4/5)
-}
+document.onkeydown = event => {
+  if (!event.shiftKey)
+    return
 
-zoomInButton.onclick = zoomIn
-zoomOutButton.onclick = zoomOut
-document.addEventListener('keydown', event => {
-  if (event.key === '+')
-    zoomIn()
-  else if (event.key === '-')
-    zoomOut()
-})
+  const currentDisplayId = getCurrentDisplayId()
+
+  switch (event.key) {
+    case 'ArrowUp':
+      setPan(currentDisplayId, 0, -40)
+      break
+    case 'ArrowRight':
+      setPan(currentDisplayId, 40, 0)
+      break
+    case 'ArrowDown':
+      setPan(currentDisplayId, 0, 40)
+      break
+    case 'ArrowLeft':
+      setPan(currentDisplayId, -40, 0)
+      break
+    case '*':
+      setZoom(currentDisplayId, 0.2)
+      break
+    case '_':
+      setZoom(currentDisplayId, -0.2)
+      break
+  }
+}
 //#endregion
 
 
