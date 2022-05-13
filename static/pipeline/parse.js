@@ -88,6 +88,42 @@ const anyTwo = [
   ['RIGHT', -1, [null]]
 ]
 
+const monotoneIntervallic = [
+  ['S', 0, ['PHRASE']],
+
+  ['PHRASE', 0, ['UNISO', 'PHRASE']],
+  ['PHRASE', 0, ['SCALE', 'PHRASE']],
+  ['PHRASE', 0, ['ARPEG', 'PHRASE']],
+  ['PHRASE', 0, ['JUMPS', 'PHRASE']],
+  ['PHRASE', -1, [null]],
+
+  ['UNISO', 0, ['unison', 'UNISO']],
+  ['UNISO', -1, ['unison']],
+
+  ['SCALE', 0, ['SCALEU', 'SCALE']],
+  ['SCALE', -1, ['SCALEU']],
+  ['SCALE', 0, ['SCALED', 'SCALE']],
+  ['SCALE', -1, ['SCALED']],
+  ['SCALEU', 0, ['scale-up', 'SCALEU']],
+  ['SCALEU', -1, ['scale-up']],
+  ['SCALED', 0, ['scale-down', 'SCALED']],
+  ['SCALED', -1, ['scale-down']],
+
+  ['ARPEG', 0, ['ARPEGU']],
+  ['ARPEGU', 0, ['arpeg-up', 'ARPEGU']],
+  ['ARPEGU', -1, ['arpeg-up']],
+  ['ARPEG', 0, ['ARPEGD']],
+  ['ARPEGD', 0, ['arpeg-down', 'ARPEGD']],
+  ['ARPEGD', -1, ['arpeg-down']],
+
+  ['JUMPS', 0, ['JUMPSU']],
+  ['JUMPSU', 0, ['jump-up', 'JUMPSU']],
+  ['JUMPSU', -1, ['jump-up']],
+  ['JUMPS', 0, ['JUMPSD']],
+  ['JUMPSD', 0, ['jump-down', 'JUMPSD']],
+  ['JUMPSD', -1, ['jump-down']]
+]
+
 const intervallic = [
   ['S', 0, ['PHRASE']],
 
@@ -100,29 +136,20 @@ const intervallic = [
   ['UNISO', 0, ['unison', 'UNISO']],
   ['UNISO', -1, ['unison']],
 
-  ['SCALE', 0, ['SCALEU']],
-  ['SCALEU', 0, ['scale-up', 'SCALEU']],
-  ['SCALEU', -1, ['scale-up']],
+  ['SCALE', 0, ['scale-up', 'SCALE']],
+  ['SCALE', 0, ['scale-down', 'SCALE']],
+  ['SCALE', -1, ['scale-up']],
+  ['SCALE', -1, ['scale-down']], 
 
-  ['SCALE', 0, ['SCALED']],
-  ['SCALED', 0, ['scale-down', 'SCALED']],
-  ['SCALED', -1, ['scale-down']],
+  ['ARPEG', 0, ['arpeg-up', 'ARPEG']],
+  ['ARPEG', 0, ['arpeg-down', 'ARPEG']],
+  ['ARPEG', -1, ['arpeg-up']],
+  ['ARPEG', -1, ['arpeg-down']],
 
-  ['ARPEG', 0, ['ARPEGU']],
-  ['ARPEGU', 0, ['arpeg-up', 'ARPEGU']],
-  ['ARPEGU', -1, ['arpeg-up']],
-
-  ['ARPEG', 0, ['ARPEGD']],
-  ['ARPEGD', 0, ['arpeg-down', 'ARPEGD']],
-  ['ARPEGD', -1, ['arpeg-down']],
-
-  ['JUMPS', 0, ['JUMPSU']],
-  ['JUMPSU', 0, ['jump-up', 'JUMPSU']],
-  ['JUMPSU', -1, ['jump-up']],
-
-  ['JUMPS', 0, ['JUMPSD']],
-  ['JUMPSD', 0, ['jump-down', 'JUMPSD']],
-  ['JUMPSD', -1, ['jump-down']]
+  ['JUMPS', 0, ['jump-up', 'JUMPS']],
+  ['JUMPS', 0, ['jump-down', 'JUMPS']],
+  ['JUMPS', -1, ['jump-up']],
+  ['JUMPS', -1, ['jump-down']]
 ]
 
 export default {
@@ -132,5 +159,6 @@ export default {
   'beat-like-seq': beatLike,
   'rhythmic-seq': rhythm,
   'any-two-motives': anyTwo,
-  'felix-intervallic': intervallic
+  'monotone-intervallic': monotoneIntervallic,
+  'intervallic': intervallic
 }

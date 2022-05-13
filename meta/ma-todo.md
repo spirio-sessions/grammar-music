@@ -8,7 +8,6 @@
   - first turn tests with scale-cancer-double, scale-mirror-cancer & scale-mirror-cancer-double transformations
   - realtime interactive tests
 - for later sessions:
-  - not only monotonous runs -> up & down for all building blocks as intermediate structure
   - root/phrase-level (tree) transformations + intermediate-level (tagged) transform
 
 ## Notes

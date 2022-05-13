@@ -396,10 +396,7 @@ export default {
   // },
 
   'scale-mirror': {
-    tree: matchTransform({
-      SCALEU: mirror,
-      SCALED: mirror
-    }),
+    tree: matchTransform({ SCALE: mirror }),
     serialize: flatten
   },
 
