@@ -76,7 +76,7 @@ app.get('/protocol/ids', (_, res) => {
 })
 
 function logRequest(req, _, next) {
-  console.log(`${new Date().toISOString()}\t${req.method}\t${req.url}\t${getRemoteIp()}`)
+  console.log(`${new Date().toISOString()}\t${req.method}\t${req.url}\t${getRemoteIp()}\n`)
   
   next()
 
