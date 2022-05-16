@@ -3,6 +3,7 @@ import fs from 'fs'
 
 const app = express()
 
+app.use(logRequest)
 app.use(express.static('static'))
 app.use(express.json())
 
@@ -73,6 +74,16 @@ app.get('/protocol/ids', (_, res) => {
         .json(filenames.map(fn => fn.split('.')[0]))
   })
 })
+
+function logRequest(req, _, next) {
+  console.log(`${new Date().toISOString()}\t${req.method}\t${req.url}\t${getRemoteIp()}`)
+  
+  next()
+
+  function getRemoteIp() {
+    return req.headers['x-forwarded-for'] || req.connection.remoteAddress
+  }
+}
 
 function nextCounter() {
   const filePath = 'nextCounter'
