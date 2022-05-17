@@ -2,13 +2,14 @@
 
 ## ToDo
 ### Technical
+- implement non-deterministic segments that accumulate intervals probabilistically
+- implement intervallic segment transformations that add new tones based on ambitus
+- configure sustain of max's adls synth
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
 - for next session:
-  - first turn tests with scale-cancer-double, scale-mirror-cancer & scale-mirror-cancer-double transformations
-  - realtime interactive tests
-- for later sessions:
   - root/phrase-level (tree) transformations + intermediate-level (tagged) transform
+  - non-monotone intervallic grammar
 
 ## Notes
 ### Cognitive Linguistics (Ron Langacker)

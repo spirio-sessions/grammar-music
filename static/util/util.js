@@ -86,7 +86,19 @@ export const median = values => {
  * @param {Number} w weight factor of true in [0, infty], 0 => false, infty => true
  * @returns {Boolean}
  */
-export const randomChoice = (w = 1) => Math.round(Math.random() * w)
+export function randomChoice(w = 1) {
+  return Math.round(Math.random() * w)
+}
+
+/**
+ * min and max are inclusive
+ * @param {Number} min 
+ * @param {Number} max 
+ * @returns {Number}
+ */
+export function randomNumber(min, max) {
+  return Math.floor(Math.random() * (max + 1 - min) + min)
+}
 
 //#endregion
 

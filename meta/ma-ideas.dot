@@ -15,6 +15,7 @@ graph G {
   nvprb [label="naively probabilistic"]
   ast [label="abstract syntax tree"]
   recrew [label="recursive rewriting"]
+  tlt [label="two level transformations"]
   srlz [label="serialization"]
   tradj [label="tree adjoining?"]
   toc [label="transformation of call"]
@@ -23,6 +24,7 @@ graph G {
   cfg [label="context free grammar"]
   pgen [label="parser generator"]
   viz [label="live visualization"]
+  tlg [label="two level grammar"]
   ptcl [label="protocol"]
   cfgs [label="pipeline configuration"]
   rec [label="recording of call / response"]
@@ -43,6 +45,8 @@ graph G {
     poc -- cfg
       cfg -- pgen
       cfg -- viz
+      cfg -- tlg
+
     poc -- nvprb
     poc -- st
       st -- ast
@@ -50,7 +54,9 @@ graph G {
     cnr -- toc
       toc -- recrew
       toc -- srlz
+        recrew -- tlt
         recrew -- tradj
+
 
     cnr -- midiout
       midiout -- webmidiout

@@ -1,10 +1,12 @@
 import { Interval, Lexem, MusicEvent, Tone } from '../util/midi-handling.js'
 import { SyntaxTree, dft, ASTNode, ASTLeaf, AbstractSyntaxTree, copyTree } from '../parsing/tree.mjs'
-import { id, randomChoice } from '../util/util.js'
+import { id, randomChoice, randomNumber } from '../util/util.js'
 
 const bpmToPeriodMs = bpm => 60000 / bpm
 
 //#region tree transformations
+
+//#region formal tree transformations
 
 /**
  * modifies input
@@ -60,22 +62,25 @@ function straight2swing(ast) {
 
 /**
  * probabilistically drop subtree
- * @param {Object.<string,number>} weightedSelectors
+ * @param {Object.<string,number>} weightedSelector
  * @returns {(ast:ASTNode)=>ASTNode}
  */
-function mkDropSubTrees(weightedSelectors) {
+function mkDropSubTrees(weightedSelector) {
   return node => {
     if (!node instanceof ASTNode)
       return node
 
     for (let i = 0; i < node.children.length; i++) {
-      if (!weightedSelectors)
+      if (!weightedSelector) // also fires when weightedSelector === 0
         dropProbabilistically()
 
+      else if (typeof(weightedSelector) === 'number')
+        dropProbabilistically(weightedSelector)
+
       else
-        Object.keys(weightedSelectors).forEach(label => {
+        Object.keys(weightedSelector).forEach(label => {
           if (label === node.children[i].label) {
-            dropProbabilistically(weightedSelectors[label])
+            dropProbabilistically(weightedSelector[label])
             return
           }
         })
@@ -94,10 +99,10 @@ function mkDropSubTrees(weightedSelectors) {
 
 /**
  * probabilistically drop subtree
- * @param {Object.<string,number>} weightedSelectors
+ * @param {Object.<string,number>|number} weightedSelector
  * @returns {(ast:ASTNode)=>ASTNode}
  */
-function mkDoubleSubTrees(weightedSelectors) {
+function mkDoubleSubTrees(weightedSelector) {
   return node => {
     if (!node instanceof ASTNode)
       return node
@@ -107,13 +112,16 @@ function mkDoubleSubTrees(weightedSelectors) {
     node.children.forEach(c => {
       newChildren.push(c)
 
-      if (!weightedSelectors)
+      if (!weightedSelector) // also fires when weightedSelector === 0
         doubleProbabilistically()
       
+      else if (typeof(weightedSelector) === 'number')
+        doubleProbabilistically(weightedSelector)
+      
       else
-        Object.keys(weightedSelectors).forEach(label => {
+        Object.keys(weightedSelector).forEach(label => {
           if (label === c.label) {
-            doubleProbabilistically(weightedSelectors[label])
+            doubleProbabilistically(weightedSelector[label])
             return
           }
         })
@@ -156,6 +164,34 @@ function reverseVertRec(ast) {
   return ast
 }
 
+//#endregion
+
+/**
+ * apply AST transformations to AST members where matchLabel matches member's label
+ * modifies AST
+ * @param {...[string, (ast:AbstractSyntaxTree)=>AbstractSyntaxTree]} config 
+ * @returns {(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}
+ */
+function matchTransform(...config) {
+  return ast => {
+    
+    dft(ast, ast => {
+      for (const [pattern, transform] of config) {
+        const regex = new RegExp(pattern)
+
+        if (regex.test(ast.label)) {
+          transform(ast)
+          return
+        }
+      }
+    })
+
+    return ast
+  }
+}
+
+//#region intervallic tree transforms
+
 /**
  * modifies input
  * @param {ASTNode} node 
@@ -175,6 +211,8 @@ function cancer(node) {
     
     interval.halfToneSteps *= -1
   })
+
+  node.label += '_CCR'
 }
 
 /**
@@ -196,6 +234,8 @@ function mirror(node) {
     
     tone = interval.to
   })
+
+  node.label += '_MRR'
 }
 
 /**
@@ -216,12 +256,12 @@ function cancerDouble(node) {
     return node
 
   const left = copyTree(node)
-  left.label = 'CCRDBL'
+  left.label += '_CCRDB_L'
   const right = copyTree(node)
-  right.label = 'CCRDBR'
   cancer(right)
+  right.label += 'DB_R'
 
-  node.label = 'CCRDB'
+  node.label += '_CCRDB'
   node.children = [left, right]
 }
 
@@ -234,12 +274,12 @@ function mirrorDouble(node) {
     return
   
   const left = copyTree(node)
-  left.label = 'MRRDBL'
+  left.label += '_MRRDB_L'
   const right = copyTree(node)
-  right.label = 'MRRDBR'
   mirror(right)
+  right.label += 'DB_R'
 
-  node.label = 'MRRDB'
+  node.label += '_MRRDB'
   node.children = [left, right]
 }
 
@@ -252,12 +292,12 @@ function mirrorCancerDouble (node) {
     return
   
   const left = copyTree(node)
-  left.label = 'MCDBL'
+  left.label += '_MCDBL'
   const right = copyTree(node)
-  right.label = 'MCDBR'
   mirrorCancer(right)
+  right.label += 'DBR'
 
-  node.label = 'MCDB'
+  node.label += 'MCDB'
   node.children = [left, right]
 }
 
@@ -266,32 +306,56 @@ function mirrorCancerDouble (node) {
  * @returns {boolean}
  */
 function isTerminalIntervalNode(node) {
-  return node.children.every(c => c instanceof ASTLeaf && c.value instanceof Interval)
+  return node instanceof ASTNode
+    && node.children.every(c => c instanceof ASTLeaf && c.value instanceof Interval)
+}
+
+//#endregion
+
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function intervallicRootTransformShuffle(node) {
+  shuffleRoot(node)
 }
 
 /**
- * apply AST transformations to AST members where matchLabel matches member's label
- * modifies AST
- * @param {{matchLabel:(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}} config 
- * @returns {(ast:AbstractSyntaxTree)=>AbstractSyntaxTree}
+ * modifies input
+ * @param {ASTNode} node 
  */
-function matchTransform(config) {
-  return ast => {
-    
-    dft(ast, ast => {
-      for (const matchLabel of Object.keys(config)) {
-        if (ast.label === matchLabel || ast.label === '*') {
-          const transform = config[matchLabel]
-          transform(ast)
-          return
-        }
-      }
-    })
+function intervallicRootTransformAll(node) {
+  const rootTransforms = [
+    shuffleRoot,
+    mkDoubleSubTrees(),
+    mkDropSubTrees()
+  ]
 
-    return ast
-  }
+  const randomIndex = randomNumber(0, rootTransforms.length - 1)
+  const transform = rootTransforms[randomIndex]
+
+  transform(node)
 }
 
+/**
+ * modifies input
+ * @param {ASTNode} node 
+ */
+function intervallicSegmentTransform(node) {
+  const segmentTransforms = [
+    cancer,
+    cancerDouble,
+    mirror,
+    mirrorDouble,
+    mirrorCancer,
+    mirrorCancerDouble
+  ]
+
+  const randomIndex = randomNumber(0, segmentTransforms.length - 1)
+  const transform = segmentTransforms[randomIndex]
+
+  transform(node)
+}
 //#endregion
 
 //#region serialization
@@ -395,48 +459,64 @@ export default {
   //   serialize: flatten
   // },
 
-  'scale-mirror': {
-    tree: matchTransform({ SCALE: mirror }),
+  // 'scale-mirror': {
+  //   tree: matchTransform(['SCALE', mirror]),
+  //   serialize: flatten
+  // },
+
+  // 'scale-mirror-double': {
+  //   tree: matchTransform(
+  //     ['SCALEU', mirrorDouble],
+  //     ['SCALED', mirrorDouble]
+  //   ),
+  //   serialize: flatten
+  // },
+
+  // 'scale-cancer': {
+  //   tree: matchTransform(
+  //     ['SCALEU', cancer],
+  //     ['SCALED', cancer]
+  //   ),
+  //   serialize: flatten
+  // },
+
+  // 'scale-cancer-double': {
+  //   tree: matchTransform(
+  //     ['SCALEU', cancerDouble],
+  //     ['SCALED', cancerDouble]
+  //   ),
+  //   serialize: flatten
+  // },
+
+  // 'scale-mirror-cancer': {
+  //   tree: matchTransform(
+  //     ['SCALEU', mirrorCancer],
+  //     ['SCALED', mirrorCancer]
+  //   ),
+  //   serialize: flatten
+  // },
+
+  // 'scale-mirror-cancer-double': {
+  //   tree: matchTransform(
+  //     ['SCALEU', mirrorCancerDouble],
+  //     ['SCALED', mirrorCancerDouble]
+  //   ),
+  //   serialize: flatten
+  // },
+
+  'intervallic-multi-level-all': {
+    tree: matchTransform(
+      ['PHRASE', intervallicRootTransformAll],
+      ['.*', intervallicSegmentTransform]
+    ),
     serialize: flatten
   },
 
-  'scale-mirror-double': {
-    tree: matchTransform({
-      SCALEU: mirrorDouble,
-      SCALED: mirrorDouble
-    }),
-    serialize: flatten
-  },
-
-  'scale-cancer': {
-    tree: matchTransform({
-      SCALEU: cancer,
-      SCALED: cancer
-    }),
-    serialize: flatten
-  },
-
-  'scale-cancer-double': {
-    tree: matchTransform({
-      SCALEU: cancerDouble,
-      SCALED: cancerDouble
-    }),
-    serialize: flatten
-  },
-
-  'scale-mirror-cancer': {
-    tree: matchTransform({
-      SCALEU: mirrorCancer,
-      SCALED: mirrorCancer
-    }),
-    serialize: flatten
-  },
-
-  'scale-mirror-cancer-double': {
-    tree: matchTransform({
-      SCALEU: mirrorCancerDouble,
-      SCALED: mirrorCancerDouble
-    }),
+  'intervallic-multi-level-shuffle': {
+    tree: matchTransform(
+      ['PHRASE', intervallicRootTransformShuffle],
+      ['.*', intervallicSegmentTransform]
+    ),
     serialize: flatten
   }
 
