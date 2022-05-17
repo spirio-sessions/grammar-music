@@ -41,6 +41,9 @@ app.post('/protocol', (req, res) => {
 
   const text = JSON.stringify(protocol, null, 4)
 
+  if (!fs.existsSync('protocols'))
+    fs.mkdirSync('protocols')
+
   fs.writeFile(`protocols/${id}.json`, text, err => {
     if (err)
       res.sendStatus(500)
