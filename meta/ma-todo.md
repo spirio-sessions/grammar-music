@@ -7,8 +7,9 @@
 - configure sustain of max's adls synth
 - graph rendering -> jpg (or other pixel format) for thesis export
 ### Experiments
+- for interview with M Drösser
+  - setup: monotone-intervallic + intervallic-multi-level-all + on genelec speakers
 - for next session:
-  - root/phrase-level (tree) transformations + intermediate-level (tagged) transform
   - non-monotone intervallic grammar
 
 ## Notes
