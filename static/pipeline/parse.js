@@ -100,12 +100,10 @@ const monotoneIntervallic = [
   ['UNISO', 0, ['unison', 'UNISO']],
   ['UNISO', -1, ['unison']],
 
-  ['SCALE', 0, ['SCALEU', 'SCALE']],
-  ['SCALE', -1, ['SCALEU']],
-  ['SCALE', 0, ['SCALED', 'SCALE']],
-  ['SCALE', -1, ['SCALED']],
+  ['SCALE', 0, ['SCALEU']],
   ['SCALEU', 0, ['scale-up', 'SCALEU']],
   ['SCALEU', -1, ['scale-up']],
+  ['SCALE', 0, ['SCALED']],
   ['SCALED', 0, ['scale-down', 'SCALED']],
   ['SCALED', -1, ['scale-down']],
 
@@ -124,13 +122,58 @@ const monotoneIntervallic = [
   ['JUMPSD', -1, ['jump-down']]
 ]
 
+const randomIntervallic = [
+  ['S', 0, ['PHRASE']],
+
+  ['PHRASE', 2, ['UNISO', 'PHRASE']],
+  ['PHRASE', 2, ['SCALE', 'PHRASE']],
+  ['PHRASE', 2, ['ARPEG', 'PHRASE']],
+  ['PHRASE', 2, ['JUMPS', 'PHRASE']],
+  ['PHRASE', 1, ['RANDS', 'PHRASE']],
+  ['PHRASE', -1, [null]],
+
+  ['UNISO', 0, ['unison', 'UNISO']],
+  ['UNISO', -1, ['unison']],
+
+  ['SCALE', 0, ['scale-up', 'SCALE']],
+  ['SCALE', 0, ['scale-down', 'SCALE']],
+  ['SCALE', -1, ['scale-up']],
+  ['SCALE', -1, ['scale-down']], 
+
+  ['ARPEG', 0, ['arpeg-up', 'ARPEG']],
+  ['ARPEG', 0, ['arpeg-down', 'ARPEG']],
+  ['ARPEG', -1, ['arpeg-up']],
+  ['ARPEG', -1, ['arpeg-down']],
+
+  ['JUMPS', 0, ['jump-up', 'JUMPS']],
+  ['JUMPS', 0, ['jump-down', 'JUMPS']],
+  ['JUMPS', -1, ['jump-up']],
+  ['JUMPS', -1, ['jump-down']],
+
+  ['RANDS', 1, ['unison', 'RANDS']],
+  ['RANDS', 1, ['unison']],
+  ['RANDS', 1, ['scale-up', 'RANDS']],
+  ['RANDS', 1, ['scale-up']],
+  ['RANDS', 1, ['scale-down', 'RANDS']],
+  ['RANDS', 1, ['scale-down']],
+  ['RANDS', 1, ['arpeg-up', 'RANDS']],
+  ['RANDS', 1, ['arpeg-up']],
+  ['RANDS', 1, ['arpeg-down', 'RANDS']],
+  ['RANDS', 1, ['arpeg-down']],
+  ['RANDS', 1, ['jump-up', 'RANDS']],
+  ['RANDS', 1, ['jump-up']],
+  ['RANDS', 1, ['jump-down', 'RANDS']],
+  ['RANDS', 1, ['jump-down']]
+]
+
 const intervallic = [
   ['S', 0, ['PHRASE']],
 
-  ['PHRASE', 0, ['UNISO', 'PHRASE']],
-  ['PHRASE', 0, ['SCALE', 'PHRASE']],
-  ['PHRASE', 0, ['ARPEG', 'PHRASE']],
-  ['PHRASE', 0, ['JUMPS', 'PHRASE']],
+  ['PHRASE', 2, ['UNISO', 'PHRASE']],
+  ['PHRASE', 2, ['SCALE', 'PHRASE']],
+  ['PHRASE', 2, ['ARPEG', 'PHRASE']],
+  ['PHRASE', 2, ['JUMPS', 'PHRASE']],
+  ['PHRASE', 1, ['RANDS', 'PHRASE']],
   ['PHRASE', -1, [null]],
 
   ['UNISO', 0, ['unison', 'UNISO']],
@@ -160,5 +203,6 @@ export default {
   'rhythmic-seq': rhythm,
   'any-two-motives': anyTwo,
   'monotone-intervallic': monotoneIntervallic,
+  'random-intervallic': randomIntervallic,
   'intervallic': intervallic
 }
