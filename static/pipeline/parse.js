@@ -173,7 +173,6 @@ const intervallic = [
   ['PHRASE', 2, ['SCALE', 'PHRASE']],
   ['PHRASE', 2, ['ARPEG', 'PHRASE']],
   ['PHRASE', 2, ['JUMPS', 'PHRASE']],
-  ['PHRASE', 1, ['RANDS', 'PHRASE']],
   ['PHRASE', -1, [null]],
 
   ['UNISO', 0, ['unison', 'UNISO']],
