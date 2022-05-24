@@ -2,6 +2,10 @@
 
 ## ToDo
 ### Technical
+- debug lex / parse compatibility check
+- maybe prioritize deleting transformations
+- implement intervallic segment transformations that introduce shifts
+- implement intervallic segment transformations that introduce rests / switch off some tones
 - implement intervallic segment transformations that add new tones based on ambitus
 - configure sustain of max's adls synth
 - graph rendering -> jpg (or other pixel format) for thesis export
